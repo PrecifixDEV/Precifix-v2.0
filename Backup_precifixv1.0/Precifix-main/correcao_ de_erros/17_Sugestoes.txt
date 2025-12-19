@@ -1,0 +1,383 @@
+# Supabase indicou 17 sugestões para melhoria do sistema:
+
+[
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.monthly_expenses\\` has a foreign key \\`monthly_expenses_monthly_billing_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "monthly_expenses",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "monthly_expenses_monthly_billing_id_fkey",
+      "fkey_columns": [
+        2
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_monthly_expenses_monthly_expenses_monthly_billing_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.monthly_expenses\\` has a foreign key \\`monthly_expenses_operational_cost_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "monthly_expenses",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "monthly_expenses_operational_cost_id_fkey",
+      "fkey_columns": [
+        7
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_monthly_expenses_monthly_expenses_operational_cost_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.notifications\\` has a foreign key \\`notifications_quote_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "notifications",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "notifications_quote_id_fkey",
+      "fkey_columns": [
+        3
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_notifications_notifications_quote_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.quotes\\` has a foreign key \\`quotes_client_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "quotes",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "quotes_client_id_fkey",
+      "fkey_columns": [
+        10
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_quotes_quotes_client_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.quotes\\` has a foreign key \\`quotes_payment_method_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "quotes",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "quotes_payment_method_id_fkey",
+      "fkey_columns": [
+        26
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_quotes_quotes_payment_method_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.quotes\\` has a foreign key \\`quotes_vehicle_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "quotes",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "quotes_vehicle_id_fkey",
+      "fkey_columns": [
+        11
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_quotes_quotes_vehicle_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.service_product_links\\` has a foreign key \\`service_product_links_product_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "name": "service_product_links",
+      "type": "table",
+      "schema": "public",
+      "fkey_name": "service_product_links_product_id_fkey",
+      "fkey_columns": [
+        2
+      ]
+    },
+    "cache_key": "unindexed_foreign_keys_public_service_product_links_service_product_links_product_id_fkey"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_operational_costs_user_id\\` on table \\`public.operational_costs\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "operational_costs",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_operational_costs_idx_operational_costs_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_product_catalog_items_user_id\\` on table \\`public.product_catalog_items\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "product_catalog_items",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_product_catalog_items_idx_product_catalog_items_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_services_user_id\\` on table \\`public.services\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "services",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_services_idx_services_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_operational_cost_payments_user_id\\` on table \\`public.operational_cost_payments\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "operational_cost_payments",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_operational_cost_payments_idx_operational_cost_payments_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_notifications_user_id\\` on table \\`public.notifications\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "notifications",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_notifications_idx_notifications_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_operational_hours_user_id\\` on table \\`public.operational_hours\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "operational_hours",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_operational_hours_idx_operational_hours_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_payment_methods_user_id\\` on table \\`public.payment_methods\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "payment_methods",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_payment_methods_idx_payment_methods_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_monthly_expenses_user_id\\` on table \\`public.monthly_expenses\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "monthly_expenses",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_monthly_expenses_idx_monthly_expenses_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_quotes_user_id\\` on table \\`public.quotes\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "quotes",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_quotes_idx_quotes_user_id"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_monthly_billing_user_id\\` on table \\`public.monthly_billing\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "monthly_billing",
+      "type": "table",
+      "schema": "public"
+    },
+    "cache_key": "unused_index_public_monthly_billing_idx_monthly_billing_user_id"
+  }
+]
+
+
+# Sugestão do agente de IA para um dos problemas:
+
+Summary of the issue
+The table public.monthly_expenses has a foreign key constraint named monthly_expenses_monthly_billing_id_fkey that references another table but does not have a supporting index on the referencing column(s). Without an index on the foreign key column, deletes or updates on the referenced primary key (in the parent table) will require a sequential scan of monthly_expenses to check for dependent rows, and joins that filter by the foreign key may be slower. This can lead to locking, slow DDL operations on the parent table, and general query performance degradation.
+
+Why it matters (brief)
+DELETE/UPDATE on the referenced (parent) table will need to scan the child table to enforce the FK, causing long-running locks.
+JOINs and WHERE filters that use the foreign key column will be slower if the column is unindexed.
+Overall increased CPU and I/O on operations touching the parent table or querying by the FK.
+Recommended fixes
+Add an index that covers the foreign key column(s)
+
+If monthly_billing_id is the only FK column, create a simple b-tree index:
+CREATE INDEX CONCURRENTLY idx_monthly_expenses_monthly_billing_id ON public.monthly_expenses(monthly_billing_id);
+Use CREATE INDEX CONCURRENTLY to avoid long locks in production.
+Consider index options based on query patterns
+
+If queries filter by both monthly_billing_id and another column (e.g., status or created_at), create a composite index in the same column order as used in queries:
+CREATE INDEX CONCURRENTLY idx_monthly_expenses_monthly_billing_id_status ON public.monthly_expenses(monthly_billing_id, status);
+If you need sorting often by another column (e.g., created_at DESC), include it in the index to support ORDER BY and LIMIT:
+CREATE INDEX CONCURRENTLY idx_monthly_expenses_mb_id_created_at_desc ON public.monthly_expenses(monthly_billing_id, created_at DESC);
+Use partial indexes for selective predicates
+
+If you only query active rows, a partial index reduces size and writes:
+CREATE INDEX CONCURRENTLY idx_monthly_expenses_mb_id_active ON public.monthly_expenses(monthly_billing_id) WHERE status = 'active';
+Verify and maintain
+
+After creating the index, run EXPLAIN ANALYZE on representative queries (DELETE/UPDATE on the parent, JOINs and WHERE queries) to confirm the planner uses the index and performance improved.
+Periodically monitor index bloat and run REINDEX or VACUUM as needed.
+Safety & deployment notes
+Prefer CREATE INDEX CONCURRENTLY in production to avoid blocking writes on monthly_expenses.
+If you cannot use CONCURRENTLY (e.g., inside a transaction or certain environments), schedule a maintenance window as CREATE INDEX (non-concurrent) will take a lock.
+Creating an index will increase storage and slightly increase write cost for inserts/updates to the indexed columns.
+Example SQL (use as appropriate)
+Basic index (safe, non-blocking): CREATE INDEX CONCURRENTLY idx_monthly_expenses_monthly_billing_id ON public.monthly_expenses(monthly_billing_id);
+
+Composite example (if queries filter by status too): CREATE INDEX CONCURRENTLY idx_monthly_expenses_mb_id_status ON public.monthly_expenses(monthly_billing_id, status);
+
+If you want, I can:
+
+Generate the exact CREATE INDEX statement for your schema given the precise FK column names (I used monthly_billing_id from the FK name but can confirm),
+Run EXPLAIN on a representative query or
+Suggest an index naming convention and retention policy for indexes.
