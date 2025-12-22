@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Lock, Building2 } from 'lucide-react'
+import { User, Mail, Lock, Building2, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -15,6 +15,8 @@ export const Register = () => {
         password: '',
         confirmPassword: ''
     })
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -102,22 +104,26 @@ export const Register = () => {
                 <Input
                     label="Crie sua senha"
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Senha#123"
                     value={formData.password}
                     onChange={handleChange}
                     icon={<Lock className="w-5 h-5" />}
+                    endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    onEndIconClick={() => setShowPassword(!showPassword)}
                     required
                 />
 
                 <Input
                     label="Confirme a senha criada"
                     name="confirmPassword"
-                    type="password"
+                    type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Senha#123"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     icon={<Lock className="w-5 h-5" />}
+                    endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    onEndIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     required
                 />
 

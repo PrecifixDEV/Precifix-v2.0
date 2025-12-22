@@ -4,12 +4,16 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
     error?: string
     icon?: React.ReactNode
+    endIcon?: React.ReactNode
+    onEndIconClick?: () => void
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({
     label,
     error,
     icon,
+    endIcon,
+    onEndIconClick,
     className = '',
     ...props
 }, ref) => {
@@ -35,12 +39,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
             focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500
             disabled:bg-slate-900 disabled:text-slate-500
             ${icon ? 'pl-10' : 'pl-3'}
+            ${endIcon ? 'pr-10' : 'pr-3'}
             ${error ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'border-slate-700 hover:border-slate-600'}
             py-2.5 sm:text-sm
             ${className}
           `}
                     {...props}
                 />
+                {endIcon && (
+                    <div
+                        onClick={onEndIconClick}
+                        className={`absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 ${onEndIconClick ? 'cursor-pointer hover:text-white' : 'pointer-events-none'}`}
+                    >
+                        {endIcon}
+                    </div>
+                )}
             </div>
             {error && (
                 <p className="mt-1 text-xs text-red-500">{error}</p>
