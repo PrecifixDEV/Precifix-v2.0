@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Lock, Building2, Eye, EyeOff } from 'lucide-react'
+import { User, Mail, Lock, Building2, Eye, EyeOff, Check, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { translateAuthError } from '../../utils/authErrors'
 
 export const Register = () => {
@@ -17,8 +17,14 @@ export const Register = () => {
     })
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [showPasswordRules, setShowPasswordRules] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    const hasMinLength = formData.password.length >= 6
+    const hasUpperCase = /[A-Z]/.test(formData.password)
+    const hasNumber = /[0-9]/.test(formData.password)
+    const isPasswordValid = hasMinLength && hasUpperCase && hasNumber
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -31,6 +37,12 @@ export const Register = () => {
 
         if (formData.password !== formData.confirmPassword) {
             setError('As senhas não conferem.')
+            setLoading(false)
+            return
+        }
+
+        if (!isPasswordValid) {
+            setError('A senha não atende aos requisitos de segurança.')
             setLoading(false)
             return
         }
@@ -101,18 +113,44 @@ export const Register = () => {
                     required
                 />
 
-                <Input
-                    label="Crie sua senha"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Senha#123"
-                    value={formData.password}
-                    onChange={handleChange}
-                    icon={<Lock className="w-5 h-5" />}
-                    endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    onEndIconClick={() => setShowPassword(!showPassword)}
-                    required
-                />
+                <div className="relative">
+                    <Input
+                        label="Crie sua senha"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Senha#123"
+                        value={formData.password}
+                        onChange={handleChange}
+                        onFocus={() => setShowPasswordRules(true)}
+                        onBlur={() => setShowPasswordRules(false)}
+                        icon={<Lock className="w-5 h-5" />}
+                        endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        onEndIconClick={() => setShowPassword(!showPassword)}
+                        required
+                    />
+
+                    {showPasswordRules && (
+                        <div className="absolute left-0 bottom-full mb-2 w-full bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl z-10">
+                            <p className="text-xs text-slate-400 mb-2 font-medium">Sua senha deve conter:</p>
+                            <ul className="space-y-1">
+                                <li className={`text-xs flex items-center gap-2 ${hasMinLength ? 'text-green-500' : 'text-slate-500'}`}>
+                                    {hasMinLength ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                    Mínimo de 6 caracteres
+                                </li>
+                                <li className={`text-xs flex items-center gap-2 ${hasUpperCase ? 'text-green-500' : 'text-slate-500'}`}>
+                                    {hasUpperCase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                    Pelo menos uma letra maiúscula
+                                </li>
+                                <li className={`text-xs flex items-center gap-2 ${hasNumber ? 'text-green-500' : 'text-slate-500'}`}>
+                                    {hasNumber ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                    Pelo menos um número
+                                </li>
+                            </ul>
+                            {/* Seta do balão */}
+                            <div className="absolute left-4 -bottom-1.5 w-3 h-3 bg-slate-800 border-b border-l border-slate-700 transform -rotate-45"></div>
+                        </div>
+                    )}
+                </div>
 
                 <Input
                     label="Confirme a senha criada"

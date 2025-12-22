@@ -116,6 +116,16 @@ export type Database = {
                     id: string
                     shop_name: string | null
                     updated_at: string | null
+                    // New fields
+                    first_name: string | null
+                    last_name: string | null
+                    company_name: string | null
+                    document_number: string | null
+                    zip_code: string | null
+                    address: string | null
+                    address_number: string | null
+                    phone_number: string | null
+                    avatar_url: string | null
                 }
                 Insert: {
                     created_at?: string | null
@@ -124,6 +134,16 @@ export type Database = {
                     id: string
                     shop_name?: string | null
                     updated_at?: string | null
+                    // New fields
+                    first_name?: string | null
+                    last_name?: string | null
+                    company_name?: string | null
+                    document_number?: string | null
+                    zip_code?: string | null
+                    address?: string | null
+                    address_number?: string | null
+                    phone_number?: string | null
+                    avatar_url?: string | null
                 }
                 Update: {
                     created_at?: string | null
@@ -132,6 +152,16 @@ export type Database = {
                     id?: string
                     shop_name?: string | null
                     updated_at?: string | null
+                    // New fields
+                    first_name?: string | null
+                    last_name?: string | null
+                    company_name?: string | null
+                    document_number?: string | null
+                    zip_code?: string | null
+                    address?: string | null
+                    address_number?: string | null
+                    phone_number?: string | null
+                    avatar_url?: string | null
                 }
                 Relationships: []
             }

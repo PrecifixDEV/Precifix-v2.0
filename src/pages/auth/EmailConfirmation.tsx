@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Mail, ArrowLeft } from 'lucide-react'
-import { Button } from '../../components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 export const EmailConfirmation = () => {
     const navigate = useNavigate()

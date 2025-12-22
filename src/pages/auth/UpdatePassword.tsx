@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Check, X, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { translateAuthError } from '../../utils/authErrors'
 
 export const UpdatePassword = () => {

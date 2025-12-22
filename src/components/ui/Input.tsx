@@ -1,65 +1,50 @@
-import React, { forwardRef } from 'react'
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps
+    extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
-    error?: string
     icon?: React.ReactNode
     endIcon?: React.ReactNode
     onEndIconClick?: () => void
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(({
-    label,
-    error,
-    icon,
-    endIcon,
-    onEndIconClick,
-    className = '',
-    ...props
-}, ref) => {
-    return (
-        <div className="w-full">
-            {label && (
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                    {label}
-                </label>
-            )}
-            <div className="relative">
-                {icon && (
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                        {icon}
-                    </div>
-                )}
-                <input
-                    ref={ref}
-                    className={`
-            block w-full rounded-lg border bg-slate-800/50 
-            text-white placeholder-slate-500
-            transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500
-            disabled:bg-slate-900 disabled:text-slate-500
-            ${icon ? 'pl-10' : 'pl-3'}
-            ${endIcon ? 'pr-10' : 'pr-3'}
-            ${error ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'border-slate-700 hover:border-slate-600'}
-            py-2.5 sm:text-sm
-            ${className}
-          `}
-                    {...props}
-                />
-                {endIcon && (
-                    <div
-                        onClick={onEndIconClick}
-                        className={`absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 ${onEndIconClick ? 'cursor-pointer hover:text-white' : 'pointer-events-none'}`}
-                    >
-                        {endIcon}
-                    </div>
-                )}
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+    ({ className, type, label, icon, endIcon, onEndIconClick, ...props }, ref) => {
+        return (
+            <div className="space-y-2 w-full">
+                {label && <Label className={className}>{label}</Label>}
+                <div className="relative">
+                    {icon && (
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            {icon}
+                        </div>
+                    )}
+                    <input
+                        type={type}
+                        className={cn(
+                            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            icon ? "pl-10" : "",
+                            endIcon ? "pr-10" : "",
+                            className
+                        )}
+                        ref={ref}
+                        {...props}
+                    />
+                    {endIcon && (
+                        <div
+                            className={cn("absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground", onEndIconClick && "cursor-pointer hover:text-foreground")}
+                            onClick={onEndIconClick}
+                        >
+                            {endIcon}
+                        </div>
+                    )}
+                </div>
             </div>
-            {error && (
-                <p className="mt-1 text-xs text-red-500">{error}</p>
-            )}
-        </div>
-    )
-})
+        )
+    }
+)
+Input.displayName = "Input"
 
-Input.displayName = 'Input'
+export { Input }

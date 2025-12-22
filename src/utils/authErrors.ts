@@ -30,7 +30,6 @@ export const translateAuthError = (errorMessage: string): string => {
     if (msg.includes('captcha')) {
         return 'Erro de verificação de segurança. Tente novamente.'
     }
-
     // Default fallback
     return errorMessage
 }
