@@ -4,6 +4,7 @@ import { User, Mail, Lock, Building2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { translateAuthError } from '../../utils/authErrors'
 
 export const Register = () => {
     const navigate = useNavigate()
@@ -40,18 +41,19 @@ export const Register = () => {
                     data: {
                         full_name: formData.fullName,
                         shop_name: formData.shopName
-                    }
+                    },
+                    emailRedirectTo: 'http://localhost:5173/'
                 }
             })
 
             if (authError) throw authError
 
             if (authData.user) {
-                // trigger in database creates profile, so we just redirect
-                navigate('/')
+                // Redirect user to confirmation page
+                navigate('/email-confirmation')
             }
         } catch (err: any) {
-            setError(err.message || 'Erro ao criar conta.')
+            setError(translateAuthError(err.message || 'Erro ao criar conta.'))
         } finally {
             setLoading(false)
         }

@@ -4,6 +4,7 @@ import { Mail, Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { translateAuthError } from '../../utils/authErrors'
 
 export const Login = () => {
     const navigate = useNavigate()
@@ -27,7 +28,7 @@ export const Login = () => {
 
             navigate('/')
         } catch (err: any) {
-            setError(err.message || 'Erro ao realizar login.')
+            setError(translateAuthError(err.message || 'Erro ao realizar login.'))
         } finally {
             setLoading(false)
         }
