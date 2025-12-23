@@ -28,6 +28,10 @@ This project is an ERP SaaS for automotive aesthetics ("Precifix"). We are curre
     -   Updated to set `subscription_status` = 'trial'.
     -   Fixed missing `shop_name` insertion.
 
+### 4. UI & Dependencies
+-   **Charts Migration:** Replaced `@tremor/react` with `shadcn/ui` charts (`recharts`) to resolve React 19 conflict.
+-   **Refactoring:** Updated `Dashboard.tsx` and `Profile.tsx` to use the new chart components and removed Tremor dependencies.
+
 ## 🚧 Pending / Next Steps
 1.  **Verify Trial Logic:** Ensure the application correctly handles the 7-day trial logic (UI display, restrictions).
 2.  **Kiwify Integration:** The field `kiwify_subscription_id` exists but is not yet populated or used. Future webhook integration needed.

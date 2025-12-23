@@ -1,26 +1,51 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, Metric, Text, BarChart, DonutChart, Title, Subtitle } from '@tremor/react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { supabase } from '../lib/supabase'
 import { Calendar, CheckCircle, Car, AlertTriangle } from 'lucide-react'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, PieChart, Pie } from 'recharts'
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from '@/components/ui/chart'
 
-// Mock data for charts (until we have real data populated)
-const dailyRevenue = [
-    { date: '01', 'Faturamento': 250 },
-    { date: '02', 'Faturamento': 1800 },
-    { date: '03', 'Faturamento': 0 },
-    { date: '04', 'Faturamento': 450 },
-    { date: '05', 'Faturamento': 900 },
-    { date: '06', 'Faturamento': 120 },
-    // ... add more days as needed
+// Mock data for charts
+const dailyRevenueData = [
+    { date: '01', amount: 250 },
+    { date: '02', amount: 1800 },
+    { date: '03', amount: 0 },
+    { date: '04', amount: 450 },
+    { date: '05', amount: 900 },
+    { date: '06', amount: 120 },
 ]
 
-const servicePopularity = [
-    { name: 'Lavagem Técnica', count: 15 },
-    { name: 'Polimento', count: 8 },
-    { name: 'Higienização', count: 12 },
-    { name: 'Vitrificação', count: 4 },
+const servicePopularityData = [
+    { name: 'Lavagem Técnica', count: 15, fill: 'var(--color-wash)' },
+    { name: 'Polimento', count: 8, fill: 'var(--color-polish)' },
+    { name: 'Higienização', count: 12, fill: 'var(--color-clean)' },
+    { name: 'Vitrificação', count: 4, fill: 'var(--color-glass)' },
 ]
+
+// Chart Config
+const chartConfig = {
+    amount: {
+        label: "Faturamento",
+        color: "#d97706", // amber-600
+    },
+    wash: {
+        label: "Lavagem Técnica",
+        color: "#0ea5e9", // sky-500
+    },
+    polish: {
+        label: "Polimento",
+        color: "#6366f1", // indigo-500
+    },
+    clean: {
+        label: "Higienização",
+        color: "#8b5cf6", // violet-500
+    },
+    glass: {
+        label: "Vitrificação",
+        color: "#ec4899", // pink-500
+    },
+} satisfies ChartConfig
 
 export const Dashboard = () => {
     // State for dashboard metrics
@@ -105,7 +130,6 @@ export const Dashboard = () => {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Warning Alert if Profile incomplete */}
-            {/* Warning Alert if Profile incomplete */}
             {showProfileAlert && (
                 <div className="mt-4 p-4 rounded-lg bg-slate-100 dark:bg-slate-800 border border-yellow-500/50 border-l-4 border-l-yellow-500 shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -135,10 +159,10 @@ export const Dashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <Title className="text-slate-900 dark:text-white text-2xl font-bold">Painel Principal</Title>
-                    <Subtitle className="text-slate-400 capitalize">
+                    <h1 className="text-slate-900 dark:text-white text-2xl font-bold">Painel Principal</h1>
+                    <p className="text-slate-400 capitalize">
                         {currentMonth} {currentYear}
-                    </Subtitle>
+                    </p>
                 </div>
 
                 {/* Date Filter Mockup */}
@@ -156,35 +180,43 @@ export const Dashboard = () => {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <Text className="text-slate-500 dark:text-slate-400">Faturamento do Mês</Text>
-                    <Metric className="text-slate-900 dark:text-white mt-2">{valueFormatter(stats.revenue)}</Metric>
-                    <div className="h-1 w-12 bg-green-500 rounded mt-4"></div>
+                    <CardContent className="p-6">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Faturamento do Mês</p>
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{valueFormatter(stats.revenue)}</div>
+                        <div className="h-1 w-12 bg-green-500 rounded mt-4"></div>
+                    </CardContent>
                 </Card>
 
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <Text className="text-slate-500 dark:text-slate-400">Receita Líquida</Text>
-                    <Metric className="text-slate-900 dark:text-white mt-2">{valueFormatter(stats.netRevenue)}</Metric>
-                    <div className="h-1 w-12 bg-blue-500 rounded mt-4"></div>
+                    <CardContent className="p-6">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Receita Líquida</p>
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{valueFormatter(stats.netRevenue)}</div>
+                        <div className="h-1 w-12 bg-blue-500 rounded mt-4"></div>
+                    </CardContent>
                 </Card>
 
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <Text className="text-slate-500 dark:text-slate-400">Serviços Concluídos</Text>
-                            <Metric className="text-slate-900 dark:text-white mt-2">{stats.completedServices}</Metric>
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm">Serviços Concluídos</p>
+                                <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{stats.completedServices}</div>
+                            </div>
+                            <CheckCircle className="w-8 h-8 text-slate-400 dark:text-slate-700" />
                         </div>
-                        <CheckCircle className="w-8 h-8 text-slate-400 dark:text-slate-700" />
-                    </div>
+                    </CardContent>
                 </Card>
 
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <Text className="text-slate-500 dark:text-slate-400">Carros Atendidos</Text>
-                            <Metric className="text-slate-900 dark:text-white mt-2">{stats.carsServiced}</Metric>
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm">Carros Atendidos</p>
+                                <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{stats.carsServiced}</div>
+                            </div>
+                            <Car className="w-8 h-8 text-slate-400 dark:text-slate-700" />
                         </div>
-                        <Car className="w-8 h-8 text-slate-400 dark:text-slate-700" />
-                    </div>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -192,76 +224,81 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Daily Revenue Chart */}
                 <Card className="lg:col-span-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <div className="flex items-center justify-between mb-4">
-                        <Title className="text-slate-900 dark:text-white">Faturamento Diário</Title>
-                        <div className="flex gap-2">
-                            <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500">
-                                <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-500"></span>
-                                Diário
-                            </span>
-                        </div>
-                    </div>
-                    <BarChart
-                        className="mt-6 h-72"
-                        data={dailyRevenue}
-                        index="date"
-                        categories={["Faturamento"]}
-                        colors={["amber"]}
-                        valueFormatter={valueFormatter}
-                        yAxisWidth={80}
-                        showLegend={false}
-                        showAnimation={true}
-                    />
+                    <CardHeader>
+                        <CardTitle className="text-slate-900 dark:text-white">Faturamento Diário</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartContainer config={chartConfig} className="min-h-[200px] w-full h-72">
+                            <BarChart data={dailyRevenueData}>
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                                <XAxis
+                                    dataKey="date"
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                />
+                                <YAxis
+                                    tickFormatter={(val) => `R$ ${val}`}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickMargin={10}
+                                />
+                                <ChartTooltip content={<ChartTooltipContent />} />
+                                <Bar dataKey="amount" fill="var(--color-amount)" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ChartContainer>
+                    </CardContent>
                 </Card>
 
                 {/* Popular Services Donut */}
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none flex flex-col">
-                    <Title className="text-slate-900 dark:text-white mb-4">Serviços Mais Populares</Title>
-                    <DonutChart
-                        className="mt-4 h-48"
-                        data={servicePopularity}
-                        category="count"
-                        index="name"
-                        valueFormatter={(val) => `${val} serviços`}
-                        colors={["amber", "blue", "indigo", "violet"]}
-                        showAnimation={true}
-                    />
-                    <div className="mt-8 flex-1">
-                        <ul className="space-y-2">
-                            {servicePopularity.map((service, index) => (
-                                <li key={index} className="flex justify-between text-sm">
-                                    <span className="text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                                        <span className={`w-2 h-2 rounded-full bg-${["cyan", "blue", "indigo", "violet"][index]}-500`}></span>
-                                        {service.name}
-                                    </span>
-                                    <span className="text-slate-900 dark:text-white font-medium">{service.count}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    <CardHeader>
+                        <CardTitle className="text-slate-900 dark:text-white">Serviços Mais Populares</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 pb-0">
+                        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+                            <PieChart>
+                                <Pie
+                                    data={servicePopularityData}
+                                    dataKey="count"
+                                    nameKey="name"
+                                    innerRadius={60}
+                                />
+                                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                                <ChartLegend
+                                    content={<ChartLegendContent nameKey="name" />}
+                                    className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+                                />
+                            </PieChart>
+                        </ChartContainer>
+                    </CardContent>
                 </Card>
             </div>
 
             {/* Bottom Row - Lists */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                        <Title className="text-slate-900 dark:text-white">Próximos Agendamentos</Title>
-                    </div>
-                    <div className="text-center py-12 text-slate-500 text-sm">
-                        Nenhum agendamento para hoje.
-                    </div>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Próximos Agendamentos</h3>
+                        </div>
+                        <div className="text-center py-12 text-slate-500 text-sm">
+                            Nenhum agendamento para hoje.
+                        </div>
+                    </CardContent>
                 </Card>
 
                 <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                        <Title className="text-slate-900 dark:text-white">Resumo de Agendamentos</Title>
-                    </div>
-                    <div className="text-center py-12 text-slate-500 text-sm">
-                        Nenhum dado disponível.
-                    </div>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Resumo de Agendamentos</h3>
+                        </div>
+                        <div className="text-center py-12 text-slate-500 text-sm">
+                            Nenhum dado disponível.
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
         </div>
