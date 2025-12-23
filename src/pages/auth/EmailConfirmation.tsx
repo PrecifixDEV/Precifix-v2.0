@@ -31,7 +31,7 @@ export const EmailConfirmation = () => {
                 variant="outline"
                 fullWidth
                 onClick={() => navigate('/login')}
-                className="group"
+                className="group bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
             >
                 <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                 Voltar para o Login

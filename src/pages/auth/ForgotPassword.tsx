@@ -49,10 +49,10 @@ export const ForgotPassword = () => {
                 </p>
 
                 <Button
-                    variant="outline"
+                    variant="default"
                     fullWidth
                     onClick={() => setSuccess(false)}
-                    className="mb-4"
+                    className="mb-4 bg-slate-800 hover:bg-slate-700 text-white border-slate-700 from-neutral-500"
                 >
                     Tentar outro e-mail
                 </Button>
@@ -84,7 +84,9 @@ export const ForgotPassword = () => {
                     placeholder="email@exemplo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    icon={<Mail className="w-5 h-5" />}
+                    icon={<Mail className="w-5 h-5 text-white" />}
+                    className="text-white"
+                    labelClassName="text-white"
                     required
                 />
 
@@ -94,7 +96,12 @@ export const ForgotPassword = () => {
                     </div>
                 )}
 
-                <Button type="submit" fullWidth isLoading={loading}>
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={loading}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                >
                     ENVIAR INSTRUÇÕES
                 </Button>
             </form>

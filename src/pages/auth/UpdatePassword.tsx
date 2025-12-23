@@ -87,9 +87,11 @@ export const UpdatePassword = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         onFocus={() => setShowPasswordRules(true)}
                         onBlur={() => setShowPasswordRules(false)}
-                        icon={<Lock className="w-5 h-5" />}
-                        endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        icon={<Lock className="w-5 h-5 text-white" />}
+                        endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
+                        className="text-white"
+                        labelClassName="text-white"
                         required
                     />
 
@@ -122,9 +124,11 @@ export const UpdatePassword = () => {
                     placeholder="Repita a senha"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    icon={<Lock className="w-5 h-5" />}
-                    endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    icon={<Lock className="w-5 h-5 text-white" />}
+                    endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                     onEndIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="text-white"
+                    labelClassName="text-white"
                     required
                 />
 
@@ -134,7 +138,12 @@ export const UpdatePassword = () => {
                     </div>
                 )}
 
-                <Button type="submit" fullWidth isLoading={loading}>
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={loading}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                >
                     ALTERAR SENHA
                 </Button>
             </form>

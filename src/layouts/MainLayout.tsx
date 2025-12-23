@@ -91,13 +91,13 @@ export const MainLayout = () => {
             <aside className={`
                 fixed lg:static inset-y-0 left-0 z-50 w-64 
                 bg-white dark:bg-slate-900 
-                border-r border-slate-200 dark:border-slate-800 
                 transform transition-transform duration-200 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `}>
                 <div className="h-full flex flex-col">
                     {/* Logo area */}
-                    <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
+                    {/* Logo area */}
+                    <div className="h-16 flex items-center px-6">
                         <Link to="/">
                             <img src={logo} alt="Precifix Logo" className="h-8 w-auto" />
                         </Link>
@@ -120,7 +120,7 @@ export const MainLayout = () => {
                                     className={`
                                         flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                         ${isActive
-                                            ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-500'
+                                            ? 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
                                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                         }
                                     `}
@@ -138,7 +138,7 @@ export const MainLayout = () => {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
-                <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8">
+                <header className="h-16 bg-white dark:bg-slate-900 shadow-md flex items-center justify-between px-4 lg:px-8 relative z-10">
                     <button
                         className="lg:hidden p-2 text-slate-400 hover:text-white"
                         onClick={() => setIsSidebarOpen(true)}

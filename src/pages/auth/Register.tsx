@@ -89,7 +89,9 @@ export const Register = () => {
                     placeholder="Ex: João da Silva"
                     value={formData.fullName}
                     onChange={handleChange}
-                    icon={<User className="w-5 h-5" />}
+                    icon={<User className="w-5 h-5 text-white" />}
+                    className="text-white"
+                    labelClassName="text-white"
                     required
                 />
 
@@ -99,7 +101,9 @@ export const Register = () => {
                     placeholder="Ex: Lava Jato do João"
                     value={formData.shopName}
                     onChange={handleChange}
-                    icon={<Building2 className="w-5 h-5" />}
+                    icon={<Building2 className="w-5 h-5 text-white" />}
+                    className="text-white"
+                    labelClassName="text-white"
                 />
 
                 <Input
@@ -109,7 +113,9 @@ export const Register = () => {
                     placeholder="email@exemplo.com"
                     value={formData.email}
                     onChange={handleChange}
-                    icon={<Mail className="w-5 h-5" />}
+                    icon={<Mail className="w-5 h-5 text-white" />}
+                    className="text-white"
+                    labelClassName="text-white"
                     required
                 />
 
@@ -123,9 +129,11 @@ export const Register = () => {
                         onChange={handleChange}
                         onFocus={() => setShowPasswordRules(true)}
                         onBlur={() => setShowPasswordRules(false)}
-                        icon={<Lock className="w-5 h-5" />}
-                        endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        icon={<Lock className="w-5 h-5 text-white" />}
+                        endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
+                        className="text-white"
+                        labelClassName="text-white"
                         required
                     />
 
@@ -159,9 +167,11 @@ export const Register = () => {
                     placeholder="Senha#123"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    icon={<Lock className="w-5 h-5" />}
-                    endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    icon={<Lock className="w-5 h-5 text-white" />}
+                    endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                     onEndIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="text-white"
+                    labelClassName="text-white"
                     required
                 />
 
@@ -171,7 +181,12 @@ export const Register = () => {
                     </div>
                 )}
 
-                <Button type="submit" fullWidth isLoading={loading} className="mt-2">
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={loading}
+                    className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                >
                     CRIAR CONTA E GANHAR 7 DIAS GRÁTIS
                 </Button>
             </form>

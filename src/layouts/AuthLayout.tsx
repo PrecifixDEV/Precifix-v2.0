@@ -18,7 +18,7 @@ export const AuthLayout: React.FC = () => {
 
             {/* Content Card with Glassmorphism */}
             <div className="relative z-10 w-full max-w-md p-6">
-                <div className="bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-8 animate-in fade-in zoom-in duration-300">
+                <div className="bg-black/20 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-8 animate-in fade-in zoom-in duration-300">
                     <div className="flex flex-col items-center mb-8">
                         <img src={logo} alt="Precifix" className="h-12 lg:h-14 mb-4" />
                     </div>

@@ -8,13 +8,14 @@ export interface InputProps
     icon?: React.ReactNode
     endIcon?: React.ReactNode
     onEndIconClick?: () => void
+    labelClassName?: string
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, icon, endIcon, onEndIconClick, ...props }, ref) => {
+    ({ className, type, label, icon, endIcon, onEndIconClick, labelClassName, ...props }, ref) => {
         return (
             <div className="space-y-2 w-full">
-                {label && <Label className={className}>{label}</Label>}
+                {label && <Label className={labelClassName}>{label}</Label>}
                 <div className="relative">
                     {icon && (
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">

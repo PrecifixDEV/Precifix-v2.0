@@ -51,8 +51,9 @@ export const Login = () => {
                     placeholder="email@exemplo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    icon={<Mail className="w-5 h-5" />}
-                    className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                    icon={<Mail className="w-5 h-5 text-white" />}
+                    className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-white"
+                    labelClassName="text-white"
                     required
                 />
 
@@ -63,10 +64,11 @@ export const Login = () => {
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        icon={<Lock className="w-5 h-5" />}
-                        endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        icon={<Lock className="w-5 h-5 text-white" />}
+                        endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
-                        className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                        className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-white"
+                        labelClassName="text-white"
                         required
                     />
                     <div className="flex justify-end pt-1">
