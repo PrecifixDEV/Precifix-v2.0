@@ -195,8 +195,8 @@ export const Dashboard = () => {
                     <div className="flex items-center justify-between mb-4">
                         <Title className="text-slate-900 dark:text-white">Faturamento Diário</Title>
                         <div className="flex gap-2">
-                            <span className="flex items-center gap-1.5 text-xs text-yellow-600 dark:text-yellow-500">
-                                <span className="w-2 h-2 rounded-full bg-yellow-600 dark:bg-yellow-500"></span>
+                            <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+                                <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-500"></span>
                                 Diário
                             </span>
                         </div>
@@ -206,7 +206,7 @@ export const Dashboard = () => {
                         data={dailyRevenue}
                         index="date"
                         categories={["Faturamento"]}
-                        colors={["yellow"]}
+                        colors={["amber"]}
                         valueFormatter={valueFormatter}
                         yAxisWidth={80}
                         showLegend={false}
@@ -223,7 +223,7 @@ export const Dashboard = () => {
                         category="count"
                         index="name"
                         valueFormatter={(val) => `${val} serviços`}
-                        colors={["cyan", "blue", "indigo", "violet"]}
+                        colors={["amber", "blue", "indigo", "violet"]}
                         showAnimation={true}
                     />
                     <div className="mt-8 flex-1">

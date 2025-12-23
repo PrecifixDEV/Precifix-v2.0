@@ -52,6 +52,7 @@ export const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-5 h-5" />}
+                    className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                     required
                 />
 
@@ -65,6 +66,7 @@ export const Login = () => {
                         icon={<Lock className="w-5 h-5" />}
                         endIcon={showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
+                        className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                         required
                     />
                     <div className="flex justify-end pt-1">
@@ -83,7 +85,12 @@ export const Login = () => {
                     </div>
                 )}
 
-                <Button type="submit" fullWidth isLoading={loading}>
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={loading}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                >
                     ENTRAR NA PLATAFORMA
                 </Button>
             </form>
