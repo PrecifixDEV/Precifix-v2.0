@@ -183,9 +183,8 @@ export const Register = () => {
 
                 <Button
                     type="submit"
-                    fullWidth
                     isLoading={loading}
-                    className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                    className="w-full mt-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
                 >
                     CRIAR CONTA E GANHAR 7 DIAS GRÁTIS
                 </Button>

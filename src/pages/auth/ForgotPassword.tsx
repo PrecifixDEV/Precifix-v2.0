@@ -50,9 +50,8 @@ export const ForgotPassword = () => {
 
                 <Button
                     variant="default"
-                    fullWidth
                     onClick={() => setSuccess(false)}
-                    className="mb-4 bg-slate-800 hover:bg-slate-700 text-white border-slate-700 from-neutral-500"
+                    className="w-full mb-4 bg-slate-800 hover:bg-slate-700 text-white border-slate-700 from-neutral-500"
                 >
                     Tentar outro e-mail
                 </Button>
@@ -98,9 +97,8 @@ export const ForgotPassword = () => {
 
                 <Button
                     type="submit"
-                    fullWidth
                     isLoading={loading}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
                 >
                     ENVIAR INSTRUÇÕES
                 </Button>

@@ -23,6 +23,8 @@ import {
     Settings,
     CreditCard
 } from 'lucide-react'
+import { SubscriptionTag } from '../components/SubscriptionTag'
+import { Clock } from '../components/Clock'
 import { supabase } from '../lib/supabase'
 import { useTheme } from '../contexts/ThemeContext'
 
@@ -31,9 +33,29 @@ import logo from '../assets/precifix-logo.png'
 export const MainLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [user, setUser] = useState<any>(null)
+    const [subscriptionData, setSubscriptionData] = useState<{ status: string | null, trialEndsAt: string | null }>({ status: null, trialEndsAt: null })
     const { theme, toggleTheme } = useTheme()
     const location = useLocation()
     const navigate = useNavigate()
+
+    const fetchProfile = async (userId: string) => {
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('subscription_status, trial_ends_at')
+                .eq('id', userId)
+                .single() as any
+
+            if (data) {
+                setSubscriptionData({
+                    status: data.subscription_status,
+                    trialEndsAt: data.trial_ends_at
+                })
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error)
+        }
+    }
 
     useEffect(() => {
         // Get initial session
@@ -42,6 +64,7 @@ export const MainLayout = () => {
                 navigate('/login')
             } else {
                 setUser(session.user)
+                fetchProfile(session.user.id)
             }
         })
 
@@ -51,6 +74,7 @@ export const MainLayout = () => {
                 navigate('/login')
             } else {
                 setUser(session.user)
+                fetchProfile(session.user.id)
             }
         })
 
@@ -149,8 +173,17 @@ export const MainLayout = () => {
                     {/* Spacer for when mobile menu is hidden */}
                     <div className="hidden lg:block"></div>
 
+                    {/* Debug Clock */}
+                    <Clock />
+
                     {/* Right Header Section */}
                     <div className="ml-auto flex items-center gap-6">
+                        {/* Subscription Tag */}
+                        <SubscriptionTag
+                            status={subscriptionData.status}
+                            trialEndsAt={subscriptionData.trialEndsAt}
+                        />
+
                         {/* Notifications */}
                         <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                             <Bell className="w-5 h-5" />

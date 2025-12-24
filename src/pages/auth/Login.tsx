@@ -89,9 +89,8 @@ export const Login = () => {
 
                 <Button
                     type="submit"
-                    fullWidth
                     isLoading={loading}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
                 >
                     ENTRAR NA PLATAFORMA
                 </Button>

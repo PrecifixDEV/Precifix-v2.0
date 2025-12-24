@@ -9,6 +9,7 @@ import { MainLayout } from './layouts/MainLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Profile } from './pages/Profile'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ManageCosts } from './pages/ManageCosts'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/custos" element={<ManageCosts />} />
 
             <Route path="/services" element={<div className="text-slate-900 dark:text-white p-6">Serviços (Em breve)</div>} />
             <Route path="/sales" element={<div className="text-slate-900 dark:text-white p-6">Vendas (Em breve)</div>} />

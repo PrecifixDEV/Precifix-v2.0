@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase'
 import { Calendar, CheckCircle, Car, AlertTriangle } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, PieChart, Pie } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from '@/components/ui/chart'
+import { ErpTester } from '@/components/ErpTester'
+
 
 // Mock data for charts
 const dailyRevenueData = [
@@ -79,7 +81,7 @@ export const Dashboard = () => {
                 .eq('id', user.id)
                 .single()
 
-            if (!profile || !profile.document_number || !profile.address || !profile.company_name) {
+            if (!profile || !profile.cpf_cnpj || !profile.company_name) {
                 setShowProfileAlert(true)
             }
         } catch (error) {
@@ -164,6 +166,9 @@ export const Dashboard = () => {
                         {currentMonth} {currentYear}
                     </p>
                 </div>
+
+                {/* DB Tester */}
+                <ErpTester />
 
                 {/* Date Filter Mockup */}
                 <div className="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">

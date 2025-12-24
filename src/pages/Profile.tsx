@@ -11,6 +11,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "../components/ui/alert-dialog"
+import { ImageCropper } from '@/components/ImageCropper'
+import heic2any from 'heic2any'
 
 export const Profile = () => {
     // ... (keep state)
@@ -44,6 +46,10 @@ export const Profile = () => {
     const [phoneNumber, setPhoneNumber] = useState('')
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
+    // Cropper State
+    const [cropModalOpen, setCropModalOpen] = useState(false)
+    const [imageToCrop, setImageToCrop] = useState<string | null>(null)
+
     useEffect(() => {
         getProfile()
     }, [])
@@ -66,14 +72,17 @@ export const Profile = () => {
                 }
 
                 if (data) {
-                    setFirstName(data.first_name || user.user_metadata?.full_name?.split(' ')[0] || '')
-                    setLastName(data.last_name || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '')
+                    const fullName = data.full_name || user.user_metadata?.full_name || '';
+                    const nameParts = fullName.split(' ');
+                    setFirstName(nameParts[0] || '');
+                    setLastName(nameParts.slice(1).join(' ') || '');
                     setCompanyName(data.company_name || '')
-                    setDocumentNumber(data.document_number || '')
-                    setZipCode(data.zip_code || '')
-                    setAddress(data.address || '')
-                    setAddressNumber(data.address_number || '')
-                    setPhoneNumber(data.phone_number || '')
+                    setDocumentNumber(data.cpf_cnpj || '')
+                    setPhoneNumber(data.mobile_phone || '')
+                    // Address fields not in DB
+                    setZipCode('')
+                    setAddress('')
+                    setAddressNumber('')
                     setAvatarUrl(data.avatar_url)
                 } else {
                     // Fallback if no profile row exists yet
@@ -107,14 +116,15 @@ export const Profile = () => {
 
             const updates = {
                 id: user.id,
-                first_name: firstName,
-                last_name: lastName,
+                email: user.email!, // Required by schema
+                full_name: `${firstName} ${lastName}`.trim(),
                 company_name: companyName,
-                document_number: documentNumber,
-                zip_code: zipCode,
-                address,
-                address_number: addressNumber,
-                phone_number: phoneNumber,
+                cpf_cnpj: documentNumber, // Mapped from document_number
+                mobile_phone: phoneNumber, // Mapped from phone_number
+                // Address fields removed as they don't exist in 'profiles' table yet
+                // zip_code: zipCode,
+                // address: address,
+                // number: addressNumber, 
                 updated_at: new Date().toISOString(),
             }
 
@@ -125,8 +135,6 @@ export const Profile = () => {
             // Update local user state for avatar/name in header
             const { error: authError } = await supabase.auth.updateUser({
                 data: {
-                    first_name: firstName,
-                    last_name: lastName,
                     full_name: `${firstName} ${lastName}`.trim(),
                 }
             })
@@ -141,42 +149,83 @@ export const Profile = () => {
         }
     }
 
-    const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        try {
-            setSaving(true)
-            if (!event.target.files || event.target.files.length === 0) {
-                throw new Error('You must select an image to upload.')
+    const onFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            let file = event.target.files[0]
+
+            // Check for HEIC
+            if (file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+                try {
+                    setSaving(true) // Show global loading while converting
+                    const convertedBlob = await heic2any({
+                        blob: file,
+                        toType: 'image/jpeg',
+                        quality: 0.8
+                    })
+
+                    // heic2any can return Blob or Blob[], handle both
+                    const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob
+                    file = new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' })
+                } catch (e) {
+                    console.error("HEIC conversion failed", e)
+                    showAlert('Erro', 'Falha ao processar imagem HEIC. Tente JPG/PNG.', 'destructive')
+                    setSaving(false)
+                    return
+                } finally {
+                    setSaving(false)
+                }
             }
 
-            const file = event.target.files[0]
-            const fileExt = file.name.split('.').pop()
-            const fileName = `${user.id}.${fileExt}`
+            const reader = new FileReader()
+            reader.addEventListener('load', () => {
+                setImageToCrop(reader.result?.toString() || null)
+                setCropModalOpen(true)
+                // Reset file input so user can select same file again if they cancel
+                if (fileInputRef.current) fileInputRef.current.value = ''
+            })
+            reader.readAsDataURL(file)
+        }
+    }
+
+    const onCropComplete = async (croppedBlob: Blob) => {
+        try {
+            setSaving(true)
+            setCropModalOpen(false)
+
+            const fileName = `${user.id}.png` // Always PNG for consistency/transparency
             const filePath = `${fileName}`
 
+            // Overwrite existing file
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, file, { upsert: true })
+                .upload(filePath, croppedBlob, { upsert: true, contentType: 'image/png' })
 
             if (uploadError) throw uploadError
 
+            // Get public URL (sometimes caching issues occur, adding timestamp query param might help UI but DB should be clean)
+            // For now, simpler is better.
             const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
+
+            // Add Timestamp to bust client cache immediately
+            const publicUrlWithTimestamp = `${data.publicUrl}?t=${new Date().getTime()}`
 
             // Update profile with new avatar URL
             const { error: updateError } = await supabase
                 .from('profiles')
                 .upsert({
                     id: user.id,
-                    avatar_url: data.publicUrl
+                    email: user.email!,
+                    avatar_url: publicUrlWithTimestamp
                 })
 
             if (updateError) throw updateError
 
             // Update auth metadata
             await supabase.auth.updateUser({
-                data: { avatar_url: data.publicUrl }
+                data: { avatar_url: publicUrlWithTimestamp }
             })
 
-            setAvatarUrl(data.publicUrl)
+            setAvatarUrl(publicUrlWithTimestamp)
             showAlert('Sucesso', 'Avatar atualizado!')
         } catch (error: any) {
             showAlert('Erro', 'Error uploading avatar: ' + error.message, 'destructive')
@@ -289,9 +338,9 @@ export const Profile = () => {
                             <input
                                 type="file"
                                 ref={fileInputRef}
-                                onChange={uploadAvatar}
+                                onChange={onFileSelect}
                                 className="hidden"
-                                accept="image/*"
+                                accept="image/*,.heic,.heif"
                             />
                             <div className="text-center">
                                 <h3 className="text-lg font-medium text-slate-900 dark:text-white">
@@ -441,6 +490,12 @@ export const Profile = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            <ImageCropper
+                open={cropModalOpen}
+                imageSrc={imageToCrop}
+                onClose={() => setCropModalOpen(false)}
+                onCropComplete={onCropComplete}
+            />
         </div>
     )
 }
