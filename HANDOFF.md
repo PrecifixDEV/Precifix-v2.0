@@ -11,6 +11,11 @@
 3.  **Manage Costs Page**:
     -   Refactored `ManageCosts.tsx` to wrap content in `<Card>` components.
     -   Updated `FixedCostsTable`, `VariableCostsTable`, and `CostAnalysisSummary` to use the standard Card design.
+4. **UI Improvements & Refactoring**:
+    -   **Theme Toggle**: Moved to Sidebar footer with a new segmented control design (Sun/Moon).
+    -   **Date Picker**: Implemented `DatePickerWithInput` in `CostFormDialog`, allowing both manual text input and calendar selection.
+    -   **Calendar Component**: Upgraded `calendar.tsx` to support `react-day-picker` v9, enabling month/year dropdowns and fixing grid layout issues.
+    -   **Light Mode**: Experimented with and then reverted a yellow-tinted light mode theme as per user request.
 
 ## Next Steps
 1.  **Accounts Receivable**: Implement the new page for managing incoming payments.

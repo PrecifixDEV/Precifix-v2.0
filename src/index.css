@@ -5,13 +5,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: 0 0% 100%; /* Pure white */
+  --background: 0 0% 100%;
+  /* Pure white */
   --foreground: 0 0% 3.9%;
   --card: 0 0% 100%;
   --card-foreground: 0 0% 3.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 3.9%;
-  --primary: 45 100% 51%; /* Main Yellow/Orange */
+  --primary: 45 100% 51%;
+  /* Main Yellow/Orange */
   --primary-foreground: 0 0% 9%;
   --primary-glow: 43 100% 65%;
   --primary-strong: 33 100% 50%;
@@ -48,36 +50,47 @@
   --gradient-primary: linear-gradient(135deg, hsl(45 100% 51%), hsl(43 100% 65%));
   --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(45 100% 98%));
   --gradient-elegant: linear-gradient(135deg, hsl(45 100% 51% / 0.1), hsl(43 100% 65% / 0.05));
-  
+
   --shadow-card: 0 4px 20px hsl(45 100% 51% / 0.08);
   --shadow-elegant: 0 10px 30px -10px hsl(45 100% 51% / 0.2);
   --shadow-glow: 0 0 40px hsl(45 100% 51% / 0.15);
 }
 
 .dark {
-  --background: 222 47% 2%; /* Slate 950+ (Darker) */
-  --foreground: 210 40% 98%; /* Slate 50 */
-  --card: 222 47% 11%; /* Slate 900 (The requested Blue) */
+  --background: 222.2 84% 4.9%;
+  /* Slate 950 */
+  --foreground: 210 40% 98%;
+  /* Slate 50 */
+  --card: 222.2 47.4% 11.2%;
+  /* Slate 900 */
   --card-foreground: 210 40% 98%;
-  --popover: 222 47% 11%;
+  --popover: 222.2 47.4% 11.2%;
+  /* Slate 900 */
   --popover-foreground: 210 40% 98%;
   --primary: 45 100% 51%;
   --primary-foreground: 0 0% 9%;
   --primary-glow: 43 100% 65%;
   --primary-strong: 33 100% 50%;
-  --secondary: 217 33% 17%; /* Slate 800/900 mix */
+  --secondary: 217.2 32.6% 17.5%;
+  /* Slate 800 */
   --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
+  --muted: 217.2 32.6% 17.5%;
+  /* Slate 800 */
   --muted-foreground: 215 20% 65%;
-  --accent: 217 33% 17%;
+  --accent: 217.2 32.6% 17.5%;
+  /* Slate 800 */
   --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 212 26% 83%; /* Slate 300?? Or similar */
+  --border: 217.2 32.6% 17.5%;
+  /* Slate 800 */
+  --input: 217.2 32.6% 17.5%;
+  /* Slate 800 */
+  --ring: 212 26% 83%;
+  /* Slate 300?? Or similar */
 
-  --sidebar-background: 222 47% 11%; /* Match Card */
+  --sidebar-background: 222 47% 11%;
+  /* Match Card */
   --sidebar-foreground: 210 40% 98%;
   --sidebar-primary: 45 100% 51%;
   --sidebar-primary-foreground: 0 0% 9%;
@@ -93,9 +106,9 @@
   --chart-5: 340 75% 55%;
 
   --gradient-primary: linear-gradient(135deg, hsl(45 100% 51%), hsl(43 100% 65%));
-  --gradient-card: linear-gradient(145deg, hsl(222 47% 12%), hsl(222 47% 10%));
+  --gradient-card: linear-gradient(145deg, hsl(222.2 47.4% 11.2%), hsl(222.2 47.4% 9%));
   --gradient-elegant: linear-gradient(135deg, hsl(45 100% 51% / 0.15), hsl(43 100% 65% / 0.08));
-  
+
   --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
   --shadow-elegant: 0 10px 30px -10px hsl(45 100% 51% / 0.3);
   --shadow-glow: 0 0 40px hsl(45 100% 51% / 0.25);
@@ -145,12 +158,23 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
   @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
   }
+
   @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
   }
 }
 
@@ -159,12 +183,15 @@
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
+
   .shadow-elegant {
     box-shadow: var(--shadow-elegant);
   }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+
   .bg-gradient-primary {
     background-image: var(--gradient-primary);
   }
@@ -174,6 +201,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

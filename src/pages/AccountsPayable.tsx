@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReceiptText } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
 import { AccountsPayableTable } from '@/components/billing/AccountsPayableTable';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
@@ -22,22 +21,16 @@ const AccountsPayable = () => {
     }));
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Contas a Pagar</h1>
+                <p className="text-slate-500 dark:text-slate-400">
+                    Visualize e gerencie seus pagamentos mensais.
+                </p>
+            </div>
+
             <Card className="bg-gradient-to-br from-card to-card/50 border-border/50 shadow-[var(--shadow-elegant)]">
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg">
-                            <ReceiptText className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-foreground">Contas a Pagar</CardTitle>
-                            <CardDescription>
-                                Visualize e gerencie seus pagamentos mensais.
-                            </CardDescription>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                     <div className="flex flex-col sm:flex-row gap-4 mb-6">
                         <div className="flex-1 space-y-2">
                             <label htmlFor="select-month" className="text-sm font-medium text-foreground">Mês</label>
@@ -45,7 +38,7 @@ const AccountsPayable = () => {
                                 value={selectedMonth.toString()}
                                 onValueChange={(value) => setSelectedMonth(parseInt(value, 10))}
                             >
-                                <SelectTrigger id="select-month" className="bg-background">
+                                <SelectTrigger id="select-month" className="bg-slate-800 border-slate-800 text-white">
                                     <SelectValue placeholder="Selecione o mês" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -63,7 +56,7 @@ const AccountsPayable = () => {
                                 value={selectedYear.toString()}
                                 onValueChange={(value) => setSelectedYear(parseInt(value, 10))}
                             >
-                                <SelectTrigger id="select-year" className="bg-background">
+                                <SelectTrigger id="select-year" className="bg-slate-800 border-slate-800 text-white">
                                     <SelectValue placeholder="Selecione o ano" />
                                 </SelectTrigger>
                                 <SelectContent>

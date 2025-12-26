@@ -8,8 +8,9 @@ export interface OperationalCost {
     created_at: string;
     expense_date?: string | null; // YYYY-MM-DD
     is_recurring?: boolean | null;
-    recurrence_frequency?: 'none' | 'daily' | 'weekly' | 'monthly' | null;
+    recurrence_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     recurrence_end_date?: string | null; // YYYY-MM-DD
+    recurrence_group_id?: string;
 }
 
 export interface OperationalHours {

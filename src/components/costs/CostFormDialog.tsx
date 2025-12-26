@@ -4,16 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { cn } from '@/lib/utils';
 import type { OperationalCost } from '@/types/costs';
+import { costService } from '@/services/costService';
+import { DatePickerWithInput } from '@/components/ui/date-picker-with-input';
 
 interface CostFormDialogProps {
     isOpen: boolean;
@@ -26,16 +23,16 @@ interface CostFormDialogProps {
 
 export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defaultType, onCostSaved }: CostFormDialogProps) => {
     const queryClient = useQueryClient();
+    console.log('CostFormDialog mounted, costService:', costService);
 
     const [description, setDescription] = useState('');
     const [value, setValue] = useState('');
     const [type, setType] = useState<'fixed' | 'variable'>('fixed');
     const [expenseDate, setExpenseDate] = useState<Date | undefined>(undefined);
     const [isRecurring, setIsRecurring] = useState(false);
-    const [recurrenceFrequency, setRecurrenceFrequency] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
+    const [recurrenceFrequency, setRecurrenceFrequency] = useState<'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('none');
     const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(undefined);
-    const [isExpenseDateOpen, setIsExpenseDateOpen] = useState(false);
-    const [isRecurrenceEndDateOpen, setIsRecurrenceEndDateOpen] = useState(false);
+
 
     useEffect(() => {
         if (cost) {
@@ -77,43 +74,16 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
 
     const upsertCostMutation = useMutation({
         mutationFn: async (newCost: any) => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Usuário não autenticado.");
-
-            const payload = {
-                description: newCost.description,
-                value: newCost.value,
-                type: newCost.type,
-                expense_date: newCost.expense_date,
-                is_recurring: newCost.is_recurring,
-                recurrence_frequency: newCost.recurrence_frequency,
-                recurrence_end_date: newCost.recurrence_end_date,
-                user_id: user.id
-            };
-
-            if (newCost.id) {
-                const { data, error } = await supabase
-                    .from('operational_costs')
-                    .update(payload)
-                    .eq('id', newCost.id)
-                    .select()
-                    .single();
-                if (error) throw error;
-                return data;
-            } else {
-                const { data, error } = await supabase
-                    .from('operational_costs')
-                    .insert(payload)
-                    .select()
-                    .single();
-                if (error) throw error;
-                return data;
-            }
+            return await costService.saveCost(newCost);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['operationalCosts'] });
             onClose();
-            onCostSaved?.(data as unknown as OperationalCost);
+            // data is an array for insert, or single object for update
+            // For callback, if array, maybe just pass first one or void, depending on usage.
+            // onCostSaved signature expects single object.
+            const savedItem = Array.isArray(data) ? data[0] : data;
+            onCostSaved?.(savedItem as unknown as OperationalCost);
         },
         onError: (err) => {
             console.error(err);
@@ -177,32 +147,11 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
 
                     <div className="space-y-2">
                         <Label>Data da Despesa *</Label>
-                        <Popover open={isExpenseDateOpen} onOpenChange={setIsExpenseDateOpen}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal bg-white dark:bg-slate-800",
-                                        !expenseDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {expenseDate ? format(expenseDate, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={expenseDate}
-                                    onSelect={(date: Date | undefined) => {
-                                        setExpenseDate(date);
-                                        setIsExpenseDateOpen(false);
-                                    }}
-                                    initialFocus
-                                    locale={ptBR}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <DatePickerWithInput
+                            date={expenseDate}
+                            setDate={setExpenseDate}
+                            placeholder="Selecione uma data"
+                        />
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -234,32 +183,11 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
                             </div>
                             <div className="space-y-2">
                                 <Label>Data Final</Label>
-                                <Popover open={isRecurrenceEndDateOpen} onOpenChange={setIsRecurrenceEndDateOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-full justify-start text-left font-normal bg-white dark:bg-slate-800",
-                                                !recurrenceEndDate && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {recurrenceEndDate ? format(recurrenceEndDate, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={recurrenceEndDate}
-                                            onSelect={(date: Date | undefined) => {
-                                                setRecurrenceEndDate(date);
-                                                setIsRecurrenceEndDateOpen(false);
-                                            }}
-                                            initialFocus
-                                            locale={ptBR}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <DatePickerWithInput
+                                    date={recurrenceEndDate}
+                                    setDate={setRecurrenceEndDate}
+                                    placeholder="Selecione uma data"
+                                />
                             </div>
                         </>
                     )}

@@ -11,8 +11,9 @@ import { CostAnalysisSummary } from '@/components/costs/CostAnalysisSummary';
 import { CostFormDialog } from '@/components/costs/CostFormDialog';
 import type { OperationalCost, OperationalHours } from '@/types/costs';
 import { timeToMinutes } from '@/utils/cost-calculations';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { costService } from '@/services/costService';
 
 export const ManageCosts = () => {
     const queryClient = useQueryClient();
@@ -66,20 +67,22 @@ export const ManageCosts = () => {
     });
 
     // Derived State
-    const fixedCosts = costs.filter(c => c.type === 'fixed');
-
-    // Filter Variable Costs by Month/Year
-    const variableCosts = costs.filter(c => {
-        if (c.type !== 'variable') return false;
-        if (!c.expense_date) return false;
-
+    // Filter Costs by Month/Year
+    // Helper to check if a cost belongs to the selected month/year
+    const belongsToSelectedPeriod = (cost: OperationalCost) => {
+        if (!cost.expense_date) return false;
         try {
-            const date = parseISO(c.expense_date);
-            return date.getMonth() + 1 === selectedMonth && date.getFullYear() === selectedYear;
+            // Check formatted string YYYY-MM-DD directly to avoid timezone issues again or use the fixed Date logic
+            // Using split avoids timezone issues completely:
+            const [year, month] = cost.expense_date.split('-').map(Number);
+            return month === selectedMonth && year === selectedYear;
         } catch (e) {
             return false;
         }
-    });
+    };
+
+    const fixedCosts = costs.filter(c => c.type === 'fixed' && belongsToSelectedPeriod(c));
+    const variableCosts = costs.filter(c => c.type === 'variable' && belongsToSelectedPeriod(c));
 
     const sumFixedCosts = fixedCosts.reduce((acc, curr) => acc + curr.value, 0);
     const sumVariableCosts = variableCosts.reduce((acc, curr) => acc + curr.value, 0);
@@ -134,9 +137,8 @@ export const ManageCosts = () => {
     };
 
     const deleteCostMutation = useMutation({
-        mutationFn: async (id: string) => {
-            const { error } = await supabase.from('operational_costs').delete().eq('id', id);
-            if (error) throw error;
+        mutationFn: async ({ id, deleteAll }: { id: string, deleteAll: boolean }) => {
+            await costService.deleteCost(id, deleteAll);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['operationalCosts'] });
@@ -221,12 +223,12 @@ export const ManageCosts = () => {
                     <FixedCostsTable
                         costs={fixedCosts}
                         onEdit={handleEditCost}
-                        onDelete={(id) => deleteCostMutation.mutate(id)}
+                        onDelete={(id, deleteAll) => deleteCostMutation.mutate({ id, deleteAll })}
                     />
                     <VariableCostsTable
                         costs={variableCosts}
                         onEdit={handleEditCost}
-                        onDelete={(id) => deleteCostMutation.mutate(id)}
+                        onDelete={(id, deleteAll) => deleteCostMutation.mutate({ id, deleteAll })}
                     />
                 </div>
 

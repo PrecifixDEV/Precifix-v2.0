@@ -8,7 +8,7 @@ import type { OperationalCost } from '@/types/costs';
 interface FixedCostsTableProps {
     costs: OperationalCost[];
     onEdit: (cost: OperationalCost) => void;
-    onDelete: (id: string) => void;
+    onDelete: (id: string, deleteAll: boolean) => void;
 }
 
 export const FixedCostsTable = ({ costs, onEdit, onDelete }: FixedCostsTableProps) => {
@@ -31,7 +31,10 @@ export const FixedCostsTable = ({ costs, onEdit, onDelete }: FixedCostsTableProp
                         {costs.length > 0 ? (
                             costs.map((cost) => (
                                 <TableRow key={cost.id}>
-                                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">{cost.description}</TableCell>
+                                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">
+                                        {cost.description}
+                                        {cost.is_recurring && <span className="ml-2 text-xs text-muted-foreground">(Recorrente)</span>}
+                                    </TableCell>
                                     <TableCell className="text-center text-slate-900 dark:text-slate-100">
                                         {cost.expense_date ? cost.expense_date.split('-')[2] : '-'}
                                     </TableCell>
@@ -48,15 +51,20 @@ export const FixedCostsTable = ({ costs, onEdit, onDelete }: FixedCostsTableProp
                                             </AlertDialogTrigger>
                                             <AlertDialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle className="text-slate-900 dark:text-white">Tem certeza?</AlertDialogTitle>
+                                                    <AlertDialogTitle className="text-slate-900 dark:text-white">
+                                                        {cost.is_recurring ? "Excluir Despesa Recorrente?" : "Tem certeza?"}
+                                                    </AlertDialogTitle>
                                                     <AlertDialogDescription className="text-slate-500 dark:text-slate-400">
-                                                        Esta ação não pode ser desfeita. Isso excluirá permanentemente o custo "{cost.description}".
+                                                        {cost.is_recurring
+                                                            ? `Esta é uma despesa recorrente. A exclusão removerá TODOS os registros futuros e passados vinculados a ela no Contas a Pagar. Deseja continuar?`
+                                                            : `Esta ação não pode ser desfeita. Isso excluirá permanentemente o custo "${cost.description}".`
+                                                        }
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white">Cancelar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => onDelete(cost.id)} className="bg-red-500 text-white hover:bg-red-600">
-                                                        Excluir
+                                                    <AlertDialogAction onClick={() => onDelete(cost.id, !!cost.is_recurring)} className="bg-red-500 text-white hover:bg-red-600">
+                                                        Excluir {cost.is_recurring ? "Tudo" : ""}
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>

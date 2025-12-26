@@ -166,62 +166,72 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
 
     // Merge Logic
     const mergedData = useMemo(() => {
-        if (!operationalCosts) return [];
+        if (!operationalCosts || !user) return [];
 
         const virtualList: VirtualPayment[] = [];
         const today = startOfDay(new Date());
 
-        // 1. Project Global Costs
-        operationalCosts.forEach(cost => {
-            // Check if there is already a payment record for this cost in this month
-            const existingPayment = payments?.find(p => p.operational_cost_id === cost.id);
+        // Helper to check if a date matches the selected month/year
+        const isInSelectedMonth = (dateStr: string | null | undefined) => {
+            if (!dateStr) return false;
+            const date = parseISO(dateStr);
+            // getMonth is 0-indexed (0=Jan), but our prop 'month' is 1-indexed (1=Jan)
+            return date.getMonth() + 1 === month && date.getFullYear() === year;
+        };
 
-            if (existingPayment) {
-                // It's already tracked
-            } else {
-                // Create Virtual Item
-                let dueDate = new Date(year, month - 1, 1);
-                // Try to extract day from expense_date string (YYYY-MM-DD) if exists
-                if (cost.expense_date) {
-                    try {
-                        const day = parseISO(cost.expense_date).getDate();
-                        const lastDayOfMonth = new Date(year, month, 0).getDate();
-                        dueDate.setDate(Math.min(day, lastDayOfMonth));
-                    } catch (e) {
-                        // Fallback to 1st
+        // 1. Iterate over all costs (instances) that match the selected month
+        if (Array.isArray(operationalCosts)) {
+            operationalCosts.forEach((cost: OperationalCost) => {
+                // If it's a recurring expense instance or a one-time expense,
+                // it should have an expense_date that places it in this month.
+                if (isInSelectedMonth(cost.expense_date)) {
+                    // Check if there is already a payment record for this specific cost instance
+                    const existingPayment = payments?.find(p => p.operational_cost_id === cost.id);
+
+                    if (!existingPayment) {
+                        // It's an open cost (not yet paid/registered in payments table)
+                        let dueDate = cost.expense_date ? parseISO(cost.expense_date) : new Date(year, month - 1, 1);
+
+                        let status: VirtualPayment['status'] = 'open';
+                        if (isBefore(dueDate, today)) {
+                            status = 'overdue';
+                        }
+
+                        virtualList.push({
+                            id: `virtual-${cost.id}`,
+                            isVirtual: true,
+                            operational_cost_id: cost.id,
+                            description: cost.description,
+                            due_date: dueDate,
+                            amount: cost.value,
+                            amount_paid: null,
+                            status: status,
+                            original_cost: cost
+                        });
                     }
                 }
-
-                // Determine status
-                let status: VirtualPayment['status'] = 'open';
-                if (isBefore(dueDate, today)) {
-                    status = 'overdue';
-                }
-
-                virtualList.push({
-                    id: `virtual-${cost.id}`,
-                    isVirtual: true,
-                    operational_cost_id: cost.id,
-                    description: cost.description,
-                    due_date: dueDate,
-                    amount: cost.value,
-                    amount_paid: null,
-                    status: status,
-                    original_cost: cost
-                });
-            }
-        });
+            });
+        }
 
         // 2. Add Actual Payments
+        // We include ALL payments found for this month (fetched by the query)
+        // This covers cases where a payment exists but maybe the cost definition is somehow missing or distinct 
+        // (though in theory every payment should match a cost if we only create payments from costs).
+        // However, we want to avoid duplicates if we already processed a cost that has a payment.
+
+        // Actually, simpler approach:
+        // The payments query ('operationalCostPayments') already fetches payments for this month.
+        // So we just mapped them.
+        // We only need to check operationalCosts to find *unpaid* ones.
+        // If a cost has a payment, `payments` query has it. We don't add it from `operationalCosts` loop.
+        // If a cost has NO payment, we add it from `operationalCosts` loop as virtual.
+
         const realPaymentsList: VirtualPayment[] = (payments || []).map(p => {
             const dueDate = parseISO(p.due_date);
             let status: VirtualPayment['status'] = p.status as any;
-
-            // Dynamic status update for display if pending but date passed
             if (status === 'pending' && isBefore(dueDate, today)) {
                 status = 'overdue';
             }
-
             return {
                 id: p.id,
                 isVirtual: false,
@@ -235,10 +245,10 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
             };
         });
 
-        // Combine
+        // Combine: Real Payments + Virtual (Unpaid) Costs
         return [...realPaymentsList, ...virtualList].sort((a, b) => a.due_date.getTime() - b.due_date.getTime());
 
-    }, [operationalCosts, payments, month, year]);
+    }, [operationalCosts, payments, month, year, user]);
 
     // Filtering
     const filteredData = mergedData.filter(item => {
@@ -304,12 +314,12 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                         placeholder="Buscar despesa..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8 bg-background"
+                        className="pl-8 bg-slate-800 border-slate-800 text-white placeholder:text-slate-400"
                     />
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-full sm:w-40 bg-background">
+                        <SelectTrigger className="w-full sm:w-40 bg-slate-800 border-slate-800 text-white">
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Status" />
@@ -328,7 +338,7 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
 
             <div className="rounded-md border bg-background shadow-sm overflow-hidden">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-slate-800">
                         <TableRow>
                             <TableHead>Descrição</TableHead>
                             <TableHead>Vencimento</TableHead>

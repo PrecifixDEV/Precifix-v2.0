@@ -17,8 +17,6 @@ import {
     X,
     LogOut,
     User,
-    Moon,
-    Sun,
     Bell,
     Settings,
     CreditCard,
@@ -28,7 +26,7 @@ import {
 import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
 import { supabase } from '../lib/supabase'
-import { useTheme } from '../contexts/ThemeContext'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 import logo from '../assets/precifix-logo.png'
 
@@ -37,7 +35,7 @@ export const MainLayout = () => {
     const [user, setUser] = useState<any>(null)
     const [nickname, setNickname] = useState<string | null>(null)
     const [subscriptionData, setSubscriptionData] = useState<{ status: string | null, trialEndsAt: string | null }>({ status: null, trialEndsAt: null })
-    const { theme, toggleTheme } = useTheme()
+
     const location = useLocation()
     const navigate = useNavigate()
 
@@ -250,6 +248,11 @@ export const MainLayout = () => {
                             )
                         })}
                     </nav>
+
+                    {/* Footer / Theme Toggle */}
+                    <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+                        <ThemeToggle />
+                    </div>
                 </div>
             </aside>
 
@@ -344,15 +347,7 @@ export const MainLayout = () => {
                                     </button>
                                 </DropdownMenuItem>
 
-                                <DropdownMenuItem asChild>
-                                    <button
-                                        onClick={toggleTheme}
-                                        className="w-full cursor-pointer flex items-center gap-2"
-                                    >
-                                        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                                        {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
-                                    </button>
-                                </DropdownMenuItem>
+
 
                                 <DropdownMenuItem asChild>
                                     <button className="w-full cursor-pointer flex items-center gap-2">
