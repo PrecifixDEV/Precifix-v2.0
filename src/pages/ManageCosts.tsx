@@ -1,23 +1,37 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Loader2, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { FixedCostsTable } from '@/components/costs/FixedCostsTable';
 import { VariableCostsTable } from '@/components/costs/VariableCostsTable';
-import { OperationalHoursForm } from '@/components/costs/OperationalHoursForm';
 import { CostAnalysisSummary } from '@/components/costs/CostAnalysisSummary';
 import { CostFormDialog } from '@/components/costs/CostFormDialog';
 import type { OperationalCost, OperationalHours } from '@/types/costs';
 import { timeToMinutes } from '@/utils/cost-calculations';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export const ManageCosts = () => {
     const queryClient = useQueryClient();
 
+    const currentMonth_initial = new Date().getMonth() + 1;
+    const currentYear_initial = new Date().getFullYear();
+
     const [isCostFormOpen, setIsCostFormOpen] = useState(false);
     const [editingCost, setEditingCost] = useState<OperationalCost | undefined>(undefined);
-    const [savingHours, setSavingHours] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth_initial);
+    const [selectedYear, setSelectedYear] = useState<number>(currentYear_initial);
+
+    // Generate recent years (e.g., current year +/- 2)
+    const years = Array.from({ length: 5 }, (_, i) => currentYear_initial - 2 + i).sort((a, b) => b - a);
+
+    const months = Array.from({ length: 12 }, (_, i) => ({
+        value: i + 1,
+        label: format(new Date(2000, i, 1), 'MMMM', { locale: ptBR }),
+    }));
 
     // Fetch Costs
     const { data: costs = [], isLoading: isLoadingCosts, error: errorCosts } = useQuery({
@@ -33,7 +47,7 @@ export const ManageCosts = () => {
         },
     });
 
-    // Fetch Operational Hours
+    // Fetch Operational Hours for Summary Calculation ONLY
     const { data: operationalHours, isLoading: isLoadingHours, error: errorHours } = useQuery({
         queryKey: ['operationalHours'],
         queryFn: async () => {
@@ -53,59 +67,50 @@ export const ManageCosts = () => {
 
     // Derived State
     const fixedCosts = costs.filter(c => c.type === 'fixed');
-    const variableCosts = costs.filter(c => c.type === 'variable');
+
+    // Filter Variable Costs by Month/Year
+    const variableCosts = costs.filter(c => {
+        if (c.type !== 'variable') return false;
+        if (!c.expense_date) return false;
+
+        try {
+            const date = parseISO(c.expense_date);
+            return date.getMonth() + 1 === selectedMonth && date.getFullYear() === selectedYear;
+        } catch (e) {
+            return false;
+        }
+    });
 
     const sumFixedCosts = fixedCosts.reduce((acc, curr) => acc + curr.value, 0);
     const sumVariableCosts = variableCosts.reduce((acc, curr) => acc + curr.value, 0);
     const totalMonthlyExpenses = sumFixedCosts + sumVariableCosts;
 
-    // Initial Hours State for Form
-    const [formHours, setFormHours] = useState<Partial<OperationalHours>>({});
-    const [selectedDays, setSelectedDays] = useState<{ [key: string]: boolean }>({
-        monday: false, tuesday: false, wednesday: false, thursday: false, friday: false, saturday: false, sunday: false
-    });
 
-    // Effect to populate form when data loads
-    React.useEffect(() => {
-        if (operationalHours) {
-            setFormHours(operationalHours);
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            const newSelectedDays: any = {};
-            days.forEach(day => {
-                // Assume selected if start time is present
-                newSelectedDays[day] = !!operationalHours[`${day}_start` as keyof OperationalHours];
-            });
-            setSelectedDays(newSelectedDays);
-        }
-    }, [operationalHours]);
-
-    // Calculations
+    // Calculations for Summary
     const calculateWorkingDaysAndHours = () => {
-        if (!formHours) return { workingDays: 0, avgDailyHours: 0 };
+        if (!operationalHours) return { workingDays: 0, avgDailyHours: 0 };
 
         let totalWeeklyMinutes = 0;
         let daysCount = 0;
 
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
         days.forEach(day => {
-            if (selectedDays[day]) {
-                const start = formHours[`${day}_start` as keyof OperationalHours];
-                const end = formHours[`${day}_end` as keyof OperationalHours];
-                if (start && end) {
-                    const startMins = timeToMinutes(start);
-                    const endMins = timeToMinutes(end);
-                    if (endMins > startMins) {
-                        totalWeeklyMinutes += (endMins - startMins);
-                        daysCount++;
-                    }
+            const start = operationalHours[`${day}_start` as keyof OperationalHours];
+            const end = operationalHours[`${day}_end` as keyof OperationalHours];
+
+            // Only count if both start and end exist (implying the day is active/selected)
+            if (start && end) {
+                const startMins = timeToMinutes(start as string);
+                const endMins = timeToMinutes(end as string);
+                if (endMins > startMins) {
+                    totalWeeklyMinutes += (endMins - startMins);
+                    daysCount++;
                 }
             }
         });
 
         // Approximate monthly calculation (4 weeks + a bit)
-        // Precise: (Total Weekly / 7) * 30.44 days/month
         const avgDailyMinutes = daysCount > 0 ? totalWeeklyMinutes / daysCount : 0;
-        // Let's estimate working days per month based on weekly pattern
         const workingDaysPerWeek = daysCount;
         const workingDaysPerMonth = workingDaysPerWeek * 4.33; // Average weeks in a month
 
@@ -142,58 +147,6 @@ export const ManageCosts = () => {
         }
     });
 
-    const saveHoursMutation = useMutation({
-        mutationFn: async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("User not found");
-
-            const payload: any = { ...formHours, user_id: user.id };
-
-            // Upsert based on user_id (since we enforce 1 record per user)
-            // Note: operational_hours ID might be missing on first create, so we rely on user_id check if possible 
-            // OR we just use insert/update based on if we fetched data.
-
-            let error;
-            if (operationalHours?.id) {
-                const { error: err } = await supabase
-                    .from('operational_hours')
-                    .update(payload)
-                    .eq('id', operationalHours.id);
-                error = err;
-            } else {
-                const { error: err } = await supabase
-                    .from('operational_hours')
-                    .insert(payload);
-                error = err;
-            }
-
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['operationalHours'] });
-            toast.success("Horários salvos com sucesso!");
-        },
-        onError: (err: any) => { // Added simple type here to suppress implicit any if needed
-            toast.error(`Erro ao salvar horários: ${err.message}`);
-        }
-    });
-
-    const handleSaveHours = async () => {
-        setSavingHours(true);
-        await saveHoursMutation.mutateAsync();
-        setSavingHours(false);
-    };
-
-    const handleDayToggle = (day: string) => {
-        setSelectedDays(prev => ({ ...prev, [day]: !prev[day] }));
-    };
-
-    const handleHourChange = (day: string, type: 'start' | 'end', value: string) => {
-        setFormHours(prev => ({
-            ...prev,
-            [`${day}_${type}`]: value
-        }));
-    };
 
     if (isLoadingCosts || isLoadingHours) {
         return <div className="flex justify-center items-center h-full pt-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -219,9 +172,48 @@ export const ManageCosts = () => {
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Gerenciar Custos</h1>
                     <p className="text-slate-500 dark:text-slate-400">Controle suas despesas fixas, variáveis e horário de funcionamento.</p>
                 </div>
-                <Button onClick={() => { setEditingCost(undefined); setIsCostFormOpen(true); }} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                <Button onClick={() => { setEditingCost(undefined); setIsCostFormOpen(true); }} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900">
                     <Plus className="mr-2 h-4 w-4" /> Novo Custo
                 </Button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 space-y-2">
+                    <label htmlFor="select-month" className="text-sm font-medium text-foreground">Mês</label>
+                    <Select
+                        value={selectedMonth.toString()}
+                        onValueChange={(value) => setSelectedMonth(parseInt(value, 10))}
+                    >
+                        <SelectTrigger id="select-month" className="bg-background">
+                            <SelectValue placeholder="Selecione o mês" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {months.map((month) => (
+                                <SelectItem key={month.value} value={month.value.toString()}>
+                                    <span className="capitalize">{month.label}</span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="flex-1 space-y-2">
+                    <label htmlFor="select-year" className="text-sm font-medium text-foreground">Ano</label>
+                    <Select
+                        value={selectedYear.toString()}
+                        onValueChange={(value) => setSelectedYear(parseInt(value, 10))}
+                    >
+                        <SelectTrigger id="select-year" className="bg-background">
+                            <SelectValue placeholder="Selecione o ano" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {years.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                    {year}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -238,15 +230,8 @@ export const ManageCosts = () => {
                     />
                 </div>
 
+                {/* Hours Form removed, kept summary */}
                 <div className="space-y-8">
-                    <OperationalHoursForm
-                        operationalHours={formHours as any}
-                        selectedDays={selectedDays}
-                        onDayToggle={handleDayToggle}
-                        onHourChange={handleHourChange}
-                        onSaveHours={handleSaveHours}
-                        isSaving={savingHours}
-                    />
                     <CostAnalysisSummary
                         sumFixedCosts={sumFixedCosts}
                         sumVariableCosts={sumVariableCosts}

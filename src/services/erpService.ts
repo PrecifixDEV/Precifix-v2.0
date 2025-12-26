@@ -81,8 +81,10 @@ export class ErpService {
         const itemsToInsert = data.items.map(item => ({
             service_order_id: order.id,
             service_id: item.service_id,
-            price: item.unit_price,
-            quantity: item.quantity
+            title: item.title, // Added title
+            unit_price: item.unit_price, // Changed price to unit_price
+            quantity: item.quantity,
+            user_id: user.id // Added user_id
         }))
 
         const { error: itemsError } = await supabase
@@ -115,7 +117,8 @@ export class ErpService {
             .insert({
                 user_id: user.id,
                 category: data.category,
-                description: data.description,
+                title: data.description, // Mapped description to title
+                notes: data.description, // Optional: also save to notes
                 amount: data.amount,
                 date: data.date
             })

@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { Calendar, CheckCircle, Car, AlertTriangle } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, PieChart, Pie } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from '@/components/ui/chart'
-import { ErpTester } from '@/components/ErpTester'
+// import { ErpTester } from '@/components/ErpTester'
 
 
 // Mock data for charts
@@ -81,7 +81,7 @@ export const Dashboard = () => {
                 .eq('id', user.id)
                 .single()
 
-            if (!profile || !profile.cpf_cnpj || !profile.company_name) {
+            if (!profile || !profile.document_number || !profile.company_name) {
                 setShowProfileAlert(true)
             }
         } catch (error) {
@@ -150,7 +150,7 @@ export const Dashboard = () => {
                         </div>
                         <Link
                             to="/profile"
-                            className="whitespace-nowrap bg-yellow-500 text-white font-medium px-4 py-2 rounded-lg text-sm shadow-sm hover:none active:bg-yellow-600 transition-none"
+                            className="whitespace-nowrap bg-yellow-500 text-slate-900 font-medium px-4 py-2 rounded-lg text-sm shadow-sm hover:none active:bg-yellow-600 transition-none"
                         >
                             Completar Perfil
                         </Link>
@@ -168,7 +168,7 @@ export const Dashboard = () => {
                 </div>
 
                 {/* DB Tester */}
-                <ErpTester />
+                {/* <ErpTester /> */}
 
                 {/* Date Filter Mockup */}
                 <div className="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
@@ -184,7 +184,7 @@ export const Dashboard = () => {
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
                         <p className="text-slate-500 dark:text-slate-400 text-sm">Faturamento do Mês</p>
                         <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{valueFormatter(stats.revenue)}</div>
@@ -192,7 +192,7 @@ export const Dashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
                         <p className="text-slate-500 dark:text-slate-400 text-sm">Receita Líquida</p>
                         <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{valueFormatter(stats.netRevenue)}</div>
@@ -200,7 +200,7 @@ export const Dashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                             <div>
@@ -212,7 +212,7 @@ export const Dashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                             <div>
@@ -228,7 +228,7 @@ export const Dashboard = () => {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Daily Revenue Chart */}
-                <Card className="lg:col-span-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="lg:col-span-2 shadow-sm dark:shadow-none">
                     <CardHeader>
                         <CardTitle className="text-slate-900 dark:text-white">Faturamento Diário</CardTitle>
                     </CardHeader>
@@ -256,7 +256,7 @@ export const Dashboard = () => {
                 </Card>
 
                 {/* Popular Services Donut */}
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none flex flex-col">
+                <Card className="shadow-sm dark:shadow-none flex flex-col">
                     <CardHeader>
                         <CardTitle className="text-slate-900 dark:text-white">Serviços Mais Populares</CardTitle>
                     </CardHeader>
@@ -282,7 +282,7 @@ export const Dashboard = () => {
 
             {/* Bottom Row - Lists */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
@@ -294,7 +294,7 @@ export const Dashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ring-0 shadow-sm dark:shadow-none">
+                <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />

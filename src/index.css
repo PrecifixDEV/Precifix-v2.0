@@ -55,35 +55,35 @@
 }
 
 .dark {
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 3.9%;
-  --popover-foreground: 0 0% 98%;
+  --background: 222 47% 2%; /* Slate 950+ (Darker) */
+  --foreground: 210 40% 98%; /* Slate 50 */
+  --card: 222 47% 11%; /* Slate 900 (The requested Blue) */
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
   --primary: 45 100% 51%;
   --primary-foreground: 0 0% 9%;
   --primary-glow: 43 100% 65%;
   --primary-strong: 33 100% 50%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 98%;
+  --secondary: 217 33% 17%; /* Slate 800/900 mix */
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
-  --ring: 0 0% 83.1%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 212 26% 83%; /* Slate 300?? Or similar */
 
-  --sidebar-background: 240 5.9% 8%;
-  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-background: 222 47% 11%; /* Match Card */
+  --sidebar-foreground: 210 40% 98%;
   --sidebar-primary: 45 100% 51%;
   --sidebar-primary-foreground: 0 0% 9%;
-  --sidebar-accent: 240 3.7% 15.9%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-accent: 217 33% 17%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 217 33% 17%;
   --sidebar-ring: 45 100% 51%;
 
   --chart-1: 220 70% 50%;
@@ -93,10 +93,10 @@
   --chart-5: 340 75% 55%;
 
   --gradient-primary: linear-gradient(135deg, hsl(45 100% 51%), hsl(43 100% 65%));
-  --gradient-card: linear-gradient(145deg, hsl(0 0% 10%), hsl(0 0% 12%));
+  --gradient-card: linear-gradient(145deg, hsl(222 47% 12%), hsl(222 47% 10%));
   --gradient-elegant: linear-gradient(135deg, hsl(45 100% 51% / 0.15), hsl(43 100% 65% / 0.08));
   
-  --shadow-card: 0 4px 20px hsl(45 100% 51% / 0.15);
+  --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
   --shadow-elegant: 0 10px 30px -10px hsl(45 100% 51% / 0.3);
   --shadow-glow: 0 0 40px hsl(45 100% 51% / 0.25);
 }

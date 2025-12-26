@@ -21,7 +21,9 @@ import {
     Sun,
     Bell,
     Settings,
-    CreditCard
+    CreditCard,
+    ChevronDown as ChevronDownIcon,
+    Building2
 } from 'lucide-react'
 import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
@@ -33,6 +35,7 @@ import logo from '../assets/precifix-logo.png'
 export const MainLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [user, setUser] = useState<any>(null)
+    const [nickname, setNickname] = useState<string | null>(null)
     const [subscriptionData, setSubscriptionData] = useState<{ status: string | null, trialEndsAt: string | null }>({ status: null, trialEndsAt: null })
     const { theme, toggleTheme } = useTheme()
     const location = useLocation()
@@ -42,7 +45,7 @@ export const MainLayout = () => {
         try {
             const { data } = await supabase
                 .from('profiles')
-                .select('subscription_status, trial_ends_at')
+                .select('subscription_status, trial_ends_at, nickname')
                 .eq('id', userId)
                 .single() as any
 
@@ -51,6 +54,7 @@ export const MainLayout = () => {
                     status: data.subscription_status,
                     trialEndsAt: data.trial_ends_at
                 })
+                setNickname(data.nickname)
             }
         } catch (error) {
             console.error('Error fetching profile:', error)
@@ -58,6 +62,18 @@ export const MainLayout = () => {
     }
 
     useEffect(() => {
+        const handleProfileUpdate = () => {
+            if (user?.id) {
+                fetchProfile(user.id)
+                // Also refresh session user to get updated metadata if needed
+                supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user) setUser(user)
+                })
+            }
+        }
+
+        window.addEventListener('profile-updated', handleProfileUpdate)
+
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!session) {
@@ -78,8 +94,11 @@ export const MainLayout = () => {
             }
         })
 
-        return () => subscription.unsubscribe()
-    }, [navigate])
+        return () => {
+            subscription.unsubscribe()
+            window.removeEventListener('profile-updated', handleProfileUpdate)
+        }
+    }, [navigate, user?.id]) // Added user?.id dependency for handleProfileUpdate
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
@@ -88,6 +107,7 @@ export const MainLayout = () => {
 
     // Get first name for greeting
     const getFirstName = () => {
+        if (nickname) return nickname
         const fullName = user?.user_metadata?.full_name || 'Usuário'
         return fullName.split(' ')[0]
     }
@@ -98,8 +118,30 @@ export const MainLayout = () => {
         { name: 'Vendas', href: '/sales', icon: ShoppingCart },
         { name: 'Clientes', href: '/clients', icon: Users },
         { name: 'Agenda', href: '/schedule', icon: Calendar },
-        { name: 'Financeiro', href: '/financial', icon: Wallet },
+        {
+            name: 'Financeiro',
+            icon: Wallet,
+            children: [
+                { name: 'Visão Geral', href: '/financial' },
+                { name: 'Contas a Pagar', href: '/contas-a-pagar' },
+                { name: 'Gerenciar Despesas', href: '/custos' }
+            ]
+        },
     ]
+
+    const [openSubmenus, setOpenSubmenus] = useState<string[]>(['Financeiro']) // Keep financial open by default for visibility or based on path
+
+    const toggleSubmenu = (name: string) => {
+        setOpenSubmenus(prev =>
+            prev.includes(name)
+                ? prev.filter(item => item !== name)
+                : [...prev, name]
+        )
+    }
+
+    const isSubmenuActive = (children: any[]) => {
+        return children.some(child => location.pathname === child.href)
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-200">
@@ -120,7 +162,6 @@ export const MainLayout = () => {
             `}>
                 <div className="h-full flex flex-col">
                     {/* Logo area */}
-                    {/* Logo area */}
                     <div className="h-16 flex items-center px-6">
                         <Link to="/">
                             <img src={logo} alt="Precifix Logo" className="h-8 w-auto" />
@@ -136,6 +177,59 @@ export const MainLayout = () => {
                     {/* Navigation */}
                     <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                         {navigation.map((item) => {
+                            if (item.children) {
+                                const isActive = isSubmenuActive(item.children)
+                                const isOpen = openSubmenus.includes(item.name) || isActive
+
+                                return (
+                                    <div key={item.name} className="space-y-1">
+                                        <button
+                                            onClick={() => toggleSubmenu(item.name)}
+                                            className={`
+                                                w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                                                ${isActive
+                                                    ? 'text-slate-900 dark:text-white'
+                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                                }
+                                            `}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <item.icon className={`w-5 h-5 ${isActive ? 'text-yellow-500' : 'text-slate-500'}`} />
+                                                {item.name}
+                                            </div>
+                                            <ChevronDownIcon
+                                                className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                            />
+                                        </button>
+
+                                        {/* Submenu items */}
+                                        {isOpen && (
+                                            <div className="pl-4 space-y-1">
+                                                {item.children.map((child) => {
+                                                    const isChildActive = location.pathname === child.href
+                                                    return (
+                                                        <Link
+                                                            key={child.name}
+                                                            to={child.href}
+                                                            className={`
+                                                                flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                                                                ${isChildActive
+                                                                    ? 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
+                                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                                                }
+                                                            `}
+                                                            onClick={() => setIsSidebarOpen(false)}
+                                                        >
+                                                            {child.name}
+                                                        </Link>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            }
+
                             const isActive = location.pathname === item.href
                             return (
                                 <Link
@@ -230,6 +324,16 @@ export const MainLayout = () => {
                                     >
                                         <User className="w-4 h-4" />
                                         Meu Perfil
+                                    </Link>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        to="/minha-empresa"
+                                        className="w-full cursor-pointer flex items-center gap-2"
+                                    >
+                                        <Building2 className="w-4 h-4" />
+                                        Minha Empresa
                                     </Link>
                                 </DropdownMenuItem>
 

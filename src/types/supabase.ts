@@ -63,6 +63,242 @@ export type Database = {
                 }
                 Relationships: []
             }
+            monthly_billing: {
+                Row: {
+                    billing_amount: number
+                    created_at: string
+                    id: string
+                    month: number
+                    updated_at: string
+                    user_id: string
+                    year: number
+                }
+                Insert: {
+                    billing_amount?: number
+                    created_at?: string
+                    id?: string
+                    month: number
+                    updated_at?: string
+                    user_id: string
+                    year: number
+                }
+                Update: {
+                    billing_amount?: number
+                    created_at?: string
+                    id?: string
+                    month?: number
+                    updated_at?: string
+                    user_id?: string
+                    year?: number
+                }
+                Relationships: []
+            }
+            monthly_expenses: {
+                Row: {
+                    created_at: string
+                    description: string
+                    id: string
+                    monthly_billing_id: string
+                    operational_cost_id: string | null
+                    source: string
+                    type: string
+                    updated_at: string
+                    value: number
+                }
+                Insert: {
+                    created_at?: string
+                    description: string
+                    id?: string
+                    monthly_billing_id: string
+                    operational_cost_id?: string | null
+                    source?: string
+                    type: string
+                    updated_at?: string
+                    value: number
+                }
+                Update: {
+                    created_at?: string
+                    description?: string
+                    id?: string
+                    monthly_billing_id?: string
+                    operational_cost_id?: string | null
+                    source?: string
+                    type?: string
+                    updated_at?: string
+                    value?: number
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "monthly_expenses_monthly_billing_id_fkey"
+                        columns: ["monthly_billing_id"]
+                        isOneToOne: false
+                        referencedRelation: "monthly_billing"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "monthly_expenses_operational_cost_id_fkey"
+                        columns: ["operational_cost_id"]
+                        isOneToOne: false
+                        referencedRelation: "operational_costs"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            operational_costs: {
+                Row: {
+                    created_at: string
+                    description: string
+                    id: string
+                    type: string
+                    updated_at: string
+                    user_id: string
+                    value: number
+                    expense_date: string | null
+                    is_recurring: boolean | null
+                    recurrence_frequency: string | null
+                    recurrence_end_date: string | null
+                }
+                Insert: {
+                    created_at?: string
+                    description: string
+                    id?: string
+                    type: string
+                    updated_at?: string
+                    user_id: string
+                    value: number
+                    expense_date?: string | null
+                    is_recurring?: boolean | null
+                    recurrence_frequency?: string | null
+                    recurrence_end_date?: string | null
+                }
+                Update: {
+                    created_at?: string
+                    description?: string
+                    id?: string
+                    type?: string
+                    updated_at?: string
+                    user_id?: string
+                    value?: number
+                    expense_date?: string | null
+                    is_recurring?: boolean | null
+                    recurrence_frequency?: string | null
+                    recurrence_end_date?: string | null
+                }
+                Relationships: []
+            },
+            operational_hours: {
+                Row: {
+                    created_at: string
+                    friday_end: string | null
+                    friday_start: string | null
+                    id: string
+                    monday_end: string | null
+                    monday_start: string | null
+                    saturday_end: string | null
+                    saturday_start: string | null
+                    sunday_end: string | null
+                    sunday_start: string | null
+                    thursday_end: string | null
+                    thursday_start: string | null
+                    tuesday_end: string | null
+                    tuesday_start: string | null
+                    updated_at: string
+                    user_id: string
+                    wednesday_end: string | null
+                    wednesday_start: string | null
+                }
+                Insert: {
+                    created_at?: string
+                    friday_end?: string | null
+                    friday_start?: string | null
+                    id?: string
+                    monday_end?: string | null
+                    monday_start?: string | null
+                    saturday_end?: string | null
+                    saturday_start?: string | null
+                    sunday_end?: string | null
+                    sunday_start?: string | null
+                    thursday_end?: string | null
+                    thursday_start?: string | null
+                    tuesday_end?: string | null
+                    tuesday_start?: string | null
+                    updated_at?: string
+                    user_id: string
+                    wednesday_end?: string | null
+                    wednesday_start?: string | null
+                }
+                Update: {
+                    created_at?: string
+                    friday_end?: string | null
+                    friday_start?: string | null
+                    id?: string
+                    monday_end?: string | null
+                    monday_start?: string | null
+                    saturday_end?: string | null
+                    saturday_start?: string | null
+                    sunday_end?: string | null
+                    sunday_start?: string | null
+                    thursday_end?: string | null
+                    thursday_start?: string | null
+                    tuesday_end?: string | null
+                    tuesday_start?: string | null
+                    updated_at?: string
+                    user_id?: string
+                    wednesday_end?: string | null
+                    wednesday_start?: string | null
+                }
+                Relationships: []
+            },
+            operational_cost_payments: {
+                Row: {
+                    id: string
+                    user_id: string
+                    operational_cost_id: string | null
+                    description: string
+                    due_date: string
+                    payment_date: string | null
+                    amount_original: number
+                    amount_paid: number | null
+                    status: string
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    operational_cost_id?: string | null
+                    description: string
+                    due_date: string
+                    payment_date?: string | null
+                    amount_original?: number
+                    amount_paid?: number | null
+                    status?: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    operational_cost_id?: string | null
+                    description?: string
+                    due_date?: string
+                    payment_date?: string | null
+                    amount_original?: number
+                    amount_paid?: number | null
+                    status?: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "operational_cost_payments_operational_cost_id_fkey"
+                        columns: ["operational_cost_id"]
+                        isOneToOne: false
+                        referencedRelation: "operational_costs"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            },
             expenses: {
                 Row: {
                     amount: number
@@ -126,6 +362,18 @@ export type Database = {
                     address_number: string | null
                     phone_number: string | null
                     avatar_url: string | null
+                    nickname: string | null
+                    residential_complement: string | null
+                    company_zip_code: string | null
+                    company_address: string | null
+                    company_number: string | null
+                    company_complement: string | null
+                    company_phone: string | null
+                    instagram: string | null
+                    website: string | null
+                    company_logo_url: string | null
+                    company_colors: Json | null
+                    company_document: string | null
                 }
                 Insert: {
                     created_at?: string | null
@@ -144,6 +392,17 @@ export type Database = {
                     address_number?: string | null
                     phone_number?: string | null
                     avatar_url?: string | null
+                    nickname?: string | null
+                    residential_complement?: string | null
+                    company_zip_code?: string | null
+                    company_address?: string | null
+                    company_number?: string | null
+                    company_complement?: string | null
+                    company_phone?: string | null
+                    instagram?: string | null
+                    website?: string | null
+                    company_logo_url?: string | null
+                    company_colors?: Json | null
                 }
                 Update: {
                     created_at?: string | null
@@ -162,6 +421,17 @@ export type Database = {
                     address_number?: string | null
                     phone_number?: string | null
                     avatar_url?: string | null
+                    nickname?: string | null
+                    residential_complement?: string | null
+                    company_zip_code?: string | null
+                    company_address?: string | null
+                    company_number?: string | null
+                    company_complement?: string | null
+                    company_phone?: string | null
+                    instagram?: string | null
+                    website?: string | null
+                    company_logo_url?: string | null
+                    company_colors?: Json | null
                 }
                 Relationships: []
             }

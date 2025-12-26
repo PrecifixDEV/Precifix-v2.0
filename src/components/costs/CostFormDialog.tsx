@@ -267,7 +267,7 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                    <Button onClick={handleSubmit} disabled={upsertCostMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                    <Button onClick={handleSubmit} disabled={upsertCostMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900">
                         {upsertCostMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {cost ? "Salvar Alterações" : "Adicionar Custo"}
                     </Button>

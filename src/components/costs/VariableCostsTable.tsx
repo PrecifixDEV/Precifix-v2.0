@@ -1,8 +1,8 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OperationalCost } from '@/types/costs';
 import { cn } from '@/lib/utils';
 
@@ -14,13 +14,16 @@ interface VariableCostsTableProps {
 
 export const VariableCostsTable = ({ costs, onEdit, onDelete }: VariableCostsTableProps) => {
     return (
-        <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Custos Variáveis</h3>
-            <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card>
+            <CardHeader>
+                <CardTitle>Custos Variáveis</CardTitle>
+            </CardHeader>
+            <CardContent>
                 <Table>
                     <TableHeader>
-                        <TableRow className="border-slate-200 dark:border-slate-800">
+                        <TableRow>
                             <TableHead className="text-slate-700 dark:text-slate-300">Descrição</TableHead>
+                            <TableHead className="text-center text-slate-700 dark:text-slate-300">Dia</TableHead>
                             <TableHead className="text-right text-slate-700 dark:text-slate-300">Valor</TableHead>
                             <TableHead className="w-[80px] text-center text-slate-700 dark:text-slate-300">Ações</TableHead>
                         </TableRow>
@@ -28,12 +31,15 @@ export const VariableCostsTable = ({ costs, onEdit, onDelete }: VariableCostsTab
                     <TableBody>
                         {costs.length > 0 ? (
                             costs.map((cost) => (
-                                <TableRow key={cost.id} className="border-slate-200 dark:border-slate-800">
+                                <TableRow key={cost.id}>
                                     <TableCell className={cn(
                                         "font-medium text-slate-900 dark:text-slate-100",
                                         cost.description === 'Produtos Gastos no Mês' && "text-yellow-600 dark:text-yellow-500"
                                     )}>
                                         {cost.description}
+                                    </TableCell>
+                                    <TableCell className="text-center text-slate-900 dark:text-slate-100">
+                                        {cost.expense_date ? cost.expense_date.split('-')[2] : '-'}
                                     </TableCell>
                                     <TableCell className={cn(
                                         "text-right text-slate-900 dark:text-slate-100",
@@ -71,14 +77,14 @@ export const VariableCostsTable = ({ costs, onEdit, onDelete }: VariableCostsTab
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center text-slate-500 dark:text-slate-400">
+                                <TableCell colSpan={4} className="h-24 text-center text-slate-500 dark:text-slate-400">
                                     Nenhum custo variável cadastrado.
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 };

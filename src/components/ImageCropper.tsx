@@ -17,9 +17,18 @@ interface ImageCropperProps {
     imageSrc: string | null
     onClose: () => void
     onCropComplete: (croppedBlob: Blob) => void
+    aspect?: number
+    cropShape?: 'round' | 'rect'
 }
 
-export const ImageCropper = ({ open, imageSrc, onClose, onCropComplete }: ImageCropperProps) => {
+export const ImageCropper = ({
+    open,
+    imageSrc,
+    onClose,
+    onCropComplete,
+    aspect = 1,
+    cropShape = 'round'
+}: ImageCropperProps) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 })
     const [zoom, setZoom] = useState(1)
     const [rotation] = useState(0)
@@ -68,11 +77,11 @@ export const ImageCropper = ({ open, imageSrc, onClose, onCropComplete }: ImageC
                             image={imageSrc}
                             crop={crop}
                             zoom={zoom}
-                            aspect={1}
+                            aspect={aspect}
                             onCropChange={onCropChange}
                             onCropComplete={onCrChange}
                             onZoomChange={onZoomChange}
-                            cropShape="round"
+                            cropShape={cropShape}
                             showGrid={false}
                         />
                     )}
@@ -104,7 +113,7 @@ export const ImageCropper = ({ open, imageSrc, onClose, onCropComplete }: ImageC
                     <Button
                         onClick={handleSave}
                         disabled={processing}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-slate-900"
                     >
                         {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                         Salvar Recorte
