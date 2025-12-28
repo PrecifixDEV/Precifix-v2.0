@@ -8,9 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
     LayoutDashboard,
-    Wrench,
     ShoppingCart,
-    Users,
     Calendar,
     Wallet,
     Menu as MenuIcon,
@@ -21,7 +19,8 @@ import {
     Settings,
     CreditCard,
     ChevronDown as ChevronDownIcon,
-    Building2
+    Building2,
+    FolderPlus
 } from 'lucide-react'
 import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
@@ -112,9 +111,17 @@ export const MainLayout = () => {
 
     const navigation = [
         { name: 'Painel Principal', href: '/', icon: LayoutDashboard },
-        { name: 'Serviços', href: '/services', icon: Wrench },
+        {
+            name: 'Cadastros',
+            icon: FolderPlus,
+            children: [
+                { name: 'Produtos', href: '/cadastros/produtos' },
+                { name: 'Serviços', href: '/cadastros/servicos' },
+                { name: 'Clientes', href: '/cadastros/clientes' },
+                { name: 'Formas de Pagamento', href: '/cadastros/formas-pagamento' },
+            ]
+        },
         { name: 'Vendas', href: '/sales', icon: ShoppingCart },
-        { name: 'Clientes', href: '/clients', icon: Users },
         { name: 'Agenda', href: '/schedule', icon: Calendar },
         {
             name: 'Financeiro',
@@ -127,7 +134,7 @@ export const MainLayout = () => {
         },
     ]
 
-    const [openSubmenus, setOpenSubmenus] = useState<string[]>(['Financeiro']) // Keep financial open by default for visibility or based on path
+    const [openSubmenus, setOpenSubmenus] = useState<string[]>(['Cadastros']) // Open Cadastros by default for visibility
 
     const toggleSubmenu = (name: string) => {
         setOpenSubmenus(prev =>
@@ -160,7 +167,7 @@ export const MainLayout = () => {
             `}>
                 <div className="h-full flex flex-col">
                     {/* Logo area */}
-                    <div className="h-16 flex items-center px-6">
+                    <div className="h-16 flex items-center px-6 bg-primary dark:bg-slate-900 dark:border-b dark:border-primary">
                         <Link to="/">
                             <img src={logo} alt="Precifix Logo" className="h-8 w-auto" />
                         </Link>
@@ -187,7 +194,7 @@ export const MainLayout = () => {
                                                 w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                                 ${isActive
                                                     ? 'text-slate-900 dark:text-white'
-                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-primary/80 dark:hover:bg-primary/80 hover:text-primary-foreground dark:hover:text-primary-foreground'
                                                 }
                                             `}
                                         >
@@ -213,7 +220,7 @@ export const MainLayout = () => {
                                                                 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                                                                 ${isChildActive
                                                                     ? 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
-                                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-primary/80 dark:hover:bg-primary/80 hover:text-primary-foreground dark:hover:text-primary-foreground'
                                                                 }
                                                             `}
                                                             onClick={() => setIsSidebarOpen(false)}
@@ -237,7 +244,7 @@ export const MainLayout = () => {
                                         flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                         ${isActive
                                             ? 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
-                                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                            : 'text-slate-600 dark:text-slate-400 hover:bg-primary/80 dark:hover:bg-primary/80 hover:text-primary-foreground dark:hover:text-primary-foreground'
                                         }
                                     `}
                                     onClick={() => setIsSidebarOpen(false)}
@@ -259,9 +266,9 @@ export const MainLayout = () => {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
-                <header className="h-16 bg-white dark:bg-slate-900 shadow-md flex items-center justify-between px-4 lg:px-8 relative z-10">
+                <header className="h-16 bg-primary dark:bg-slate-900 dark:border-b dark:border-primary shadow-md flex items-center justify-between px-4 lg:px-8 relative z-10">
                     <button
-                        className="lg:hidden p-2 text-slate-400 hover:text-white"
+                        className="lg:hidden p-2 text-slate-900 dark:text-slate-400 hover:text-white"
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <MenuIcon className="w-6 h-6" />
@@ -282,7 +289,7 @@ export const MainLayout = () => {
                         />
 
                         {/* Notifications */}
-                        <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                        <button className="relative p-2 text-slate-900 dark:text-slate-400 hover:bg-slate-100/20 dark:hover:bg-slate-800 rounded-full transition-colors">
                             <Bell className="w-5 h-5" />
                             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-900"></span>
                         </button>

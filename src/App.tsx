@@ -12,6 +12,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { ManageCosts } from './pages/ManageCosts'
 import AccountsPayable from './pages/AccountsPayable'
 import { MyCompany } from './pages/MyCompany'
+import { Products } from './pages/cadastros/Products'
 
 
 function App() {
@@ -35,9 +36,13 @@ function App() {
             <Route path="/custos" element={<ManageCosts />} />
             <Route path="/contas-a-pagar" element={<AccountsPayable />} />
 
-            <Route path="/services" element={<div className="text-slate-900 dark:text-white p-6">Serviços (Em breve)</div>} />
+            {/* Cadastros Routes */}
+            <Route path="/cadastros/produtos" element={<Products />} />
+            <Route path="/cadastros/servicos" element={<div className="text-slate-900 dark:text-white p-6">Serviços (Em breve)</div>} />
+            <Route path="/cadastros/clientes" element={<div className="text-slate-900 dark:text-white p-6">Clientes (Em breve)</div>} />
+            <Route path="/cadastros/formas-pagamento" element={<div className="text-slate-900 dark:text-white p-6">Formas de Pagamento (Em breve)</div>} />
+
             <Route path="/sales" element={<div className="text-slate-900 dark:text-white p-6">Vendas (Em breve)</div>} />
-            <Route path="/clients" element={<div className="text-slate-900 dark:text-white p-6">Clientes (Em breve)</div>} />
             <Route path="/schedule" element={<div className="text-slate-900 dark:text-white p-6">Agenda (Em breve)</div>} />
             <Route path="/financial" element={<div className="text-slate-900 dark:text-white p-6">Financeiro (Em breve)</div>} />
           </Route>

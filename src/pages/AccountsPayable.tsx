@@ -38,7 +38,7 @@ const AccountsPayable = () => {
                                 value={selectedMonth.toString()}
                                 onValueChange={(value) => setSelectedMonth(parseInt(value, 10))}
                             >
-                                <SelectTrigger id="select-month" className="bg-slate-800 border-slate-800 text-white">
+                                <SelectTrigger id="select-month">
                                     <SelectValue placeholder="Selecione o mês" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -56,7 +56,7 @@ const AccountsPayable = () => {
                                 value={selectedYear.toString()}
                                 onValueChange={(value) => setSelectedYear(parseInt(value, 10))}
                             >
-                                <SelectTrigger id="select-year" className="bg-slate-800 border-slate-800 text-white">
+                                <SelectTrigger id="select-year">
                                     <SelectValue placeholder="Selecione o ano" />
                                 </SelectTrigger>
                                 <SelectContent>

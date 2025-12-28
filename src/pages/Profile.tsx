@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { Camera, Loader2, Save, User, ArrowRight, Info } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -486,18 +487,18 @@ export const Profile = () => {
                                 <ArrowRight className="w-5 h-5" />
                             </button>
 
-                            <button
+                            <Button
                                 type="submit"
                                 disabled={saving}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-6 py-2.5" // Optional: standard sizing might be fine, or override if needed
                             >
                                 {saving ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
                                 ) : (
-                                    <Save className="w-5 h-5" />
+                                    <Save className="w-5 h-5 mr-2" />
                                 )}
                                 {saving ? 'Salvando...' : 'Salvar Alterações'}
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </CardContent>

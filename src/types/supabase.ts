@@ -41,7 +41,7 @@ export type Database = {
                     phone?: string | null
                     state?: string | null
                     updated_at?: string | null
-                    user_id?: string
+                    user_id: string
                     zip_code?: string | null
                 }
                 Update: {
@@ -60,6 +60,39 @@ export type Database = {
                     updated_at?: string | null
                     user_id?: string
                     zip_code?: string | null
+                }
+                Relationships: []
+            }
+            expenses: {
+                Row: {
+                    amount: number
+                    created_at: string
+                    date: string
+                    description: string
+                    id: string
+                    type: string
+                    updated_at: string
+                    user_id: string
+                }
+                Insert: {
+                    amount?: number
+                    created_at?: string
+                    date: string
+                    description: string
+                    id?: string
+                    type: string
+                    updated_at?: string
+                    user_id: string
+                }
+                Update: {
+                    amount?: number
+                    created_at?: string
+                    date?: string
+                    description?: string
+                    id?: string
+                    type?: string
+                    updated_at?: string
+                    user_id?: string
                 }
                 Relationships: []
             }
@@ -98,94 +131,120 @@ export type Database = {
                     created_at: string
                     description: string
                     id: string
-                    monthly_billing_id: string
-                    operational_cost_id: string | null
-                    source: string
-                    type: string
+                    month: number
                     updated_at: string
+                    user_id: string
                     value: number
+                    year: number
                 }
                 Insert: {
                     created_at?: string
                     description: string
                     id?: string
-                    monthly_billing_id: string
-                    operational_cost_id?: string | null
-                    source?: string
-                    type: string
+                    month: number
                     updated_at?: string
+                    user_id: string
                     value: number
+                    year: number
                 }
                 Update: {
                     created_at?: string
                     description?: string
                     id?: string
-                    monthly_billing_id?: string
-                    operational_cost_id?: string | null
-                    source?: string
-                    type?: string
+                    month?: number
                     updated_at?: string
+                    user_id?: string
                     value?: number
+                    year?: number
+                }
+                Relationships: []
+            }
+            operational_cost_payments: {
+                Row: {
+                    amount_original: number
+                    amount_paid: number
+                    created_at: string
+                    description: string
+                    due_date: string
+                    id: string
+                    operational_cost_id: string | null
+                    payment_date: string | null
+                    status: string
+                    updated_at: string
+                    user_id: string
+                }
+                Insert: {
+                    amount_original: number
+                    amount_paid?: number
+                    created_at?: string
+                    description: string
+                    due_date: string
+                    id?: string
+                    operational_cost_id?: string | null
+                    payment_date?: string | null
+                    status?: string
+                    updated_at?: string
+                    user_id: string
+                }
+                Update: {
+                    amount_original?: number
+                    amount_paid?: number
+                    created_at?: string
+                    description?: string
+                    due_date?: string
+                    id?: string
+                    operational_cost_id?: string | null
+                    payment_date?: string | null
+                    status?: string
+                    updated_at?: string
+                    user_id?: string
                 }
                 Relationships: [
                     {
-                        foreignKeyName: "monthly_expenses_monthly_billing_id_fkey"
-                        columns: ["monthly_billing_id"]
-                        isOneToOne: false
-                        referencedRelation: "monthly_billing"
-                        referencedColumns: ["id"]
-                    },
-                    {
-                        foreignKeyName: "monthly_expenses_operational_cost_id_fkey"
+                        foreignKeyName: "operational_cost_payments_operational_cost_id_fkey"
                         columns: ["operational_cost_id"]
                         isOneToOne: false
                         referencedRelation: "operational_costs"
                         referencedColumns: ["id"]
-                    }
+                    },
                 ]
             }
             operational_costs: {
                 Row: {
                     created_at: string
                     description: string
+                    expense_date: string | null
                     id: string
+                    recurrence_frequency: string | null
                     type: string
                     updated_at: string
                     user_id: string
                     value: number
-                    expense_date: string | null
-                    is_recurring: boolean | null
-                    recurrence_frequency: string | null
-                    recurrence_end_date: string | null
                 }
                 Insert: {
                     created_at?: string
                     description: string
+                    expense_date?: string | null
                     id?: string
+                    recurrence_frequency?: string | null
                     type: string
                     updated_at?: string
                     user_id: string
                     value: number
-                    expense_date?: string | null
-                    is_recurring?: boolean | null
-                    recurrence_frequency?: string | null
-                    recurrence_end_date?: string | null
                 }
                 Update: {
                     created_at?: string
                     description?: string
+                    expense_date?: string | null
                     id?: string
+                    recurrence_frequency?: string | null
                     type?: string
                     updated_at?: string
                     user_id?: string
                     value?: number
-                    expense_date?: string | null
-                    is_recurring?: boolean | null
-                    recurrence_frequency?: string | null
-                    recurrence_end_date?: string | null
                 }
                 Relationships: []
-            },
+            }
             operational_hours: {
                 Row: {
                     created_at: string
@@ -248,289 +307,180 @@ export type Database = {
                     wednesday_start?: string | null
                 }
                 Relationships: []
-            },
-            operational_cost_payments: {
+            }
+            products: {
                 Row: {
-                    id: string
-                    user_id: string
-                    operational_cost_id: string | null
-                    description: string
-                    due_date: string
-                    payment_date: string | null
-                    amount_original: number
-                    amount_paid: number | null
-                    status: string
+                    code: string | null
                     created_at: string
-                    updated_at: string
-                }
-                Insert: {
-                    id?: string
-                    user_id: string
-                    operational_cost_id?: string | null
-                    description: string
-                    due_date: string
-                    payment_date?: string | null
-                    amount_original?: number
-                    amount_paid?: number | null
-                    status?: string
-                    created_at?: string
-                    updated_at?: string
-                }
-                Update: {
-                    id?: string
-                    user_id?: string
-                    operational_cost_id?: string | null
-                    description?: string
-                    due_date?: string
-                    payment_date?: string | null
-                    amount_original?: number
-                    amount_paid?: number | null
-                    status?: string
-                    created_at?: string
-                    updated_at?: string
-                }
-                Relationships: [
-                    {
-                        foreignKeyName: "operational_cost_payments_operational_cost_id_fkey"
-                        columns: ["operational_cost_id"]
-                        isOneToOne: false
-                        referencedRelation: "operational_costs"
-                        referencedColumns: ["id"]
-                    }
-                ]
-            },
-            expenses: {
-                Row: {
-                    amount: number
-                    category: string | null
-                    created_at: string | null
-                    date: string
+                    description: string | null
+                    dilution: string | null
                     id: string
-                    is_paid: boolean | null
-                    notes: string | null
-                    paid_date: string | null
-                    recurrence: string | null
-                    title: string
-                    updated_at: string | null
+                    image_url: string | null
+                    name: string
+                    price: number
+                    size: string | null
+                    stock_quantity: number
+                    updated_at: string
                     user_id: string
                 }
                 Insert: {
-                    amount: number
-                    category?: string | null
-                    created_at?: string | null
-                    date?: string
+                    code?: string | null
+                    created_at?: string
+                    description?: string | null
+                    dilution?: string | null
                     id?: string
-                    is_paid?: boolean | null
-                    notes?: string | null
-                    paid_date?: string | null
-                    recurrence?: string | null
-                    title: string
-                    updated_at?: string | null
-                    user_id?: string
+                    image_url?: string | null
+                    name: string
+                    price?: number
+                    size?: string | null
+                    stock_quantity?: number
+                    updated_at?: string
+                    user_id: string
                 }
                 Update: {
-                    amount?: number
-                    category?: string | null
-                    created_at?: string | null
-                    date?: string
+                    code?: string | null
+                    created_at?: string
+                    description?: string | null
+                    dilution?: string | null
                     id?: string
-                    is_paid?: boolean | null
-                    notes?: string | null
-                    paid_date?: string | null
-                    recurrence?: string | null
-                    title?: string
-                    updated_at?: string | null
+                    image_url?: string | null
+                    name?: string
+                    price?: number
+                    size?: string | null
+                    stock_quantity?: number
+                    updated_at?: string
                     user_id?: string
                 }
                 Relationships: []
             }
             profiles: {
                 Row: {
-                    created_at: string | null
-                    email: string | null
-                    full_name: string | null
-                    id: string
-                    shop_name: string | null
-                    updated_at: string | null
-                    // New fields
-                    first_name: string | null
-                    last_name: string | null
-                    company_name: string | null
-                    document_number: string | null
-                    zip_code: string | null
                     address: string | null
                     address_number: string | null
-                    phone_number: string | null
                     avatar_url: string | null
+                    created_at: string | null
+                    document_number: string | null
+                    email: string
+                    first_name: string | null
+                    full_name: string | null
+                    id: string
+                    last_name: string | null
                     nickname: string | null
+                    phone_number: string | null
                     residential_complement: string | null
-                    company_zip_code: string | null
-                    company_address: string | null
-                    company_number: string | null
-                    company_complement: string | null
-                    company_phone: string | null
-                    instagram: string | null
-                    website: string | null
-                    company_logo_url: string | null
-                    company_colors: Json | null
-                    company_document: string | null
+                    subscription_status: string | null
+                    trial_ends_at: string | null
+                    updated_at: string | null
+                    zip_code: string | null
                 }
                 Insert: {
+                    address?: string | null
+                    address_number?: string | null
+                    avatar_url?: string | null
                     created_at?: string | null
-                    email?: string | null
+                    document_number?: string | null
+                    email: string
+                    first_name?: string | null
                     full_name?: string | null
                     id: string
-                    shop_name?: string | null
-                    updated_at?: string | null
-                    // New fields
-                    first_name?: string | null
                     last_name?: string | null
-                    company_name?: string | null
-                    document_number?: string | null
-                    zip_code?: string | null
-                    address?: string | null
-                    address_number?: string | null
-                    phone_number?: string | null
-                    avatar_url?: string | null
                     nickname?: string | null
+                    phone_number?: string | null
                     residential_complement?: string | null
-                    company_zip_code?: string | null
-                    company_address?: string | null
-                    company_number?: string | null
-                    company_complement?: string | null
-                    company_phone?: string | null
-                    instagram?: string | null
-                    website?: string | null
-                    company_logo_url?: string | null
-                    company_colors?: Json | null
+                    subscription_status?: string | null
+                    trial_ends_at?: string | null
+                    updated_at?: string | null
+                    zip_code?: string | null
                 }
                 Update: {
-                    created_at?: string | null
-                    email?: string | null
-                    full_name?: string | null
-                    id?: string
-                    shop_name?: string | null
-                    updated_at?: string | null
-                    // New fields
-                    first_name?: string | null
-                    last_name?: string | null
-                    company_name?: string | null
-                    document_number?: string | null
-                    zip_code?: string | null
                     address?: string | null
                     address_number?: string | null
-                    phone_number?: string | null
                     avatar_url?: string | null
+                    created_at?: string | null
+                    document_number?: string | null
+                    email?: string
+                    first_name?: string | null
+                    full_name?: string | null
+                    id?: string
+                    last_name?: string | null
                     nickname?: string | null
+                    phone_number?: string | null
                     residential_complement?: string | null
-                    company_zip_code?: string | null
-                    company_address?: string | null
-                    company_number?: string | null
-                    company_complement?: string | null
-                    company_phone?: string | null
-                    instagram?: string | null
-                    website?: string | null
-                    company_logo_url?: string | null
-                    company_colors?: Json | null
+                    subscription_status?: string | null
+                    trial_ends_at?: string | null
+                    updated_at?: string | null
+                    zip_code?: string | null
                 }
                 Relationships: []
             }
-            service_order_items: {
+            sales: {
                 Row: {
-                    created_at: string | null
+                    amount: number
+                    created_at: string
+                    date: string
                     id: string
-                    quantity: number | null
                     service_id: string | null
-                    service_order_id: string
-                    title: string
-                    unit_price: number
                     user_id: string
                 }
                 Insert: {
-                    created_at?: string | null
+                    amount?: number
+                    created_at?: string
+                    date: string
                     id?: string
-                    quantity?: number | null
                     service_id?: string | null
-                    service_order_id: string
-                    title: string
-                    unit_price: number
                     user_id: string
                 }
                 Update: {
-                    created_at?: string | null
+                    amount?: number
+                    created_at?: string
+                    date?: string
                     id?: string
-                    quantity?: number | null
                     service_id?: string | null
-                    service_order_id?: string
-                    title?: string
-                    unit_price?: number
                     user_id?: string
                 }
                 Relationships: [
                     {
-                        foreignKeyName: "service_order_items_service_id_fkey"
+                        foreignKeyName: "sales_service_id_fkey"
                         columns: ["service_id"]
                         isOneToOne: false
                         referencedRelation: "services"
-                        referencedColumns: ["id"]
-                    },
-                    {
-                        foreignKeyName: "service_order_items_service_order_id_fkey"
-                        columns: ["service_order_id"]
-                        isOneToOne: false
-                        referencedRelation: "service_orders"
                         referencedColumns: ["id"]
                     },
                 ]
             }
             service_orders: {
                 Row: {
-                    client_id: string | null
+                    client_id: string
                     created_at: string | null
-                    date_in: string | null
-                    date_out: string | null
-                    discount: number | null
-                    final_amount: number | null
+                    date: string
+                    description: string | null
                     id: string
-                    notes: string | null
-                    sale_number: string | null
-                    status: string
-                    total_amount: number | null
+                    status: string | null
+                    total_amount: number
                     updated_at: string | null
                     user_id: string
-                    vehicle_id: string | null
                 }
                 Insert: {
-                    client_id?: string | null
+                    client_id: string
                     created_at?: string | null
-                    date_in?: string | null
-                    date_out?: string | null
-                    discount?: number | null
-                    final_amount?: number | null
+                    date: string
+                    description?: string | null
                     id?: string
-                    notes?: string | null
-                    sale_number?: string | null
-                    status?: string
-                    total_amount?: number | null
+                    status?: string | null
+                    total_amount?: number
                     updated_at?: string | null
                     user_id: string
-                    vehicle_id?: string | null
                 }
                 Update: {
-                    client_id?: string | null
+                    client_id?: string
                     created_at?: string | null
-                    date_in?: string | null
-                    date_out?: string | null
-                    discount?: number | null
-                    final_amount?: number | null
+                    date?: string
+                    description?: string | null
                     id?: string
-                    notes?: string | null
-                    sale_number?: string | null
-                    status?: string
-                    total_amount?: number | null
+                    status?: string | null
+                    total_amount?: number
                     updated_at?: string | null
                     user_id?: string
-                    vehicle_id?: string | null
                 }
                 Relationships: [
                     {
@@ -540,100 +490,37 @@ export type Database = {
                         referencedRelation: "clients"
                         referencedColumns: ["id"]
                     },
-                    {
-                        foreignKeyName: "service_orders_vehicle_id_fkey"
-                        columns: ["vehicle_id"]
-                        isOneToOne: false
-                        referencedRelation: "vehicles"
-                        referencedColumns: ["id"]
-                    },
                 ]
             }
             services: {
                 Row: {
-                    active: boolean | null
-                    base_price: number
-                    category: string | null
                     created_at: string | null
                     description: string | null
                     id: string
                     name: string
+                    price: number
                     updated_at: string | null
                     user_id: string
                 }
                 Insert: {
-                    active?: boolean | null
-                    base_price?: number
-                    category?: string | null
                     created_at?: string | null
                     description?: string | null
                     id?: string
                     name: string
+                    price?: number
                     updated_at?: string | null
                     user_id: string
                 }
                 Update: {
-                    active?: boolean | null
-                    base_price?: number
-                    category?: string | null
                     created_at?: string | null
                     description?: string | null
                     id?: string
                     name?: string
+                    price?: number
                     updated_at?: string | null
                     user_id?: string
                 }
                 Relationships: []
-            }
-            vehicles: {
-                Row: {
-                    brand: string | null
-                    client_id: string
-                    color: string | null
-                    created_at: string | null
-                    id: string
-                    license_plate: string | null
-                    model: string | null
-                    notes: string | null
-                    updated_at: string | null
-                    user_id: string
-                    year: string | null
-                }
-                Insert: {
-                    brand?: string | null
-                    client_id: string
-                    color?: string | null
-                    created_at?: string | null
-                    id?: string
-                    license_plate?: string | null
-                    model?: string | null
-                    notes?: string | null
-                    updated_at?: string | null
-                    user_id: string
-                    year?: string | null
-                }
-                Update: {
-                    brand?: string | null
-                    client_id?: string
-                    color?: string | null
-                    created_at?: string | null
-                    id?: string
-                    license_plate?: string | null
-                    model?: string | null
-                    notes?: string | null
-                    updated_at?: string | null
-                    user_id?: string
-                    year?: string | null
-                }
-                Relationships: [
-                    {
-                        foreignKeyName: "vehicles_client_id_fkey"
-                        columns: ["client_id"]
-                        isOneToOne: false
-                        referencedRelation: "clients"
-                        referencedColumns: ["id"]
-                    },
-                ]
             }
         }
         Views: {

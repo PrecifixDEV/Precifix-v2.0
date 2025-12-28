@@ -314,12 +314,12 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                         placeholder="Buscar despesa..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8 bg-slate-800 border-slate-800 text-white placeholder:text-slate-400"
+                        className="pl-8"
                     />
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-full sm:w-40 bg-slate-800 border-slate-800 text-white">
+                        <SelectTrigger className="w-full sm:w-40">
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Status" />
@@ -338,7 +338,7 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
 
             <div className="rounded-md border bg-background shadow-sm overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-slate-800">
+                    <TableHeader className="bg-slate-100 dark:bg-slate-800">
                         <TableRow>
                             <TableHead>Descrição</TableHead>
                             <TableHead>Vencimento</TableHead>
