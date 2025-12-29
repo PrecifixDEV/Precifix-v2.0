@@ -81,7 +81,7 @@ export const Dashboard = () => {
                 .eq('id', user.id)
                 .single()
 
-            if (!profile || !profile.document_number || !profile.company_name) {
+            if (!profile || !profile.cpf_cnpj || !profile.company_name) {
                 setShowProfileAlert(true)
             }
         } catch (error) {
