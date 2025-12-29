@@ -13,8 +13,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { productService, type Product } from '@/services/productService';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 const productSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
@@ -24,6 +26,8 @@ const productSchema = z.object({
     stock_quantity: z.coerce.number().min(0, "Estoque deve ser positivo"),
     size: z.string().optional(),
     dilution: z.string().optional(),
+    is_for_sale: z.boolean().optional(),
+    sale_price: z.coerce.number().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -41,7 +45,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [dilutionType, setDilutionType] = useState<'ready' | 'dilution'>('dilution');
 
-    const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ProductFormValues>({
+    const { register, handleSubmit, formState: { errors }, reset, setValue, watch, setError } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema) as any,
         defaultValues: {
             name: '',
@@ -51,6 +55,8 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             stock_quantity: 0,
             size: '',
             dilution: '',
+            is_for_sale: false,
+            sale_price: 0,
         }
     });
 
@@ -64,6 +70,8 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 setValue('stock_quantity', productToEdit.stock_quantity.toString() as any);
                 setValue('size', productToEdit.size || '');
                 setValue('dilution', productToEdit.dilution || '');
+                setValue('is_for_sale', productToEdit.is_for_sale || false);
+                setValue('sale_price', (productToEdit.sale_price || 0).toString() as any);
 
                 if (productToEdit.dilution === 'Pronto Uso') {
                     setDilutionType('ready');
@@ -81,8 +89,10 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     stock_quantity: '0' as any,
                     size: '',
                     dilution: '',
+                    is_for_sale: false,
+                    sale_price: '0' as any,
                 });
-                setDilutionType('dilution'); // Default to dilution for new products, or maybe 'ready'? User decides.
+                setDilutionType('dilution');
                 setImagePreview(null);
             }
             setImageFile(null);
@@ -111,6 +121,28 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 throw new Error("Usuário não autenticado");
             }
 
+            // Check if product name or code already exists
+            // If cloning (id is empty string) or new, excludeId is undefined.
+            // If editing existing product (id is valid), excludeId is that id.
+            const excludeId = (productToEdit && productToEdit.id) ? productToEdit.id : undefined;
+
+            const availability = await productService.checkProductAvailability(data.name, data.code, excludeId);
+
+            let hasError = false;
+            if (availability.nameExists) {
+                setError('name', { type: 'manual', message: 'Já existe um produto com este nome.' });
+                hasError = true;
+            }
+            if (availability.codeExists) {
+                setError('code', { type: 'manual', message: 'Já existe um produto com este código.' });
+                hasError = true;
+            }
+
+            if (hasError) {
+                setIsLoading(false);
+                return;
+            }
+
             let imageUrl = productToEdit?.image_url || null;
 
             if (imageFile) {
@@ -127,9 +159,13 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 size: data.size || null,
                 dilution: dilutionType === 'ready' ? 'Pronto Uso' : (data.dilution || null),
                 image_url: imageUrl,
+                is_for_sale: data.is_for_sale || false,
+                sale_price: data.sale_price || 0,
             };
 
-            if (productToEdit) {
+            // If productToEdit exists AND has an ID (not empty string), it's an update.
+            // If ID is empty string (cloning) or productToEdit is null (create new), it's a create.
+            if (productToEdit && productToEdit.id) {
                 await productService.updateProduct(productToEdit.id, productData);
             } else {
                 await productService.createProduct(productData);
@@ -139,7 +175,6 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             onOpenChange(false);
         } catch (error) {
             console.error("Erro ao salvar produto:", error);
-            // Ideally use a toast here
             alert("Erro ao salvar produto. Verifique se você está logado ou tente novamente.");
         } finally {
             setIsLoading(false);
@@ -151,7 +186,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-slate-900 dark:text-white">
-                        {productToEdit ? 'Editar Produto' : 'Novo Produto'}
+                        {productToEdit && productToEdit.id ? 'Editar Produto' : 'Novo Produto'}
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -188,7 +223,17 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         <div className="space-y-2">
                             <Label htmlFor="code">Código</Label>
                             <Input id="code" {...register("code")} className="bg-white dark:bg-slate-800" />
+                            {errors.code && <span className="text-red-500 text-xs">{errors.code.message}</span>}
                         </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="is_for_sale"
+                            checked={watch("is_for_sale")}
+                            onCheckedChange={(checked) => setValue("is_for_sale", checked as boolean)}
+                        />
+                        <Label htmlFor="is_for_sale">Produto para Venda</Label>
                     </div>
 
                     <div className="space-y-2">
@@ -196,12 +241,20 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         <Input id="description" {...register("description")} className="bg-white dark:bg-slate-800" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-3" : "grid-cols-2")}>
                         <div className="space-y-2">
-                            <Label htmlFor="price">Preço (R$) *</Label>
+                            <Label htmlFor="price">Preço de Custo (R$) *</Label>
                             <Input id="price" type="number" step="0.01" {...register("price")} className="bg-white dark:bg-slate-800" />
                             {errors.price && <span className="text-red-500 text-xs">{errors.price.message}</span>}
                         </div>
+
+                        {watch("is_for_sale") && (
+                            <div className="space-y-2">
+                                <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
+                                <Input id="sale_price" type="number" step="0.01" {...register("sale_price")} className="bg-white dark:bg-slate-800" />
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <Label htmlFor="stock_quantity">Estoque *</Label>
                             <Input id="stock_quantity" type="number" {...register("stock_quantity")} className="bg-white dark:bg-slate-800" />
@@ -281,7 +334,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         </Button>
                         <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-none">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {productToEdit ? 'Salvar Alterações' : 'Criar Produto'}
+                            {productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
                         </Button>
                     </DialogFooter>
                 </form>

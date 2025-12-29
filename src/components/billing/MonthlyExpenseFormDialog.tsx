@@ -35,7 +35,7 @@ export const MonthlyExpenseFormDialog = ({ isOpen, onClose, monthlyBillingId, ex
             setDescription(expense.description);
             setValue(expense.value.toFixed(2));
             setType(expense.type);
-            setExpenseDate(new Date(expense.created_at));
+            setExpenseDate(expense.created_at ? new Date(expense.created_at) : undefined);
         } else {
             setDescription('');
             setValue('');

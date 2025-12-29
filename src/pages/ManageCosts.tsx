@@ -174,7 +174,7 @@ export const ManageCosts = () => {
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Gerenciar Custos</h1>
                     <p className="text-slate-500 dark:text-slate-400">Controle suas despesas fixas, variáveis e horário de funcionamento.</p>
                 </div>
-                <Button onClick={() => { setEditingCost(undefined); setIsCostFormOpen(true); }} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900">
+                <Button onClick={() => { setEditingCost(undefined); setIsCostFormOpen(true); }} variant="outline">
                     <Plus className="mr-2 h-4 w-4" /> Novo Custo
                 </Button>
             </div>

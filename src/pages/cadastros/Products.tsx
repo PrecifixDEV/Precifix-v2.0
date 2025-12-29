@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Package } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,9 +11,36 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ProductFormDialog } from './ProductFormDialog';
+import { ProductSaleDialog } from './ProductSaleDialog';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { productService, type Product } from '@/services/productService';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export const Products = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -22,6 +49,10 @@ export const Products = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+    const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
+    const [productForSale, setProductForSale] = useState<Product | null>(null);
+    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+    const [filterType, setFilterType] = useState<'all' | 'for_sale' | 'zero_stock' | 'incomplete'>('all');
 
     useEffect(() => {
         fetchProducts();
@@ -76,10 +107,99 @@ export const Products = () => {
         }
     };
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.code && product.code.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const handleClone = (product: Product) => {
+        // We want to edit a "new" product that has the same data as the cloned one.
+        // We'll pass the product to the dialog, but we'll need a way to tell the dialog "this is a clone, don't update the original ID".
+        // For now, let's pass it as productToEdit but with a special flag we'll add to the dialog props, 
+        // OR we can pass a modified object that doesn't have an ID? 
+        // Product type usually requires ID. 
+        // Let's modify the state:
+        setProductToEdit({ ...product, id: '' }); // Passing empty ID to signify new? Or better, let's handle this in the Dialog.
+        setIsDialogOpen(true);
+    };
+
+    const handleToggleForSale = async (product: Product) => {
+        if (!product.is_for_sale) {
+            setProductForSale(product);
+            setIsSaleDialogOpen(true);
+        } else {
+            try {
+                const updatedProduct = { ...product, is_for_sale: false };
+                await productService.updateProduct(product.id, { is_for_sale: false });
+
+                setProducts(products.map(p => p.id === product.id ? updatedProduct : p));
+                toast.success('Produto marcado para Uso Próprio');
+            } catch (error) {
+                console.error("Erro ao atualizar status do produto:", error);
+                toast.error("Erro ao atualizar status do produto");
+            }
+        }
+    };
+
+    const handleEditSale = (product: Product) => {
+        setProductForSale(product);
+        setIsSaleDialogOpen(true);
+    };
+
+    const handleBulkPrint = () => {
+        const selected = products.filter(p => selectedProducts.includes(p.id));
+        const printWindow = window.open('', '', 'height=600,width=800');
+        if (printWindow) {
+            printWindow.document.write('<html><head><title>Lista de Produtos</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('body { font-family: sans-serif; padding: 20px; }');
+            printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+            printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
+            printWindow.document.write('th { background-color: #f2f2f2; }');
+            printWindow.document.write('.header { text-align: center; margin-bottom: 20px; }');
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<div class="header"><h1>Lista de Produtos</h1></div>');
+            printWindow.document.write('<table><thead><tr><th>Produto</th><th>Código</th><th>Preço Custo</th><th>Preço Venda</th><th>Estoque</th></tr></thead><tbody>');
+            selected.forEach(p => {
+                const salePrice = p.sale_price || 0;
+                const priceFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price);
+                const salePriceFormatted = p.is_for_sale ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(salePrice) : '-';
+                printWindow.document.write(`<tr>
+                    <td>${p.name}</td>
+                    <td>${p.code || '-'}</td>
+                    <td>${priceFormatted}</td>
+                    <td>${salePriceFormatted}</td>
+                    <td>${p.stock_quantity}</td>
+                </tr>`);
+            });
+            printWindow.document.write('</tbody></table>');
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+    };
+
+    const confirmBulkDelete = async () => {
+        try {
+            await productService.deleteProducts(selectedProducts);
+            setProducts(products.filter(p => !selectedProducts.includes(p.id)));
+            setSelectedProducts([]);
+            setIsDeleteAlertOpen(false);
+            toast.success("Produtos excluídos com sucesso");
+        } catch (error) {
+            console.error("Erro ao excluir produtos:", error);
+            toast.error("Erro ao excluir produtos");
+        }
+    };
+
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (product.code && product.code.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        if (!matchesSearch) return false;
+
+        if (filterType === 'for_sale') return product.is_for_sale;
+        if (filterType === 'zero_stock') return product.stock_quantity <= 0;
+        if (filterType === 'incomplete') return !product.code || !product.image_url;
+
+        return true;
+    });
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -97,22 +217,82 @@ export const Products = () => {
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between gap-4">
-                        <div className="relative flex-1 max-w-sm">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
-                            <Input
-                                placeholder="Buscar produto..."
-                                className="pl-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="flex items-center gap-2 flex-1 max-w-sm">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="icon" title="Filtrar" className={filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}>
+                                        <Filter className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-56">
+                                    <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => setFilterType('all')}
+                                        className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                                    >
+                                        Todos
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setFilterType('for_sale')}
+                                        className={filterType === 'for_sale' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                                    >
+                                        Produtos para Venda
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setFilterType('zero_stock')}
+                                        className={filterType === 'zero_stock' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                                    >
+                                        Produtos com Estoque Zerado
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setFilterType('incomplete')}
+                                        className={filterType === 'incomplete' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                                    >
+                                        Produtos Cadastro Incompleto
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <div className="relative flex-1">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
+                                <Input
+                                    placeholder="Buscar produto..."
+                                    className="pl-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <Button
-                            onClick={handleCreateNew}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-none font-medium"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Novo Produto
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            {selectedProducts.length > 0 && (
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={handleBulkPrint}
+                                        title="Imprimir Selecionados"
+                                    >
+                                        <Printer className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        onClick={() => setIsDeleteAlertOpen(true)}
+                                        title="Excluir Selecionados"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </>
+                            )}
+                            <Button
+                                onClick={handleCreateNew}
+                                variant="outline"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Novo Produto
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -151,7 +331,13 @@ export const Products = () => {
                                     </TableRow>
                                 ) : (
                                     filteredProducts.map((product) => (
-                                        <TableRow key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <TableRow
+                                            key={product.id}
+                                            className={cn(
+                                                "transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50",
+                                                product.is_for_sale && "bg-green-50 hover:bg-green-100 dark:bg-green-900/40 dark:hover:bg-green-900/50"
+                                            )}
+                                        >
                                             <TableCell className="text-center">
                                                 <Checkbox
                                                     checked={selectedProducts.includes(product.id)}
@@ -187,17 +373,80 @@ export const Products = () => {
                                                 {product.stock_quantity}
                                             </TableCell>
                                             <TableCell className="text-right font-medium text-slate-900 dark:text-white">
-                                                {formatCurrency(product.price)}
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {product.is_for_sale ? (
+                                                        <>
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <span className="cursor-help decoration-dotted underline underline-offset-4 decoration-slate-400">
+                                                                            {formatCurrency(product.price)}
+                                                                        </span>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Preço de Venda: {formatCurrency(product.sale_price || 0)}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleEditSale(product);
+                                                                }}
+                                                                title="Alterar Preço de Venda"
+                                                            >
+                                                                <ShoppingBag className="h-4 w-4" />
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        formatCurrency(product.price)
+                                                    )}
+                                                </div>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20" onClick={() => handleEdit(product)}>
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => handleDelete(product.id)}>
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                            <span className="sr-only">Abrir menu</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                        <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                                            <Edit2 className="mr-2 h-4 w-4" />
+                                                            Alterar
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleClone(product)}>
+                                                            <Copy className="mr-2 h-4 w-4" />
+                                                            Clonar Produto
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleToggleForSale(product)}>
+                                                            {product.is_for_sale ? (
+                                                                <>
+                                                                    <Store className="mr-2 h-4 w-4 opacity-50" />
+                                                                    Marcar Uso Próprio
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <DollarSign className="mr-2 h-4 w-4 text-green-600" />
+                                                                    Produto para Venda
+                                                                </>
+                                                            )}
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleDelete(product.id)}
+                                                            className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Apagar
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -208,12 +457,39 @@ export const Products = () => {
                 </CardContent>
             </Card>
 
+            <ProductSaleDialog
+                open={isSaleDialogOpen}
+                onOpenChange={setIsSaleDialogOpen}
+                product={productForSale}
+                onSuccess={fetchProducts}
+            />
+
             <ProductFormDialog
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
                 productToEdit={productToEdit}
                 onSuccess={fetchProducts}
             />
+
+            <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir Produtos Selecionados?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Aviso: serão excluídos todos os produtos selecionados e eles serão removidos de todos os serviços cadastrados. Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmBulkDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white border-none"
+                        >
+                            Excluir Todos
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

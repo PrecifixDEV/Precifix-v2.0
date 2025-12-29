@@ -82,7 +82,7 @@ export class ErpService {
             service_order_id: order.id,
             service_id: item.service_id,
             title: item.title, // Added title
-            unit_price: item.unit_price, // Changed price to unit_price
+            price: item.unit_price, // Changed price to unit_price
             quantity: item.quantity,
             user_id: user.id // Added user_id
         }))

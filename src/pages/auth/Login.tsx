@@ -90,7 +90,7 @@ export const Login = () => {
                 <Button
                     type="submit"
                     isLoading={loading}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                    className="w-full font-bold"
                 >
                     ENTRAR NA PLATAFORMA
                 </Button>

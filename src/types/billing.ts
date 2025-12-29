@@ -5,8 +5,8 @@ export interface MonthlyBilling {
     month: number;
     year: number;
     billing_amount: number;
-    created_at: string;
-    updated_at: string;
+    created_at: string | null;
+    updated_at: string | null;
 }
 
 export interface MonthlyExpense {
@@ -17,8 +17,8 @@ export interface MonthlyExpense {
     type: 'fixed' | 'variable';
     source: 'global' | 'monthly_override';
     operational_cost_id: string | null;
-    created_at: string;
-    updated_at: string;
+    created_at: string | null;
+    updated_at: string | null;
     day?: number; // Added for UI consistency if needed, though expense_date logic in other tables uses a full date string usually. Retaining original backup structure for now.
 }
 
@@ -32,6 +32,6 @@ export interface OperationalCostPayment {
     amount_original: number;
     amount_paid: number | null;
     status: 'pending' | 'paid' | 'overdue' | 'cancelled' | 'partially_paid'; // 'cancelled' for ignored global costs? Or 'overdue' logic handled dynamically. Sticking to plan.
-    created_at: string;
-    updated_at: string;
+    created_at: string | null;
+    updated_at: string | null;
 }

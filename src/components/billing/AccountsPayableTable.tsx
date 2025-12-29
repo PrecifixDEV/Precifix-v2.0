@@ -186,7 +186,7 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                 // it should have an expense_date that places it in this month.
                 if (isInSelectedMonth(cost.expense_date)) {
                     // Check if there is already a payment record for this specific cost instance
-                    const existingPayment = payments?.find(p => p.operational_cost_id === cost.id);
+                    const existingPayment = payments?.find((p: OperationalCostPayment) => p.operational_cost_id === cost.id);
 
                     if (!existingPayment) {
                         // It's an open cost (not yet paid/registered in payments table)
@@ -226,7 +226,7 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
         // If a cost has a payment, `payments` query has it. We don't add it from `operationalCosts` loop.
         // If a cost has NO payment, we add it from `operationalCosts` loop as virtual.
 
-        const realPaymentsList: VirtualPayment[] = (payments || []).map(p => {
+        const realPaymentsList: VirtualPayment[] = (payments || []).map((p: OperationalCostPayment) => {
             const dueDate = parseISO(p.due_date);
             let status: VirtualPayment['status'] = p.status as any;
             if (status === 'pending' && isBefore(dueDate, today)) {
