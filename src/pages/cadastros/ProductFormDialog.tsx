@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { productService, type Product } from '@/services/productService';
+import { compressAndConvertToWebP } from '@/utils/imageUtils';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -43,7 +44,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
     const [isLoading, setIsLoading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [dilutionType, setDilutionType] = useState<'ready' | 'dilution'>('dilution');
+    const [dilutionType, setDilutionType] = useState<'ready' | 'dilution'>('ready');
 
     const { register, handleSubmit, formState: { errors }, reset, setValue, watch, setError } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema) as any,
@@ -92,7 +93,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     is_for_sale: false,
                     sale_price: '0' as any,
                 });
-                setDilutionType('dilution');
+                setDilutionType('ready');
                 setImagePreview(null);
             }
             setImageFile(null);
@@ -109,6 +110,12 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleRemoveImage = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent triggering any parent click
+        setImageFile(null);
+        setImagePreview(null);
     };
 
     const onSubmit = async (data: ProductFormValues) => {
@@ -145,8 +152,21 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
             let imageUrl = productToEdit?.image_url || null;
 
+            // Handle image logic
+            // Handle image logic
             if (imageFile) {
-                imageUrl = await productService.uploadProductImage(imageFile);
+                // Comprimir e converter para WebP antes do upload
+                try {
+                    const compressedFile = await compressAndConvertToWebP(imageFile);
+                    imageUrl = await productService.uploadProductImage(compressedFile);
+                } catch (error) {
+                    console.error("Erro na compressão:", error);
+                    // Fallback: tenta enviar o arquivo original se a compressão falhar
+                    imageUrl = await productService.uploadProductImage(imageFile);
+                }
+            } else if (!imagePreview) {
+                // If no new file and no preview, it means the image was removed (or never existed)
+                imageUrl = null;
             }
 
             const productData = {
@@ -192,24 +212,55 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
                     {/* Image Upload */}
-                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors relative">
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            onChange={handleImageChange}
-                        />
+                    {/* Image Upload */}
+                    <div className="flex flex-col items-center justify-center p-4">
                         {imagePreview ? (
-                            <div className="relative w-32 h-32">
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-md" />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-md text-white font-medium">
-                                    Alterar
+                            <div className="relative w-40 h-40 group">
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover rounded-md border border-slate-200 dark:border-slate-700"
+                                />
+
+                                {/* Trigger apenas no botão Alterar */}
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <label
+                                        htmlFor="image-upload"
+                                        className="bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded cursor-pointer pointer-events-auto transition-colors"
+                                    >
+                                        Alterar
+                                    </label>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveImage}
+                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm transition-colors z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                    title="Remover imagem"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+
+                                <input
+                                    id="image-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageChange}
+                                />
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center text-slate-500 dark:text-slate-400">
-                                <Upload className="w-8 h-8 mb-2" />
-                                <span className="text-sm">Clique para enviar imagem</span>
+                            <div className="w-full h-32 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors relative cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    onChange={handleImageChange}
+                                />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 pointer-events-none">
+                                    <Upload className="w-8 h-8 mb-2" />
+                                    <span className="text-sm">Clique para enviar imagem</span>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -9,6 +9,7 @@ import type { OperationalHours } from '@/types/costs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 // import { ImageCropper } from '@/components/ImageCropper';
 import heic2any from 'heic2any';
+import { compressAndConvertToWebP } from '@/utils/imageUtils';
 import { Separator } from '@/components/ui/separator';
 
 export const MyCompany = () => {
@@ -253,55 +254,23 @@ export const MyCompany = () => {
             }
 
             // 2. Resize & Compress
-            const resizeImage = (imgFile: File): Promise<Blob> => {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.src = URL.createObjectURL(imgFile);
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const MAX_SIZE = 700;
-
-                        if (width > height) {
-                            if (width > MAX_SIZE) {
-                                height *= MAX_SIZE / width;
-                                width = MAX_SIZE;
-                            }
-                        } else {
-                            if (height > MAX_SIZE) {
-                                width *= MAX_SIZE / height;
-                                height = MAX_SIZE;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        if (!ctx) {
-                            reject(new Error("Canvas context failed"));
-                            return;
-                        }
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Use original type if supported, else JPEG. Quality 0.8 for JPEGs.
-                        const type = imgFile.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        canvas.toBlob((blob) => {
-                            if (blob) resolve(blob);
-                            else reject(new Error("Canvas to Blob conversion failed"));
-                        }, type, 0.8);
-                    };
-                    img.onerror = (err) => reject(err);
-                });
-            };
-
-            const finalBlob = await resizeImage(processedFile);
+            let finalFile: File;
+            try {
+                finalFile = await compressAndConvertToWebP(processedFile);
+            } catch (error) {
+                console.error("Erro na compressão (Company):", error);
+                finalFile = processedFile;
+            }
 
             // 3. Upload
-            const fileName = `company_logo_${userId}.${processedFile.type === 'image/png' ? 'png' : 'jpg'}`;
+            const fileExt = finalFile.name.split('.').pop();
+            const fileName = `company_logo_${userId}.${fileExt}`;
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(`company/${fileName}`, finalBlob, { upsert: true, contentType: processedFile.type === 'image/png' ? 'image/png' : 'image/jpeg' });
+                .upload(`company/${fileName}`, finalFile, {
+                    upsert: true,
+                    contentType: finalFile.type
+                });
 
             if (uploadError) throw uploadError;
 

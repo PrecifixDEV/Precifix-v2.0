@@ -41,6 +41,7 @@ import {
 import { productService, type Product } from '@/services/productService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 export const Products = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -53,10 +54,36 @@ export const Products = () => {
     const [productForSale, setProductForSale] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [filterType, setFilterType] = useState<'all' | 'for_sale' | 'zero_stock' | 'incomplete'>('all');
+    const [companyInfo, setCompanyInfo] = useState<{ name: string; logo: string | null; primaryColor: string }>({
+        name: '',
+        logo: null,
+        primaryColor: '#000000'
+    });
 
     useEffect(() => {
         fetchProducts();
+        fetchCompanyInfo();
     }, []);
+
+    const fetchCompanyInfo = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data } = await supabase
+                .from('profiles')
+                .select('company_name, company_logo_url, company_colors')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                const colors = data.company_colors as any;
+                setCompanyInfo({
+                    name: data.company_name || 'Minha Empresa',
+                    logo: data.company_logo_url,
+                    primaryColor: colors?.primary || '#000000'
+                });
+            }
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -154,13 +181,26 @@ export const Products = () => {
             printWindow.document.write('.header { text-align: center; margin-bottom: 20px; }');
             printWindow.document.write('</style>');
             printWindow.document.write('</head><body>');
-            printWindow.document.write('<div class="header"><h1>Lista de Produtos</h1></div>');
-            printWindow.document.write('<table><thead><tr><th>Produto</th><th>Código</th><th>Preço Custo</th><th>Preço Venda</th><th>Estoque</th></tr></thead><tbody>');
+            printWindow.document.write('</head><body>');
+
+            // Header with Company Info
+            printWindow.document.write(`
+                <div style="padding: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    ${companyInfo.logo ? `<img src="${companyInfo.logo}" style="height: 50px; margin-right: 15px; object-fit: contain;" />` : ''}
+                    <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: black;">${companyInfo.name}</h1>
+                </div>
+            `);
+
+            printWindow.document.write('<div class="header"><h2 style="font-size: 18px; margin: 0;">Lista de Produtos</h2></div>');
+            printWindow.document.write('<table><thead><tr><th style="width: 50px;">Img</th><th>Produto</th><th>Código</th><th>Preço Custo</th><th>Preço Venda</th><th>Estoque</th></tr></thead><tbody>');
             selected.forEach(p => {
                 const salePrice = p.sale_price || 0;
                 const priceFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price);
                 const salePriceFormatted = p.is_for_sale ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(salePrice) : '-';
                 printWindow.document.write(`<tr>
+                    <td style="padding: 4px; width: 50px; text-align: center; vertical-align: middle;">
+                        ${p.image_url ? `<img src="${p.image_url}" style="width: 42px; height: 42px; object-fit: cover; display: block; margin: 0 auto;" />` : '<div style="width: 42px; height: 42px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: #f5f5f5; color: #ccc;">-</div>'}
+                    </td>
                     <td>${p.name}</td>
                     <td>${p.code || '-'}</td>
                     <td>${priceFormatted}</td>
@@ -169,9 +209,9 @@ export const Products = () => {
                 </tr>`);
             });
             printWindow.document.write('</tbody></table>');
+            printWindow.document.write('<script>window.onload = function() { window.print(); window.close(); }</script>');
             printWindow.document.write('</body></html>');
             printWindow.document.close();
-            printWindow.print();
         }
     };
 

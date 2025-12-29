@@ -199,12 +199,13 @@ export const Profile = () => {
             setSaving(true)
             setCropModalOpen(false)
 
-            const fileName = `${user.id}.png`
+            const fileExt = croppedBlob.type === 'image/webp' ? 'webp' : 'png'
+            const fileName = `${user.id}.${fileExt}`
             const filePath = `${fileName}`
 
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, croppedBlob, { upsert: true, contentType: 'image/png' })
+                .upload(filePath, croppedBlob, { upsert: true, contentType: croppedBlob.type })
 
             if (uploadError) throw uploadError
 
