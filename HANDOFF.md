@@ -15,6 +15,9 @@
     -   **Image Column**: Added a product image column to the print layout (resized to ~42px with safety padding to preserve row height).
     -   **Branded Header**: The print page now features a clean, centered header displaying the **Company Logo** and **Company Name** (fetched from `profiles`).
     -   **Refinements**: Removed generic titles and color bars for a professional, minimalist look.
+4.  **Build & UI Optimization**:
+    -   **Build Performance**: Implemented `manualChunks` in `vite.config.ts`, splitting large vendors (React, Supabase, UI libs) to reduce main bundle size and improve caching.
+    -   **Auth UI**: Fixed input transparency issues on Login, Register, Forgot Password, and Update Password screens for a cohesive dark-mode aesthetic.
 
 ## Next Steps
 1.  **Master Data Continuation**:

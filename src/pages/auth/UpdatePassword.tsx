@@ -90,7 +90,7 @@ export const UpdatePassword = () => {
                         icon={<Lock className="w-5 h-5 text-white" />}
                         endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
-                        className="text-white"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
                         labelClassName="text-white"
                         required
                     />
@@ -127,7 +127,7 @@ export const UpdatePassword = () => {
                     icon={<Lock className="w-5 h-5 text-white" />}
                     endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                     onEndIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-white"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
                     labelClassName="text-white"
                     required
                 />

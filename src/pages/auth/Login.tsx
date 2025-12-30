@@ -52,7 +52,7 @@ export const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-5 h-5 text-white" />}
-                    className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-white"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
                     labelClassName="text-white"
                     required
                 />
@@ -67,7 +67,7 @@ export const Login = () => {
                         icon={<Lock className="w-5 h-5 text-white" />}
                         endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
-                        className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-white"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
                         labelClassName="text-white"
                         required
                     />
