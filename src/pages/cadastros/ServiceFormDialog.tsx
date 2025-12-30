@@ -23,13 +23,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Plus, Trash2, Droplets, Beaker, CarFront } from "lucide-react";
+import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -74,7 +83,8 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 }) => {
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
-    const [selectedProducts, setSelectedProducts] = useState<ProductWithQuantity[]>([]); // Changed type
+    const [selectedProducts, setSelectedProducts] = useState<ProductWithQuantity[]>([]);
+    const [openCombobox, setOpenCombobox] = useState(false);
 
     const form = useForm<ServiceFormValues>({
         resolver: zodResolver(serviceSchema) as any,
@@ -320,144 +330,153 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 flex-1 overflow-hidden">
-                                    <div className="border rounded-md p-2 flex flex-col">
-                                        <span className="text-xs font-semibold mb-2">Disponíveis (Não Venda)</span>
-                                        <ScrollArea className="flex-1 h-[200px]">
-                                            <div className="space-y-1">
-                                                {products.map(product => {
-                                                    const isSelected = selectedProducts.some(sp => sp.id === product.id);
-                                                    return (
-                                                        <button
-                                                            key={product.id}
-                                                            type="button"
-                                                            disabled={isSelected}
-                                                            onClick={() => toggleProduct(product)}
-                                                            className={`w-full text-left text-sm p-2 rounded hover:bg-muted flex justify-between items-center ${isSelected ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                        >
-                                                            <span className="truncate">{product.name}</span>
-                                                            <Plus className="w-4 h-4" />
-                                                        </button>
-                                                    );
-                                                })}
-                                                {products.length === 0 && <p className="text-xs text-muted-foreground p-2">Nenhum produto de consumo cadastrado.</p>}
-                                            </div>
-                                        </ScrollArea>
+                                <div className="flex flex-col gap-4 flex-1 overflow-hidden">
+                                    <div className="flex flex-col gap-2">
+                                        <Label>Adicionar Produto</Label>
+                                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={openCombobox}
+                                                    className="w-full justify-between"
+                                                >
+                                                    Selecione um produto...
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[400px] p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Buscar produto..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {products.map((product) => {
+                                                                const isSelected = selectedProducts.some(sp => sp.id === product.id);
+                                                                return (
+                                                                    <CommandItem
+                                                                        key={product.id}
+                                                                        value={product.name}
+                                                                        onSelect={() => {
+                                                                            if (!isSelected) {
+                                                                                toggleProduct(product);
+                                                                            }
+                                                                            setOpenCombobox(false);
+                                                                        }}
+                                                                        className={isSelected ? "opacity-50 cursor-not-allowed" : ""}
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                "mr-2 h-4 w-4",
+                                                                                isSelected ? "opacity-100" : "opacity-0"
+                                                                            )}
+                                                                        />
+                                                                        {product.name}
+                                                                    </CommandItem>
+                                                                );
+                                                            })}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
 
-                                    <div className="border rounded-md p-2 flex flex-col">
+                                    <div className="border rounded-md p-2 flex flex-col flex-1 overflow-hidden">
                                         <span className="text-xs font-semibold mb-2">Selecionados</span>
-                                        <ScrollArea className="flex-1 h-[200px]">
+                                        <ScrollArea className="flex-1">
                                             <div className="space-y-4">
                                                 {selectedProducts.map(sp => (
-                                                    <div key={sp.id} className="bg-muted/30 p-3 rounded-md border text-sm space-y-3">
-                                                        <div className="flex justify-between items-start">
-                                                            <div className="flex flex-col flex-1">
-                                                                <span className="font-medium truncate">{sp.name}</span>
-                                                                {sp.is_dilutable && (
-                                                                    <div className="flex items-center gap-2 mt-2">
-                                                                        <Label htmlFor={`dilution-${sp.id}`} className="text-[10px] text-muted-foreground uppercase tracking-wide">Pronto Uso</Label>
-                                                                        <Switch
-                                                                            id={`dilution-${sp.id}`}
-                                                                            checked={sp.use_dilution}
-                                                                            onCheckedChange={(checked) => updateProduct(sp.id, { use_dilution: checked })}
-                                                                            className="scale-75 origin-left data-[state=checked]:bg-primary"
-                                                                        />
-                                                                        <Label htmlFor={`dilution-${sp.id}`} className="text-[10px] text-muted-foreground uppercase tracking-wide">Diluir</Label>
-                                                                    </div>
-                                                                )}
+                                                    <div key={sp.id} className="bg-muted/30 p-2 rounded-md border text-sm space-y-2">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                <span className="font-medium truncate text-sm" title={sp.name}>{sp.name}</span>
+
+                                                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                    <Label htmlFor={`dilution-${sp.id}`} className={cn("text-[10px] uppercase font-bold tracking-wider cursor-pointer", !sp.use_dilution ? "text-primary" : "text-muted-foreground")}>Pronto Uso</Label>
+                                                                    <Switch
+                                                                        id={`dilution-${sp.id}`}
+                                                                        checked={sp.use_dilution}
+                                                                        onCheckedChange={(checked) => updateProduct(sp.id, { use_dilution: checked })}
+                                                                        className="scale-75 data-[state=checked]:bg-blue-500"
+                                                                    />
+                                                                    <Label htmlFor={`dilution-${sp.id}`} className={cn("text-[10px] uppercase font-bold tracking-wider cursor-pointer", sp.use_dilution ? "text-blue-500" : "text-muted-foreground")}>Diluir</Label>
+                                                                </div>
                                                             </div>
-                                                            <button type="button" onClick={() => toggleProduct(sp)} className="text-destructive hover:text-destructive/80 p-1">
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => toggleProduct(sp)}
+                                                                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-6 w-6"
+                                                            >
                                                                 <Trash2 className="w-4 h-4" />
-                                                            </button>
+                                                            </Button>
                                                         </div>
 
                                                         {sp.use_dilution ? (
-                                                            <div className="grid grid-cols-3 gap-2">
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-1 justify-center">
-                                                                        <TooltipProvider>
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger asChild>
-                                                                                    <Droplets className="w-3 h-3 text-blue-500 cursor-help" />
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent>Proporção da Diluição</TooltipContent>
-                                                                            </Tooltip>
-                                                                        </TooltipProvider>
-                                                                        <span className="text-[10px] text-muted-foreground">Diluição</span>
+                                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                                <div className="relative flex items-center border border-blue-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-blue-500 transition-colors h-8">
+                                                                    <div className="pl-2 pr-1 text-blue-500 shrink-0">
+                                                                        <Droplets className="w-3.5 h-3.5" />
                                                                     </div>
                                                                     <Input
-                                                                        className="h-7 text-xs text-center px-1"
-                                                                        placeholder="1:10"
+                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
+                                                                        placeholder="Proporção de Diluição (1:X)"
                                                                         value={sp.dilution_ratio || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { dilution_ratio: e.target.value })}
                                                                     />
                                                                 </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-1 justify-center">
-                                                                        <TooltipProvider>
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger asChild>
-                                                                                    <Beaker className="w-3 h-3 text-purple-500 cursor-help" />
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent>Tamanho do Recipiente (ml)</TooltipContent>
-                                                                            </Tooltip>
-                                                                        </TooltipProvider>
-                                                                        <span className="text-[10px] text-muted-foreground">Recipiente</span>
+                                                                <div className="relative flex items-center border border-purple-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-purple-500 transition-colors h-8">
+                                                                    <div className="pl-2 pr-1 text-purple-500 shrink-0">
+                                                                        <Beaker className="w-3.5 h-3.5" />
                                                                     </div>
                                                                     <Input
                                                                         type="number"
-                                                                        className="h-7 text-xs text-center px-1"
-                                                                        placeholder="ml"
+                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
+                                                                        placeholder="Tamanho do Recipiente (ml)"
                                                                         value={sp.container_size_ml || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { container_size_ml: Number(e.target.value) })}
                                                                     />
                                                                 </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-1 justify-center">
-                                                                        <TooltipProvider>
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger asChild>
-                                                                                    <CarFront className="w-3 h-3 text-green-500 cursor-help" />
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent>Quantidade Usada por Veículo (ml)</TooltipContent>
-                                                                            </Tooltip>
-                                                                        </TooltipProvider>
-                                                                        <span className="text-[10px] text-muted-foreground">Por Carro</span>
+                                                                <div className="relative flex items-center border border-green-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-green-500 transition-colors h-8">
+                                                                    <div className="pl-2 pr-1 text-green-500 shrink-0">
+                                                                        <CarFront className="w-3.5 h-3.5" />
                                                                     </div>
                                                                     <Input
                                                                         type="number"
-                                                                        className="h-7 text-xs text-center px-1"
-                                                                        placeholder="ml"
+                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
+                                                                        placeholder="Qtd Usada no Veículo (ml)"
                                                                         value={sp.quantity}
                                                                         onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
                                                                     />
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className="flex flex-col gap-1">
-                                                                <div className="flex items-center gap-1">
-                                                                    <TooltipProvider>
-                                                                        <Tooltip>
-                                                                            <TooltipTrigger asChild>
-                                                                                <CarFront className="w-3 h-3 text-green-500 cursor-help" />
-                                                                            </TooltipTrigger>
-                                                                            <TooltipContent>Quantidade Usada por Veículo (ml)</TooltipContent>
-                                                                        </Tooltip>
-                                                                    </TooltipProvider>
-                                                                    <span className="text-xs text-muted-foreground">Quantidade Usada (ml)</span>
+                                                            <div className="grid grid-cols-1 gap-2">
+                                                                <div className="relative flex items-center border border-green-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-green-500 transition-colors h-8 w-full sm:w-1/2">
+                                                                    <div className="pl-2 pr-1 text-green-500 shrink-0">
+                                                                        <CarFront className="w-3.5 h-3.5" />
+                                                                    </div>
+                                                                    <Input
+                                                                        type="number"
+                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
+                                                                        placeholder="Qtd Usada no Veículo (ml/un)"
+                                                                        value={sp.quantity}
+                                                                        onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
+                                                                    />
                                                                 </div>
-                                                                <Input
-                                                                    type="number"
-                                                                    className="h-8 w-full text-xs"
-                                                                    value={sp.quantity}
-                                                                    onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
-                                                                />
                                                             </div>
                                                         )}
                                                     </div>
                                                 ))}
-                                                {selectedProducts.length === 0 && <p className="text-xs text-muted-foreground p-2">Nenhum custo adicionado.</p>}
+                                                {selectedProducts.length === 0 && (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10">
+                                                        <Search className="w-8 h-8 mb-2 opacity-50" />
+                                                        <p>Nenhum custo adicionado.</p>
+                                                        <p className="text-xs">Utilize a busca acima para adicionar produtos.</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </ScrollArea>
                                     </div>
