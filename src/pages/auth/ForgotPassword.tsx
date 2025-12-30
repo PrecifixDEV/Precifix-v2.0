@@ -84,7 +84,7 @@ export const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-5 h-5 text-white" />}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />

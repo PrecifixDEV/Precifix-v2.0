@@ -90,7 +90,7 @@ export const Register = () => {
                     value={formData.fullName}
                     onChange={handleChange}
                     icon={<User className="w-5 h-5 text-white" />}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />
@@ -102,7 +102,7 @@ export const Register = () => {
                     value={formData.shopName}
                     onChange={handleChange}
                     icon={<Building2 className="w-5 h-5 text-white" />}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                 />
 
@@ -114,7 +114,7 @@ export const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     icon={<Mail className="w-5 h-5 text-white" />}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />
@@ -132,7 +132,7 @@ export const Register = () => {
                         icon={<Lock className="w-5 h-5 text-white" />}
                         endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                        className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                         labelClassName="text-white"
                         required
                     />
@@ -170,7 +170,7 @@ export const Register = () => {
                     icon={<Lock className="w-5 h-5 text-white" />}
                     endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                     onEndIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />
