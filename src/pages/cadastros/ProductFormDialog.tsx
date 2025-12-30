@@ -26,7 +26,9 @@ const productSchema = z.object({
     price: z.coerce.number().min(0, "Preço deve ser positivo"),
     stock_quantity: z.coerce.number().min(0, "Estoque deve ser positivo"),
     size: z.string().optional(),
-    dilution: z.string().optional(),
+    is_dilutable: z.boolean().optional(),
+    dilution_ratio: z.string().optional(),
+    container_size_ml: z.coerce.number().optional(),
     is_for_sale: z.boolean().optional(),
     sale_price: z.coerce.number().optional(),
 });
@@ -55,7 +57,9 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             price: 0,
             stock_quantity: 0,
             size: '',
-            dilution: '',
+            is_dilutable: false,
+            dilution_ratio: '',
+            container_size_ml: 0,
             is_for_sale: false,
             sale_price: 0,
         }
@@ -70,14 +74,16 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 setValue('price', productToEdit.price.toString() as any);
                 setValue('stock_quantity', productToEdit.stock_quantity.toString() as any);
                 setValue('size', productToEdit.size || '');
-                setValue('dilution', productToEdit.dilution || '');
+                setValue('is_dilutable', productToEdit.is_dilutable || false);
+                setValue('dilution_ratio', productToEdit.dilution_ratio || '');
+                setValue('container_size_ml', (productToEdit.container_size_ml || 0).toString() as any);
                 setValue('is_for_sale', productToEdit.is_for_sale || false);
                 setValue('sale_price', (productToEdit.sale_price || 0).toString() as any);
 
-                if (productToEdit.dilution === 'Pronto Uso') {
-                    setDilutionType('ready');
-                } else {
+                if (productToEdit.is_dilutable) {
                     setDilutionType('dilution');
+                } else {
+                    setDilutionType('ready');
                 }
 
                 setImagePreview(productToEdit.image_url);
@@ -89,7 +95,9 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     price: '0' as any,
                     stock_quantity: '0' as any,
                     size: '',
-                    dilution: '',
+                    is_dilutable: false,
+                    dilution_ratio: '',
+                    container_size_ml: '0' as any,
                     is_for_sale: false,
                     sale_price: '0' as any,
                 });
@@ -128,11 +136,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 throw new Error("Usuário não autenticado");
             }
 
-            // Check if product name or code already exists
-            // If cloning (id is empty string) or new, excludeId is undefined.
-            // If editing existing product (id is valid), excludeId is that id.
             const excludeId = (productToEdit && productToEdit.id) ? productToEdit.id : undefined;
-
             const availability = await productService.checkProductAvailability(data.name, data.code, excludeId);
 
             let hasError = false;
@@ -152,22 +156,19 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
             let imageUrl = productToEdit?.image_url || null;
 
-            // Handle image logic
-            // Handle image logic
             if (imageFile) {
-                // Comprimir e converter para WebP antes do upload
                 try {
                     const compressedFile = await compressAndConvertToWebP(imageFile);
                     imageUrl = await productService.uploadProductImage(compressedFile);
                 } catch (error) {
                     console.error("Erro na compressão:", error);
-                    // Fallback: tenta enviar o arquivo original se a compressão falhar
                     imageUrl = await productService.uploadProductImage(imageFile);
                 }
             } else if (!imagePreview) {
-                // If no new file and no preview, it means the image was removed (or never existed)
                 imageUrl = null;
             }
+
+            const isDilutable = dilutionType === 'dilution';
 
             const productData = {
                 user_id: user.id,
@@ -177,14 +178,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 price: data.price,
                 stock_quantity: data.stock_quantity,
                 size: data.size || null,
-                dilution: dilutionType === 'ready' ? 'Pronto Uso' : (data.dilution || null),
+                is_dilutable: isDilutable,
+                dilution_ratio: isDilutable ? (data.dilution_ratio || null) : null,
+                container_size_ml: isDilutable ? (data.container_size_ml || null) : null,
                 image_url: imageUrl,
                 is_for_sale: data.is_for_sale || false,
                 sale_price: data.sale_price || 0,
             };
 
-            // If productToEdit exists AND has an ID (not empty string), it's an update.
-            // If ID is empty string (cloning) or productToEdit is null (create new), it's a create.
             if (productToEdit && productToEdit.id) {
                 await productService.updateProduct(productToEdit.id, productData);
             } else {
@@ -212,7 +213,6 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
                     {/* Image Upload */}
-                    {/* Image Upload */}
                     <div className="flex flex-col items-center justify-center p-4">
                         {imagePreview ? (
                             <div className="relative w-40 h-40 group">
@@ -222,7 +222,6 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                     className="w-full h-full object-cover rounded-md border border-slate-200 dark:border-slate-700"
                                 />
 
-                                {/* Trigger apenas no botão Alterar */}
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                     <label
                                         htmlFor="image-upload"
@@ -315,69 +314,72 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="size">Tamanho (ex: 500ml)</Label>
-                            <Input id="size" {...register("size")} className="bg-white dark:bg-slate-800" />
-                            {(() => {
-                                const sizeValue = watch("size");
-                                const sizeNum = parseFloat(sizeValue || '0');
-                                if (!isNaN(sizeNum) && sizeNum >= 1000) {
-                                    const liters = sizeNum / 1000;
-                                    return (
-                                        <span className="text-xs text-slate-500 block pt-1">
-                                            {liters.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} {liters === 1 ? 'litro' : 'litros'}
-                                        </span>
-                                    );
-                                }
-                                return null;
-                            })()}
+                            <Label htmlFor="size">Tamanho / Descrição</Label>
+                            <Input id="size" placeholder="ex: 500ml ou 'Kit Completo'" {...register("size")} className="bg-white dark:bg-slate-800" />
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between h-5">
-                                <Label className="mb-0">Tipo de Diluição</Label>
-                                <div className="flex gap-4">
-                                    <label className="flex items-center space-x-2 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="dilutionType"
-                                            value="ready"
-                                            checked={dilutionType === 'ready'}
-                                            onChange={() => {
-                                                setDilutionType('ready');
-                                                setValue('dilution', 'Pronto Uso');
-                                            }}
-                                            className="accent-yellow-500 w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium whitespace-nowrap">Pronto Uso</span>
-                                    </label>
-                                    <label className="flex items-center space-x-2 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="dilutionType"
-                                            value="dilution"
-                                            checked={dilutionType === 'dilution'}
-                                            onChange={() => {
-                                                setDilutionType('dilution');
-                                                setValue('dilution', '');
-                                            }}
-                                            className="accent-yellow-500 w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium">Diluível</span>
-                                    </label>
-                                </div>
-                            </div>
 
-                            {dilutionType === 'dilution' ? (
-                                <Input
-                                    id="dilution"
-                                    placeholder="Ex: 1:10"
-                                    {...register("dilution")}
-                                    className="bg-white dark:bg-slate-800"
-                                />
-                            ) : (
-                                <div className="h-10"></div>
-                            )}
+                        <div className="space-y-2">
+                            <Label>Tipo de Produto</Label>
+                            <div className="flex gap-4 pt-2">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="dilutionType"
+                                        value="ready"
+                                        checked={dilutionType === 'ready'}
+                                        onChange={() => {
+                                            setDilutionType('ready');
+                                            setValue('is_dilutable', false);
+                                            setValue('dilution_ratio', '');
+                                            setValue('container_size_ml', 0);
+                                        }}
+                                        className="accent-yellow-500 w-4 h-4"
+                                    />
+                                    <span className="text-sm font-medium whitespace-nowrap">Pronto Uso</span>
+                                </label>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="dilutionType"
+                                        value="dilution"
+                                        checked={dilutionType === 'dilution'}
+                                        onChange={() => {
+                                            setDilutionType('dilution');
+                                            setValue('is_dilutable', true);
+                                        }}
+                                        className="accent-yellow-500 w-4 h-4"
+                                    />
+                                    <span className="text-sm font-medium">Diluível</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
+
+                    {dilutionType === 'dilution' && (
+                        <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="space-y-2">
+                                <Label htmlFor="dilution_ratio">Proporção da Diluição</Label>
+                                <Input
+                                    id="dilution_ratio"
+                                    placeholder="Ex: 1:10"
+                                    {...register("dilution_ratio")}
+                                    className="bg-white dark:bg-slate-800"
+                                />
+                                <span className="text-xs text-slate-500">Ex: 1:10, 1:20, 1:100</span>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="container_size_ml">Tamanho da Embalagem (ml)</Label>
+                                <Input
+                                    id="container_size_ml"
+                                    type="number"
+                                    placeholder="Ex: 5000"
+                                    {...register("container_size_ml")}
+                                    className="bg-white dark:bg-slate-800"
+                                />
+                                <span className="text-xs text-slate-500">Volume total em ml (ex: 5L = 5000)</span>
+                            </div>
+                        </div>
+                    )}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -407,7 +407,7 @@ export const Products = () => {
                                                 {product.size || '-'}
                                             </TableCell>
                                             <TableCell className="text-slate-600 dark:text-slate-400">
-                                                {product.dilution || '-'}
+                                                {product.is_dilutable ? (product.dilution_ratio || '-') : 'Pronto Uso'}
                                             </TableCell>
                                             <TableCell className="text-slate-600 dark:text-slate-400">
                                                 {product.stock_quantity}

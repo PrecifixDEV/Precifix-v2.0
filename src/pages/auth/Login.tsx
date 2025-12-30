@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -89,9 +89,10 @@ export const Login = () => {
 
                 <Button
                     type="submit"
-                    isLoading={loading}
+                    disabled={loading}
                     className="w-full font-bold"
                 >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     ENTRAR NA PLATAFORMA
                 </Button>
             </form>

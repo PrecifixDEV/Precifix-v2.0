@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Lock, Building2, Eye, EyeOff, Check, X } from 'lucide-react'
+import { User, Mail, Lock, Building2, Eye, EyeOff, Check, X, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -183,9 +183,10 @@ export const Register = () => {
 
                 <Button
                     type="submit"
-                    isLoading={loading}
+                    disabled={loading}
                     className="w-full mt-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
                 >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     CRIAR CONTA E GANHAR 7 DIAS GRÁTIS
                 </Button>
             </form>

@@ -7,6 +7,11 @@ export type Json =
     | Json[]
 
 export type Database = {
+    // Allows to automatically instantiate createClient with right options
+    // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+    __InternalSupabase: {
+        PostgrestVersion: "14.1"
+    }
     public: {
         Tables: {
             clients: {
@@ -267,7 +272,7 @@ export type Database = {
                     thursday_start?: string | null
                     tuesday_end?: string | null
                     tuesday_start?: string | null
-                    user_id?: string
+                    user_id: string
                     wednesday_end?: string | null
                     wednesday_start?: string | null
                 }
@@ -276,51 +281,60 @@ export type Database = {
             products: {
                 Row: {
                     code: string | null
+                    category: string | null
+                    container_size_ml: number | null
                     created_at: string | null
                     description: string | null
-                    dilution: string | null
+                    dilution_ratio: string | null
                     id: string
                     image_url: string | null
+                    is_dilutable: boolean | null
+                    is_for_sale: boolean | null
                     name: string
                     price: number
+                    sale_price: number | null
                     size: string | null
                     stock_quantity: number
                     updated_at: string | null
                     user_id: string
-                    is_for_sale: boolean
-                    sale_price: number | null
                 }
                 Insert: {
                     code?: string | null
+                    category?: string | null
+                    container_size_ml?: number | null
                     created_at?: string | null
                     description?: string | null
-                    dilution?: string | null
+                    dilution_ratio?: string | null
                     id?: string
                     image_url?: string | null
+                    is_dilutable?: boolean | null
+                    is_for_sale?: boolean | null
                     name: string
                     price: number
+                    sale_price?: number | null
                     size?: string | null
                     stock_quantity: number
                     updated_at?: string | null
                     user_id: string
-                    is_for_sale?: boolean
-                    sale_price?: number | null
                 }
                 Update: {
                     code?: string | null
+                    category?: string | null
+                    container_size_ml?: number | null
                     created_at?: string | null
                     description?: string | null
-                    dilution?: string | null
+                    dilution_ratio?: string | null
                     id?: string
                     image_url?: string | null
+                    is_dilutable?: boolean | null
+                    is_for_sale?: boolean | null
                     name?: string
                     price?: number
+                    sale_price?: number | null
                     size?: string | null
                     stock_quantity?: number
                     updated_at?: string | null
                     user_id?: string
-                    is_for_sale?: boolean
-                    sale_price?: number | null
                 }
                 Relationships: []
             }
@@ -534,11 +548,60 @@ export type Database = {
                     },
                 ]
             }
+            service_products: {
+                Row: {
+                    container_size_ml: number | null
+                    created_at: string
+                    dilution_ratio: string | null
+                    id: string
+                    product_id: string
+                    quantity: number
+                    service_id: string
+                    user_id: string
+                }
+                Insert: {
+                    container_size_ml?: number | null
+                    created_at?: string
+                    dilution_ratio?: string | null
+                    id?: string
+                    product_id: string
+                    quantity: number
+                    service_id: string
+                    user_id?: string
+                }
+                Update: {
+                    container_size_ml?: number | null
+                    created_at?: string
+                    dilution_ratio?: string | null
+                    id?: string
+                    product_id?: string
+                    quantity?: number
+                    service_id?: string
+                    user_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "service_products_product_id_fkey"
+                        columns: ["product_id"]
+                        isOneToOne: false
+                        referencedRelation: "products"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "service_products_service_id_fkey"
+                        columns: ["service_id"]
+                        isOneToOne: false
+                        referencedRelation: "services"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
             services: {
                 Row: {
                     created_at: string | null
                     description: string | null
                     duration_minutes: number
+                    icon: string | null
                     id: string
                     name: string
                     price: number
@@ -549,6 +612,7 @@ export type Database = {
                     created_at?: string | null
                     description?: string | null
                     duration_minutes: number
+                    icon?: string | null
                     id?: string
                     name: string
                     price: number
@@ -559,6 +623,7 @@ export type Database = {
                     created_at?: string | null
                     description?: string | null
                     duration_minutes?: number
+                    icon?: string | null
                     id?: string
                     name?: string
                     price?: number
@@ -626,3 +691,104 @@ export type Database = {
         }
     }
 }
+
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+    PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: Exclude<keyof Database, "__InternalSupabase"> },
+    TableName extends PublicTableNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+            Row: infer R
+        }
+    ? R
+    : never
+    : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+            Row: infer R
+        }
+    ? R
+    : never
+    : never
+
+export type TablesInsert<
+    PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: Exclude<keyof Database, "__InternalSupabase"> },
+    TableName extends PublicTableNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+        Insert: infer I
+    }
+    ? I
+    : never
+    : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+    }
+    ? I
+    : never
+    : never
+
+export type TablesUpdate<
+    PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: Exclude<keyof Database, "__InternalSupabase"> },
+    TableName extends PublicTableNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+        Update: infer U
+    }
+    ? U
+    : never
+    : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+    }
+    ? U
+    : never
+    : never
+
+export type Enums<
+    PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: Exclude<keyof Database, "__InternalSupabase"> },
+    EnumName extends PublicEnumNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+    : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+    PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: Exclude<keyof Database, "__InternalSupabase"> },
+    CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+        schema: keyof Database
+    }
+    ? "CompositeTypes" extends keyof Database[PublicCompositeTypeNameOrOptions["schema"]]
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: Exclude<keyof Database, "__InternalSupabase"> }
+    ? "CompositeTypes" extends keyof Database[PublicCompositeTypeNameOrOptions["schema"]]
+    ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+    : never
+    : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock, Check, X, Eye, EyeOff } from 'lucide-react'
+import { Lock, Check, X, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -140,9 +140,10 @@ export const UpdatePassword = () => {
 
                 <Button
                     type="submit"
-                    isLoading={loading}
+                    disabled={loading}
                     className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
                 >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     ALTERAR SENHA
                 </Button>
             </form>

@@ -13,6 +13,7 @@ import { ManageCosts } from './pages/ManageCosts'
 import AccountsPayable from './pages/AccountsPayable'
 import { MyCompany } from './pages/MyCompany'
 import { Products } from './pages/cadastros/Products'
+import { Services } from './pages/cadastros/Services'
 
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
 
             {/* Cadastros Routes */}
             <Route path="/cadastros/produtos" element={<Products />} />
-            <Route path="/cadastros/servicos" element={<div className="text-slate-900 dark:text-white p-6">Serviços (Em breve)</div>} />
+            <Route path="/cadastros/servicos" element={<Services />} />
             <Route path="/cadastros/clientes" element={<div className="text-slate-900 dark:text-white p-6">Clientes (Em breve)</div>} />
             <Route path="/cadastros/formas-pagamento" element={<div className="text-slate-900 dark:text-white p-6">Formas de Pagamento (Em breve)</div>} />
 
