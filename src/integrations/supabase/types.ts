@@ -604,7 +604,7 @@ export type Database = {
                     icon: string | null
                     id: string
                     name: string
-                    price: number
+                    base_price: number
                     updated_at: string | null
                     user_id: string
                 }
@@ -615,7 +615,7 @@ export type Database = {
                     icon?: string | null
                     id?: string
                     name: string
-                    price: number
+                    base_price: number
                     updated_at?: string | null
                     user_id: string
                 }
@@ -626,7 +626,7 @@ export type Database = {
                     icon?: string | null
                     id?: string
                     name?: string
-                    price?: number
+                    base_price?: number
                     updated_at?: string | null
                     user_id?: string
                 }

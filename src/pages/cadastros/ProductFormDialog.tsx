@@ -12,6 +12,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { productService, type Product } from '@/services/productService';
@@ -22,7 +23,7 @@ import { cn } from '@/lib/utils';
 const productSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
     code: z.string().optional(),
-    description: z.string().optional(),
+    description: z.string().max(500, "Descrição deve ter no máximo 500 caracteres").optional(),
     price: z.coerce.number().min(0, "Preço deve ser positivo"),
     stock_quantity: z.coerce.number().min(0, "Estoque deve ser positivo"),
     size: z.string().optional(),
@@ -137,21 +138,28 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             }
 
             const excludeId = (productToEdit && productToEdit.id) ? productToEdit.id : undefined;
-            const availability = await productService.checkProductAvailability(data.name, data.code, excludeId);
+            // Skip code check if we are generating it or if it is empty for now (will be generated)
+            const checkCode = data.code ? data.code : undefined;
+
+            const availability = await productService.checkProductAvailability(data.name, checkCode, excludeId);
 
             let hasError = false;
             if (availability.nameExists) {
                 setError('name', { type: 'manual', message: 'Já existe um produto com este nome.' });
                 hasError = true;
             }
-            if (availability.codeExists) {
-                setError('code', { type: 'manual', message: 'Já existe um produto com este código.' });
-                hasError = true;
-            }
+            // Code availability check might be needed if we allow manual edit, but for auto-gen we assume uniqueness or handle DB error.
+            // keeping it simple for now as per request "hidden input" implied auto-handling.
 
             if (hasError) {
                 setIsLoading(false);
                 return;
+            }
+
+            let finalCode = data.code;
+            if (!finalCode) {
+                // Generate simple unique code (PRD + last 6 chars of timestamp + random digit) to minimize collision
+                finalCode = `PRD-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 10)}`;
             }
 
             let imageUrl = productToEdit?.image_url || null;
@@ -173,7 +181,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             const productData = {
                 user_id: user.id,
                 name: data.name,
-                code: data.code || null,
+                code: finalCode || null,
                 description: data.description || null,
                 price: data.price,
                 stock_quantity: data.stock_quantity,
@@ -264,17 +272,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Nome do Produto *</Label>
                             <Input id="name" {...register("name")} className="bg-white dark:bg-slate-800" />
                             {errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="code">Código</Label>
-                            <Input id="code" {...register("code")} className="bg-white dark:bg-slate-800" />
-                            {errors.code && <span className="text-red-500 text-xs">{errors.code.message}</span>}
-                        </div>
+                        {/* Hidden Code Input Field - kept in state but not shown */}
+                        <input type="hidden" {...register("code")} />
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -288,7 +293,17 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                     <div className="space-y-2">
                         <Label htmlFor="description">Descrição</Label>
-                        <Input id="description" {...register("description")} className="bg-white dark:bg-slate-800" />
+                        <Textarea
+                            id="description"
+                            {...register("description")}
+                            className="bg-white dark:bg-slate-800 min-h-[60px] resize-y"
+                            maxLength={500}
+                            rows={2}
+                            placeholder="Máximo 500 caracteres"
+                        />
+                        <div className="text-xs text-right text-muted-foreground">
+                            {watch("description")?.length || 0}/500
+                        </div>
                     </div>
 
                     <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-3" : "grid-cols-2")}>
@@ -314,8 +329,15 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="size">Tamanho / Descrição</Label>
-                            <Input id="size" placeholder="ex: 500ml ou 'Kit Completo'" {...register("size")} className="bg-white dark:bg-slate-800" />
+                            <Label htmlFor="container_size_ml">Tamanho da Embalagem (ml)</Label>
+                            <Input
+                                id="container_size_ml"
+                                type="number"
+                                placeholder="Ex: 5000"
+                                {...register("container_size_ml")}
+                                className="bg-white dark:bg-slate-800"
+                            />
+                            <span className="text-xs text-slate-500">Volume total em ml (ex: 5L = 5000)</span>
                         </div>
 
                         <div className="space-y-2">
@@ -356,7 +378,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     </div>
 
                     {dilutionType === 'dilution' && (
-                        <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="space-y-2">
                                 <Label htmlFor="dilution_ratio">Proporção da Diluição</Label>
                                 <Input
@@ -366,17 +388,6 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                     className="bg-white dark:bg-slate-800"
                                 />
                                 <span className="text-xs text-slate-500">Ex: 1:10, 1:20, 1:100</span>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="container_size_ml">Tamanho da Embalagem (ml)</Label>
-                                <Input
-                                    id="container_size_ml"
-                                    type="number"
-                                    placeholder="Ex: 5000"
-                                    {...register("container_size_ml")}
-                                    className="bg-white dark:bg-slate-800"
-                                />
-                                <span className="text-xs text-slate-500">Volume total em ml (ex: 5L = 5000)</span>
                             </div>
                         </div>
                     )}

@@ -2,6 +2,9 @@ import { supabase } from "@/lib/supabase";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Service = Database["public"]["Tables"]["services"]["Row"];
+export type ServiceWithProductCount = Service & {
+    service_products: { id: string }[];
+};
 export type NewService = Database["public"]["Tables"]["services"]["Insert"];
 export type UpdateService = Database["public"]["Tables"]["services"]["Update"];
 
@@ -21,11 +24,11 @@ export const servicesService = {
     async getServices() {
         const { data, error } = await supabase
             .from("services")
-            .select("*")
+            .select("*, service_products(id)")
             .order("name");
 
         if (error) throw error;
-        return data;
+        return data as unknown as ServiceWithProductCount[];
     },
 
     async getService(id: string) {

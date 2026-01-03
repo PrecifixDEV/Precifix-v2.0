@@ -23,8 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, Search, Info } from "lucide-react";
+import { cn, minutesToHHMM, hhmmToMinutes } from "@/lib/utils";
 import {
     Command,
     CommandEmpty,
@@ -38,9 +38,23 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
 
 
 import { supabase } from "@/lib/supabase";
@@ -54,7 +68,9 @@ import { toast } from "sonner";
 const serviceSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
     description: z.string().optional(),
-    price: z.coerce.number().min(0, "Preço deve ser maior ou igual a zero"),
+    price: z.union([z.string(), z.number()])
+        .transform((v) => (v === "" ? undefined : Number(v)))
+        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Valor obrigatório" }),
     duration_minutes: z.coerce.number().min(1, "Duração deve ser de pelo menos 1 minuto"),
     icon: z.string().optional(),
 });
@@ -85,17 +101,21 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedProducts, setSelectedProducts] = useState<ProductWithQuantity[]>([]);
     const [openCombobox, setOpenCombobox] = useState(false);
+    const [durationInput, setDurationInput] = useState("");
 
     const form = useForm<ServiceFormValues>({
         resolver: zodResolver(serviceSchema) as any,
+        mode: "onChange",
         defaultValues: {
             name: "",
             description: "",
-            price: 0,
+            price: "" as any,
             duration_minutes: 60,
             icon: "CarFront",
         },
     });
+
+    const { isValid } = form.formState;
 
     useEffect(() => {
         if (open) {
@@ -104,19 +124,21 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                 form.reset({
                     name: serviceToEdit.name,
                     description: serviceToEdit.description || "",
-                    price: serviceToEdit.price,
-                    duration_minutes: serviceToEdit.duration_minutes,
+                    price: serviceToEdit.base_price || 0,
+                    duration_minutes: serviceToEdit.duration_minutes || 60,
                     icon: serviceToEdit.icon || "CarFront",
                 });
+                setDurationInput(minutesToHHMM(serviceToEdit.duration_minutes || 60));
                 loadServiceProducts(serviceToEdit.id);
             } else {
                 form.reset({
                     name: "",
                     description: "",
-                    price: 0,
+                    price: "" as any,
                     duration_minutes: 60,
                     icon: "CarFront",
                 });
+                setDurationInput("01:00");
                 setSelectedProducts([]);
             }
         }
@@ -156,7 +178,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
-        form.setValue("name", name);
+        form.setValue("name", name, { shouldValidate: true });
         // Only auto-suggest if the user hasn't manually changed the icon yet?
         // actually user requirement says "Ao digitar... use suggestIcon para pré-selecionar"
         const suggested = suggestIcon(name);
@@ -188,7 +210,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
             const serviceData = {
                 name: values.name,
                 description: values.description || null,
-                price: values.price,
+                base_price: values.price,
                 duration_minutes: values.duration_minutes,
                 icon: values.icon || null,
                 user_id: (await supabase.auth.getUser()).data.user!.id,
@@ -257,20 +279,28 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                         <FormField
                                             control={form.control}
                                             name="name"
-                                            render={({ field }) => (
+                                            render={({ field, fieldState }) => (
                                                 <FormItem>
-                                                    <FormLabel>Nome do Serviço</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="Ex: Lavagem Simples"
-                                                            {...field}
-                                                            onChange={(e) => {
-                                                                field.onChange(e);
-                                                                handleNameChange(e);
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
+                                                    <FormLabel className="!text-foreground">Nome do Serviço *</FormLabel>
+                                                    <TooltipProvider>
+                                                        <Tooltip open={!!fieldState.error}>
+                                                            <TooltipTrigger asChild>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Ex: Lavagem Simples"
+                                                                        {...field}
+                                                                        onChange={(e) => {
+                                                                            field.onChange(e);
+                                                                            handleNameChange(e);
+                                                                        }}
+                                                                    />
+                                                                </FormControl>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                                                <p>{fieldState.error?.message || "Nome é obrigatório"}</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
                                                 </FormItem>
                                             )}
                                         />
@@ -281,26 +311,70 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                     <FormField
                                         control={form.control}
                                         name="price"
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <FormItem>
-                                                <FormLabel>Preço (R$)</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" step="0.01" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
+                                                <FormLabel className="!text-foreground">Valor Cobrado *</FormLabel>
+                                                <TooltipProvider>
+                                                    <Tooltip open={!!fieldState.error}>
+                                                        <TooltipTrigger asChild>
+                                                            <FormControl>
+                                                                <Input type="number" step="0.01" placeholder="R$ 0,00" {...field} />
+                                                            </FormControl>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                                            <p>{fieldState.error?.message || "Valor obrigatório (mín. R$ 0,00)"}</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
                                             </FormItem>
                                         )}
                                     />
                                     <FormField
                                         control={form.control}
                                         name="duration_minutes"
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <FormItem>
-                                                <FormLabel>Duração (min)</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
+                                                <FormLabel className="!text-foreground">Tempo de Execução do Serviço *</FormLabel>
+                                                <TooltipProvider>
+                                                    <Tooltip open={!!fieldState.error}>
+                                                        <TooltipTrigger asChild>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="text"
+                                                                    placeholder="HH:MM"
+                                                                    value={durationInput}
+                                                                    onChange={(e) => {
+                                                                        let val = e.target.value.replace(/[^0-9:]/g, "");
+                                                                        if (val.length === 2 && !val.includes(":")) {
+                                                                            val += ":";
+                                                                        }
+                                                                        if (val.length > 5) {
+                                                                            val = val.slice(0, 5);
+                                                                        }
+                                                                        setDurationInput(val);
+
+                                                                        // Always update form value to ensure validation triggers
+                                                                        // hhmmToMinutes returns 0 for incomplete/invalid inputs, which triggers min(1) error
+                                                                        const minutes = hhmmToMinutes(val);
+                                                                        field.onChange(minutes);
+                                                                    }}
+                                                                    onBlur={() => {
+                                                                        // Simple validation on blur to ensure format
+                                                                        const minutes = hhmmToMinutes(durationInput);
+                                                                        if (minutes > 0) {
+                                                                            // Re-format to ensure canonical HH:MM
+                                                                            setDurationInput(minutesToHHMM(minutes));
+                                                                            field.onChange(minutes);
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                                            <p>{fieldState.error?.message || "Tempo obrigatório (mín. 1 min)"}</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
                                             </FormItem>
                                         )}
                                     />
@@ -383,7 +457,61 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                     </div>
 
                                     <div className="border rounded-md p-2 flex flex-col flex-1 overflow-hidden">
-                                        <span className="text-xs font-semibold mb-2">Selecionados</span>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-xs font-semibold">Selecionados</span>
+                                            <Sheet>
+                                                <SheetTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
+                                                        <Info className="h-4 w-4" />
+                                                    </Button>
+                                                </SheetTrigger>
+                                                <SheetContent>
+                                                    <SheetHeader>
+                                                        <SheetTitle>Entenda os Campos</SheetTitle>
+                                                        <SheetDescription>
+                                                            Explicação detalhada sobre como preencher os custos dos produtos.
+                                                        </SheetDescription>
+                                                    </SheetHeader>
+                                                    <div className="mt-6 space-y-6">
+                                                        <div className="flex gap-4">
+                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-100/10 text-blue-500">
+                                                                <Droplets className="h-5 w-5" />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <h4 className="text-sm font-medium leading-none">Proporção de Diluição</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    Indique a diluição do produto (ex: 1:10). Isso significa 1 parte de produto para 10 partes de água.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-4">
+                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-purple-400/50 bg-purple-100/10 text-purple-500">
+                                                                <Beaker className="h-5 w-5" />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <h4 className="text-sm font-medium leading-none">Tamanho do Recipiente</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    A capacidade total do recipiente final onde a mistura é feita (em ml). Ex: Borrifador de 500ml.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-4">
+                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-green-400/50 bg-green-100/10 text-green-500">
+                                                                <CarFront className="h-5 w-5" />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <h4 className="text-sm font-medium leading-none">Quantidade usada no veículo</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    Quanto da mistura pronta (ou do produto puro) é gasto em média por veículo (em ml ou unidades).
+                                                                    <br />
+                                                                    Ex: Utilizou 2 borrifadores de 500ml, então 1000ml.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </SheetContent>
+                                            </Sheet>
+                                        </div>
                                         <ScrollArea className="flex-1">
                                             <div className="space-y-4">
                                                 {selectedProducts.map(sp => (
@@ -447,7 +575,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
                                                                         placeholder="Qtd Usada no Veículo (ml)"
-                                                                        value={sp.quantity}
+                                                                        value={sp.quantity || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
                                                                     />
                                                                 </div>
@@ -462,7 +590,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
                                                                         placeholder="Qtd Usada no Veículo (ml/un)"
-                                                                        value={sp.quantity}
+                                                                        value={sp.quantity || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
                                                                     />
                                                                 </div>
@@ -488,7 +616,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={loading}>
+                            <Button type="submit" disabled={loading || !isValid} className={!isValid ? "opacity-50 cursor-not-allowed" : ""}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Salvar
                             </Button>
