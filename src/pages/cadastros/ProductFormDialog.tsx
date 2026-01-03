@@ -15,6 +15,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { productService, type Product } from '@/services/productService';
 import { compressAndConvertToWebP } from '@/utils/imageUtils';
 import { supabase } from '@/lib/supabase';
@@ -24,14 +30,28 @@ const productSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
     code: z.string().optional(),
     description: z.string().max(500, "Descrição deve ter no máximo 500 caracteres").optional(),
-    price: z.coerce.number().min(0, "Preço deve ser positivo"),
-    stock_quantity: z.coerce.number().min(0, "Estoque deve ser positivo"),
+    price: z.union([z.string(), z.number()])
+        .transform((v) => (v === "" ? undefined : Number(v)))
+        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Preço deve ser positivo" }),
+    stock_quantity: z.union([z.string(), z.number()])
+        .transform((v) => (v === "" ? undefined : Number(v)))
+        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Estoque deve ser positivo" }),
     size: z.string().optional(),
     is_dilutable: z.boolean().optional(),
     dilution_ratio: z.string().optional(),
-    container_size_ml: z.coerce.number().optional(),
+    container_size_ml: z.union([z.string(), z.number()])
+        .transform((v) => (v === "" ? undefined : Number(v)))
+        .refine((v) => v !== undefined && !isNaN(v) && v > 0, { message: "Tamanho da embalagem é obrigatório" }),
     is_for_sale: z.boolean().optional(),
     sale_price: z.coerce.number().optional(),
+}).superRefine((data, ctx) => {
+    if (data.is_dilutable && !data.dilution_ratio) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Proporção da diluição é obrigatória para produtos diluíveis",
+            path: ["dilution_ratio"],
+        });
+    }
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -49,18 +69,19 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [dilutionType, setDilutionType] = useState<'ready' | 'dilution'>('ready');
 
-    const { register, handleSubmit, formState: { errors }, reset, setValue, watch, setError } = useForm<ProductFormValues>({
+    const { register, handleSubmit, formState: { errors, isValid }, reset, setValue, watch, setError } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema) as any,
+        mode: "onChange",
         defaultValues: {
             name: '',
             code: '',
             description: '',
-            price: 0,
-            stock_quantity: 0,
+            price: '' as any,
+            stock_quantity: '' as any,
             size: '',
             is_dilutable: false,
             dilution_ratio: '',
-            container_size_ml: 0,
+            container_size_ml: '' as any,
             is_for_sale: false,
             sale_price: 0,
         }
@@ -72,14 +93,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 setValue('name', productToEdit.name);
                 setValue('code', productToEdit.code || '');
                 setValue('description', productToEdit.description || '');
-                setValue('price', productToEdit.price.toString() as any);
-                setValue('stock_quantity', productToEdit.stock_quantity.toString() as any);
+                setValue('price', productToEdit.price);
+                setValue('stock_quantity', productToEdit.stock_quantity);
                 setValue('size', productToEdit.size || '');
                 setValue('is_dilutable', productToEdit.is_dilutable || false);
                 setValue('dilution_ratio', productToEdit.dilution_ratio || '');
-                setValue('container_size_ml', (productToEdit.container_size_ml || 0).toString() as any);
+                setValue('container_size_ml', productToEdit.container_size_ml || 0);
                 setValue('is_for_sale', productToEdit.is_for_sale || false);
-                setValue('sale_price', (productToEdit.sale_price || 0).toString() as any);
+                setValue('sale_price', productToEdit.sale_price || 0);
 
                 if (productToEdit.is_dilutable) {
                     setDilutionType('dilution');
@@ -93,14 +114,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     name: '',
                     code: '',
                     description: '',
-                    price: '0' as any,
-                    stock_quantity: '0' as any,
+                    price: '' as any,
+                    stock_quantity: '' as any,
                     size: '',
                     is_dilutable: false,
                     dilution_ratio: '',
-                    container_size_ml: '0' as any,
+                    container_size_ml: '' as any,
                     is_for_sale: false,
-                    sale_price: '0' as any,
+                    sale_price: 0,
                 });
                 setDilutionType('ready');
                 setImagePreview(null);
@@ -148,8 +169,6 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 setError('name', { type: 'manual', message: 'Já existe um produto com este nome.' });
                 hasError = true;
             }
-            // Code availability check might be needed if we allow manual edit, but for auto-gen we assume uniqueness or handle DB error.
-            // keeping it simple for now as per request "hidden input" implied auto-handling.
 
             if (hasError) {
                 setIsLoading(false);
@@ -158,7 +177,6 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
             let finalCode = data.code;
             if (!finalCode) {
-                // Generate simple unique code (PRD + last 6 chars of timestamp + random digit) to minimize collision
                 finalCode = `PRD-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 10)}`;
             }
 
@@ -183,12 +201,12 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 name: data.name,
                 code: finalCode || null,
                 description: data.description || null,
-                price: data.price,
-                stock_quantity: data.stock_quantity,
+                price: Number(data.price),
+                stock_quantity: Number(data.stock_quantity),
                 size: data.size || null,
                 is_dilutable: isDilutable,
                 dilution_ratio: isDilutable ? (data.dilution_ratio || null) : null,
-                container_size_ml: isDilutable ? (data.container_size_ml || null) : null,
+                container_size_ml: isDilutable ? (Number(data.container_size_ml) || null) : Number(data.container_size_ml),
                 image_url: imageUrl,
                 is_for_sale: data.is_for_sale || false,
                 sale_price: data.sale_price || 0,
@@ -212,10 +230,10 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto w-[90vw] sm:w-full">
                 <DialogHeader>
                     <DialogTitle className="text-slate-900 dark:text-white">
-                        {productToEdit && productToEdit.id ? 'Editar Produto' : 'Novo Produto'}
+                        {productToEdit?.id ? 'Editar Produto' : productToEdit ? 'Clonando Produto Existente' : 'Novo Produto'}
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -274,9 +292,22 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                     <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Nome do Produto *</Label>
-                            <Input id="name" {...register("name")} className="bg-white dark:bg-slate-800" />
-                            {errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
+                            <Label htmlFor="name" className="!text-foreground">Nome do Produto *</Label>
+                            <TooltipProvider>
+                                <Tooltip open={!!errors.name}>
+                                    <TooltipTrigger asChild>
+                                        <Input
+                                            id="name"
+                                            {...register("name")}
+                                            className="bg-white dark:bg-slate-800"
+                                            placeholder="Ex: Cera de Carnaúba"
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                        <p>{errors.name?.message}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                         {/* Hidden Code Input Field - kept in state but not shown */}
                         <input type="hidden" {...register("code")} />
@@ -308,9 +339,24 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                     <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-3" : "grid-cols-2")}>
                         <div className="space-y-2">
-                            <Label htmlFor="price">Preço de Custo (R$) *</Label>
-                            <Input id="price" type="number" step="0.01" {...register("price")} className="bg-white dark:bg-slate-800" />
-                            {errors.price && <span className="text-red-500 text-xs">{errors.price.message}</span>}
+                            <Label htmlFor="price" className="!text-foreground">Preço de Custo (R$) *</Label>
+                            <TooltipProvider>
+                                <Tooltip open={!!errors.price}>
+                                    <TooltipTrigger asChild>
+                                        <Input
+                                            id="price"
+                                            type="number"
+                                            step="0.01"
+                                            {...register("price")}
+                                            className="bg-white dark:bg-slate-800"
+                                            placeholder="R$ 0,00"
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                        <p>{errors.price?.message}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
 
                         {watch("is_for_sale") && (
@@ -321,22 +367,45 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         )}
 
                         <div className="space-y-2">
-                            <Label htmlFor="stock_quantity">Estoque *</Label>
-                            <Input id="stock_quantity" type="number" {...register("stock_quantity")} className="bg-white dark:bg-slate-800" />
-                            {errors.stock_quantity && <span className="text-red-500 text-xs">{errors.stock_quantity.message}</span>}
+                            <Label htmlFor="stock_quantity" className="!text-foreground">Estoque *</Label>
+                            <TooltipProvider>
+                                <Tooltip open={!!errors.stock_quantity}>
+                                    <TooltipTrigger asChild>
+                                        <Input
+                                            id="stock_quantity"
+                                            type="number"
+                                            {...register("stock_quantity")}
+                                            className="bg-white dark:bg-slate-800"
+                                            placeholder="Ex: 10"
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                        <p>{errors.stock_quantity?.message}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="container_size_ml">Tamanho da Embalagem (ml)</Label>
-                            <Input
-                                id="container_size_ml"
-                                type="number"
-                                placeholder="Ex: 5000"
-                                {...register("container_size_ml")}
-                                className="bg-white dark:bg-slate-800"
-                            />
+                            <Label htmlFor="container_size_ml" className="!text-foreground">Tamanho da Embalagem (ml) *</Label>
+                            <TooltipProvider>
+                                <Tooltip open={!!errors.container_size_ml}>
+                                    <TooltipTrigger asChild>
+                                        <Input
+                                            id="container_size_ml"
+                                            type="number"
+                                            placeholder="Ex: 5000"
+                                            {...register("container_size_ml")}
+                                            className="bg-white dark:bg-slate-800"
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                        <p>{errors.container_size_ml?.message}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                             <span className="text-xs text-slate-500">Volume total em ml (ex: 5L = 5000)</span>
                         </div>
 
@@ -353,7 +422,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                             setDilutionType('ready');
                                             setValue('is_dilutable', false);
                                             setValue('dilution_ratio', '');
-                                            setValue('container_size_ml', 0);
+                                            // Don't reset container size as it's now always required
                                         }}
                                         className="accent-yellow-500 w-4 h-4"
                                     />
@@ -380,13 +449,22 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     {dilutionType === 'dilution' && (
                         <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="space-y-2">
-                                <Label htmlFor="dilution_ratio">Proporção da Diluição</Label>
-                                <Input
-                                    id="dilution_ratio"
-                                    placeholder="Ex: 1:10"
-                                    {...register("dilution_ratio")}
-                                    className="bg-white dark:bg-slate-800"
-                                />
+                                <Label htmlFor="dilution_ratio" className="!text-foreground">Proporção da Diluição *</Label>
+                                <TooltipProvider>
+                                    <Tooltip open={!!errors.dilution_ratio}>
+                                        <TooltipTrigger asChild>
+                                            <Input
+                                                id="dilution_ratio"
+                                                placeholder="Ex: 1:10"
+                                                {...register("dilution_ratio")}
+                                                className="bg-white dark:bg-slate-800"
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                            <p>{errors.dilution_ratio?.message}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                                 <span className="text-xs text-slate-500">Ex: 1:10, 1:20, 1:100</span>
                             </div>
                         </div>
@@ -396,7 +474,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-none">
+                        <Button
+                            type="submit"
+                            disabled={isLoading || !isValid}
+                            className={cn(
+                                "border-none",
+                                !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 text-slate-900"
+                            )}
+                        >
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
                         </Button>

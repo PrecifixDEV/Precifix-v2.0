@@ -607,6 +607,9 @@ export type Database = {
                     base_price: number
                     updated_at: string | null
                     user_id: string
+                    commission_percent: number | null
+                    other_costs: number | null
+                    labor_cost_per_hour: number | null
                 }
                 Insert: {
                     created_at?: string | null
@@ -618,6 +621,9 @@ export type Database = {
                     base_price: number
                     updated_at?: string | null
                     user_id: string
+                    commission_percent?: number | null
+                    other_costs?: number | null
+                    labor_cost_per_hour?: number | null
                 }
                 Update: {
                     created_at?: string | null
@@ -629,6 +635,9 @@ export type Database = {
                     base_price?: number
                     updated_at?: string | null
                     user_id?: string
+                    commission_percent?: number | null
+                    other_costs?: number | null
+                    labor_cost_per_hour?: number | null
                 }
                 Relationships: []
             }

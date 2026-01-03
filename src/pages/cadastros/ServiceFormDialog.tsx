@@ -1,87 +1,61 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-
-
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ServiceIconSelector } from "@/components/services/ServiceIconSelector";
+import { servicesService, type Service, type ServiceProductInput } from "@/services/servicesService";
+import { productService, type Product } from "@/services/productService";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, Search, Info } from "lucide-react";
+import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, Search, Info, RefreshCw, DollarSign, Percent, BarChart3, Clock, Tag, Users } from "lucide-react";
 import { cn, minutesToHHMM, hhmmToMinutes } from "@/lib/utils";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet";
-
-
-import { supabase } from "@/lib/supabase";
-import { ServiceIconSelector, suggestIcon } from "@/components/services/ServiceIconSelector";
-import { servicesService, type ServiceProductInput } from "@/services/servicesService";
-import type { Service } from "@/services/servicesService";
-import { productService } from "@/services/productService";
-import type { Product } from "@/services/productService";
-import { toast } from "sonner";
+import { useQuery } from '@tanstack/react-query';
 
 const serviceSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
     description: z.string().optional(),
-    price: z.union([z.string(), z.number()])
-        .transform((v) => (v === "" ? undefined : Number(v)))
-        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Valor obrigatório" }),
-    duration_minutes: z.coerce.number().min(1, "Duração deve ser de pelo menos 1 minuto"),
+    price: z.preprocess(
+        (val) => (val === "" ? undefined : Number(val)),
+        z.number().min(0, "O valor deve ser maior ou igual a zero")
+    ),
+    duration_minutes: z.number().min(1, "O tempo de execução deve ser de pelo menos 1 minuto"),
     icon: z.string().optional(),
+    commission_percent: z.preprocess(
+        (val) => (val === "" ? 0 : Number(val)),
+        z.number().min(0, "A comissão deve ser maior ou igual a zero").max(100, "Máximo 100%")
+    ).optional(),
+    other_costs: z.preprocess(
+        (val) => (val === "" ? 0 : Number(val)),
+        z.number().min(0, "O custo deve ser maior ou igual a zero")
+    ).optional(),
+    labor_cost_per_hour: z.preprocess(
+        (val) => (val === "" ? 0 : Number(val)),
+        z.number().min(0, "O custo deve ser maior ou igual a zero")
+    ).optional(),
 });
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
 
 interface ProductWithQuantity extends Product {
     quantity: number;
+    // New fields for dilution logic
     dilution_ratio: string | null;
     container_size_ml: number | null;
-    use_dilution: boolean;
+    concentrate_package_size_ml: number | null;
+    use_dilution?: boolean;
 }
 
 interface ServiceFormDialogProps {
@@ -90,6 +64,17 @@ interface ServiceFormDialogProps {
     serviceToEdit?: Service | null;
     onSuccess: () => void;
 }
+
+// Simple heuristic to suggest icons based on service name
+const suggestIcon = (name: string): string => {
+    const lower = name.toLowerCase();
+    if (lower.includes("lavagem") || lower.includes("completa")) return "CarFront";
+    if (lower.includes("polimento") || lower.includes("cristaliza")) return "Sparkles";
+    if (lower.includes("higieniza") || lower.includes("interno")) return "SprayCan";
+    if (lower.includes("motor")) return "Cog";
+    if (lower.includes("enceramento") || lower.includes("cera")) return "Droplets";
+    return "CarFront"; // Default
+};
 
 export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     open,
@@ -112,10 +97,71 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
             price: "" as any,
             duration_minutes: 60,
             icon: "CarFront",
+            commission_percent: 0,
+            other_costs: 0,
+            labor_cost_per_hour: 0,
         },
     });
 
     const { isValid } = form.formState;
+
+    // --- Pricing Logic Start ---
+    const { data: operationalCosts } = useQuery({
+        queryKey: ['operational_costs'],
+        queryFn: async () => {
+            const { data } = await supabase.from('operational_costs').select('*').eq('user_id', (await supabase.auth.getUser()).data.user!.id);
+            return data;
+        },
+        enabled: open
+    });
+
+    const { data: operationalHours } = useQuery({
+        queryKey: ['operational_hours'],
+        queryFn: async () => {
+            const { data } = await supabase.from('operational_hours').select('*').eq('user_id', (await supabase.auth.getUser()).data.user!.id).single();
+            return data;
+        },
+        enabled: open
+    });
+
+    const calculateSystemHourlyRate = () => {
+        if (!operationalCosts || !operationalHours) return 0;
+
+        const totalMonthlyExpenses = operationalCosts.reduce((acc: number, cost: any) => {
+            if (cost.is_recurring) return acc + cost.value;
+            return acc;
+        }, 0);
+
+        const weekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        let weeklyMinutes = 0;
+        weekDays.forEach(day => {
+            // @ts-ignore
+            const start = operationalHours[`${day}_start`];
+            // @ts-ignore
+            const end = operationalHours[`${day}_end`];
+            if (start && end) {
+                weeklyMinutes += hhmmToMinutes(end as string) - hhmmToMinutes(start as string);
+            }
+        });
+
+        const monthlyHours = (weeklyMinutes * 4.33) / 60;
+        if (monthlyHours === 0) return 0;
+
+        return totalMonthlyExpenses / monthlyHours;
+    };
+
+    const handleLoadSystemHourlyRate = () => {
+        const rate = calculateSystemHourlyRate();
+        form.setValue("labor_cost_per_hour", Number(rate.toFixed(2)));
+        toast.success(`Custo hora base atualizado: R$ ${rate.toFixed(2)}`);
+    };
+
+    const watchPrice = form.watch("price");
+    const watchDuration = form.watch("duration_minutes");
+    const watchLaborCost = form.watch("labor_cost_per_hour");
+    const watchCommission = form.watch("commission_percent");
+    const watchOtherCosts = form.watch("other_costs");
+    // --- Pricing Logic End ---
 
     useEffect(() => {
         if (open) {
@@ -127,6 +173,9 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                     price: serviceToEdit.base_price || 0,
                     duration_minutes: serviceToEdit.duration_minutes || 60,
                     icon: serviceToEdit.icon || "CarFront",
+                    commission_percent: serviceToEdit.commission_percent || 0,
+                    other_costs: serviceToEdit.other_costs || 0,
+                    labor_cost_per_hour: serviceToEdit.labor_cost_per_hour || 0,
                 });
                 setDurationInput(minutesToHHMM(serviceToEdit.duration_minutes || 60));
                 loadServiceProducts(serviceToEdit.id);
@@ -137,6 +186,9 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                     price: "" as any,
                     duration_minutes: 60,
                     icon: "CarFront",
+                    commission_percent: 0,
+                    other_costs: 0,
+                    labor_cost_per_hour: 0,
                 });
                 setDurationInput("01:00");
                 setSelectedProducts([]);
@@ -166,6 +218,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                     quantity: sp.quantity,
                     dilution_ratio: sp.dilution_ratio || sp.products.dilution_ratio || "",
                     container_size_ml: sp.container_size_ml || sp.products.container_size_ml || 0,
+                    concentrate_package_size_ml: sp.products.container_size_ml || 1000, // Preserve original package size
                     use_dilution: !!sp.dilution_ratio, // If it has a ratio saved, assume it uses dilution
                 }));
                 setSelectedProducts(mapped);
@@ -195,6 +248,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                 quantity: 1,
                 dilution_ratio: product.dilution_ratio,
                 container_size_ml: product.container_size_ml,
+                concentrate_package_size_ml: product.container_size_ml, // Initialize with product package size
                 use_dilution: !!product.is_dilutable
             }]);
         }
@@ -204,16 +258,57 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
         setSelectedProducts(prev => prev.map(p => p.id === productId ? { ...p, ...updates } : p));
     };
 
+    // Helper to calculate product cost securely
+    const getProductCost = (p: ProductWithQuantity) => {
+        if (p.use_dilution && p.dilution_ratio) {
+            // Dilution Logic
+            // Cost = Usage * CostPerMlDiluted
+            // CostPerMlDiluted = CostPerMlConcentrate / Ratio
+            let ratio = 1;
+            if (p.dilution_ratio.includes(':')) {
+                ratio = Number(p.dilution_ratio.split(':')[1]) || 1;
+            } else {
+                ratio = Number(p.dilution_ratio) || 1;
+            }
+            // Use original package size. p.container_size_ml might be the Dilution Container (e.g. 500ml)
+            // so we use concentrate_package_size_ml or fallback
+            const packageSize = p.concentrate_package_size_ml || 1000;
+            const costPerMlConcentrate = p.price / packageSize;
+            const costPerMlDiluted = costPerMlConcentrate / ratio;
+            return p.quantity * costPerMlDiluted;
+        } else {
+            // Ready to use
+            // If ready to use, container_size_ml IS the package size typically, 
+            // but let's be safe and use concentrate_package_size_ml if set, or fallback.
+            const packageSize = p.concentrate_package_size_ml || p.container_size_ml || 1000;
+            const costPerMl = p.price / packageSize;
+            return p.quantity * costPerMl;
+        }
+    };
+
+    // Calculate total stats for Pricing Tab
+    const price = Number(watchPrice) || 0;
+    const laborCostTotal = (Number(watchDuration) / 60) * Number(watchLaborCost);
+    const commissionCost = (price * Number(watchCommission)) / 100;
+    const productsTotalCost = selectedProducts.reduce((acc, p) => acc + getProductCost(p), 0);
+    const totalServiceCost = laborCostTotal + commissionCost + Number(watchOtherCosts) + productsTotalCost;
+    const netProfit = price - totalServiceCost;
+    const marginPercent = price > 0 ? (netProfit / price) * 100 : 0;
+
+
     const onSubmit = async (values: ServiceFormValues) => {
         setLoading(true);
         try {
             const serviceData = {
                 name: values.name,
                 description: values.description || null,
-                base_price: values.price,
+                base_price: values.price || 0,
                 duration_minutes: values.duration_minutes,
                 icon: values.icon || null,
                 user_id: (await supabase.auth.getUser()).data.user!.id,
+                commission_percent: values.commission_percent,
+                other_costs: values.other_costs,
+                labor_cost_per_hour: values.labor_cost_per_hour,
             };
 
             const formattedProducts: ServiceProductInput[] = selectedProducts.map(p => ({
@@ -242,17 +337,18 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>{serviceToEdit ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
+                    <DialogTitle className="text-slate-900 dark:text-white">{serviceToEdit ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden flex flex-col">
                         <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
-                            <TabsList className="grid w-full grid-cols-2">
+                            <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="details">Detalhes</TabsTrigger>
-                                <TabsTrigger value="costs">Custos & Produtos</TabsTrigger>
+                                <TabsTrigger value="costs">Produtos Utilizados</TabsTrigger>
+                                <TabsTrigger value="pricing">Precificação</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="details" className="space-y-4 flex-1 overflow-y-auto p-1">
@@ -289,6 +385,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     <Input
                                                                         placeholder="Ex: Lavagem Simples"
                                                                         {...field}
+                                                                        className="bg-white dark:bg-slate-800"
                                                                         onChange={(e) => {
                                                                             field.onChange(e);
                                                                             handleNameChange(e);
@@ -304,25 +401,43 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                 </FormItem>
                                             )}
                                         />
+                                        <FormField
+                                            control={form.control}
+                                            name="description"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Descrição</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea placeholder="Detalhes do serviço..." {...field} className="bg-white dark:bg-slate-800" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </div>
+                            </TabsContent>
 
+                            <TabsContent value="pricing" className="space-y-4 flex-1 overflow-y-auto p-1">
                                 <div className="grid grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="price"
                                         render={({ field, fieldState }) => (
                                             <FormItem>
-                                                <FormLabel className="!text-foreground">Valor Cobrado *</FormLabel>
+                                                <FormLabel className="!text-foreground">Valor Cobrado (R$)</FormLabel>
                                                 <TooltipProvider>
                                                     <Tooltip open={!!fieldState.error}>
                                                         <TooltipTrigger asChild>
                                                             <FormControl>
-                                                                <Input type="number" step="0.01" placeholder="R$ 0,00" {...field} />
+                                                                <div className="relative">
+                                                                    <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                                    <Input type="number" step="0.01" placeholder="0.00" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                                </div>
                                                             </FormControl>
                                                         </TooltipTrigger>
                                                         <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                            <p>{fieldState.error?.message || "Valor obrigatório (mín. R$ 0,00)"}</p>
+                                                            <p>{fieldState.error?.message || "Valor obrigatório"}</p>
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
@@ -334,44 +449,39 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                         name="duration_minutes"
                                         render={({ field, fieldState }) => (
                                             <FormItem>
-                                                <FormLabel className="!text-foreground">Tempo de Execução do Serviço *</FormLabel>
+                                                <FormLabel className="!text-foreground">Tempo de Execução</FormLabel>
                                                 <TooltipProvider>
                                                     <Tooltip open={!!fieldState.error}>
                                                         <TooltipTrigger asChild>
                                                             <FormControl>
-                                                                <Input
-                                                                    type="text"
-                                                                    placeholder="HH:MM"
-                                                                    value={durationInput}
-                                                                    onChange={(e) => {
-                                                                        let val = e.target.value.replace(/[^0-9:]/g, "");
-                                                                        if (val.length === 2 && !val.includes(":")) {
-                                                                            val += ":";
-                                                                        }
-                                                                        if (val.length > 5) {
-                                                                            val = val.slice(0, 5);
-                                                                        }
-                                                                        setDurationInput(val);
-
-                                                                        // Always update form value to ensure validation triggers
-                                                                        // hhmmToMinutes returns 0 for incomplete/invalid inputs, which triggers min(1) error
-                                                                        const minutes = hhmmToMinutes(val);
-                                                                        field.onChange(minutes);
-                                                                    }}
-                                                                    onBlur={() => {
-                                                                        // Simple validation on blur to ensure format
-                                                                        const minutes = hhmmToMinutes(durationInput);
-                                                                        if (minutes > 0) {
-                                                                            // Re-format to ensure canonical HH:MM
-                                                                            setDurationInput(minutesToHHMM(minutes));
+                                                                <div className="relative">
+                                                                    <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                                    <Input
+                                                                        type="text"
+                                                                        placeholder="HH:MM"
+                                                                        className="pl-8 bg-white dark:bg-slate-800"
+                                                                        value={durationInput}
+                                                                        onChange={(e) => {
+                                                                            let val = e.target.value.replace(/[^0-9:]/g, "");
+                                                                            if (val.length === 2 && !val.includes(":")) val += ":";
+                                                                            if (val.length > 5) val = val.slice(0, 5);
+                                                                            setDurationInput(val);
+                                                                            const minutes = hhmmToMinutes(val);
                                                                             field.onChange(minutes);
-                                                                        }
-                                                                    }}
-                                                                />
+                                                                        }}
+                                                                        onBlur={() => {
+                                                                            const minutes = hhmmToMinutes(durationInput);
+                                                                            if (minutes > 0) {
+                                                                                setDurationInput(minutesToHHMM(minutes));
+                                                                                field.onChange(minutes);
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </div>
                                                             </FormControl>
                                                         </TooltipTrigger>
                                                         <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                            <p>{fieldState.error?.message || "Tempo obrigatório (mín. 1 min)"}</p>
+                                                            <p>{fieldState.error?.message || "Tempo obrigatório"}</p>
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
@@ -380,19 +490,87 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                     />
                                 </div>
 
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Descrição</FormLabel>
-                                            <FormControl>
-                                                <Textarea placeholder="Detalhes do serviço..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="labor_cost_per_hour"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center justify-between">
+                                                    <FormLabel>Custo Hora (R$)</FormLabel>
+                                                    <Button type="button" variant="ghost" size="sm" onClick={handleLoadSystemHourlyRate} className="h-5 text-xs text-blue-500 px-2 py-0">
+                                                        <RefreshCw className="w-3 h-3 mr-1" />
+                                                        Do Sistema
+                                                    </Button>
+                                                </div>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Users className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                    </div>
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="commission_percent"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Comissão (%)</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Percent className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="number" step="0.1" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                    </div>
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="other_costs"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Outros Custos (R$)</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Tag className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                    </div>
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="bg-muted/50 rounded-lg p-4 space-y-2 border mt-4">
+                                    <h3 className="font-semibold text-sm flex items-center mb-2">
+                                        <BarChart3 className="w-4 h-4 mr-2" />
+                                        Análise de Lucratividade
+                                    </h3>
+                                    <div className="grid grid-cols-3 gap-4 text-sm text-center">
+                                        <div className="bg-background rounded p-2 border">
+                                            <p className="text-muted-foreground text-[10px] uppercase font-bold text-left">Custo Total</p>
+                                            <p className="font-medium text-lg text-left">R$ {totalServiceCost.toFixed(2)}</p>
+                                        </div>
+                                        <div className="bg-background rounded p-2 border">
+                                            <p className="text-muted-foreground text-[10px] uppercase font-bold text-left">Lucro Líquido</p>
+                                            <p className={cn("font-bold text-lg text-left", netProfit >= 0 ? "text-green-600" : "text-red-500")}>
+                                                R$ {netProfit.toFixed(2)}
+                                            </p>
+                                        </div>
+                                        <div className="bg-background rounded p-2 border">
+                                            <p className="text-muted-foreground text-[10px] uppercase font-bold text-left">Margem</p>
+                                            <p className={cn("font-bold text-lg text-left", marginPercent >= 20 ? "text-green-600" : "text-amber-500")}>
+                                                {marginPercent.toFixed(1)}%
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground text-center pt-2">
+                                        * Baseado no tempo de execução, comissão, custos extras e produtos.
+                                    </div>
+                                </div>
                             </TabsContent>
 
                             <TabsContent value="costs" className="flex-1 flex flex-col gap-4 overflow-hidden p-1">
@@ -458,7 +636,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 
                                     <div className="border rounded-md p-2 flex flex-col flex-1 overflow-hidden">
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-xs font-semibold">Selecionados</span>
+                                            <span className="text-xs font-semibold">Selecionados ({selectedProducts.length})</span>
                                             <Sheet>
                                                 <SheetTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
@@ -467,9 +645,9 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                 </SheetTrigger>
                                                 <SheetContent>
                                                     <SheetHeader>
-                                                        <SheetTitle>Entenda os Campos</SheetTitle>
+                                                        <SheetTitle>Custos e Diluição</SheetTitle>
                                                         <SheetDescription>
-                                                            Explicação detalhada sobre como preencher os custos dos produtos.
+                                                            Como calcular os custos corretamente.
                                                         </SheetDescription>
                                                     </SheetHeader>
                                                     <div className="mt-6 space-y-6">
@@ -478,9 +656,11 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                 <Droplets className="h-5 w-5" />
                                                             </div>
                                                             <div className="space-y-1">
-                                                                <h4 className="text-sm font-medium leading-none">Proporção de Diluição</h4>
+                                                                <h4 className="text-sm font-medium leading-none">Diluição (1:X)</h4>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    Indique a diluição do produto (ex: 1:10). Isso significa 1 parte de produto para 10 partes de água.
+                                                                    Ex: 1:100 = 10ml produto + 990ml água (Total 1L).
+                                                                    <br />
+                                                                    Cálculo: Custo por ML Diluído = (Preço / Tamanho Embalagem) / Ratio.
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -489,9 +669,9 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                 <Beaker className="h-5 w-5" />
                                                             </div>
                                                             <div className="space-y-1">
-                                                                <h4 className="text-sm font-medium leading-none">Tamanho do Recipiente</h4>
+                                                                <h4 className="text-sm font-medium leading-none">Recipiente de Diluição</h4>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    A capacidade total do recipiente final onde a mistura é feita (em ml). Ex: Borrifador de 500ml.
+                                                                    Apenas referência para o aplicador saber qual borrifador usar (ex: 500ml). Não afeta o cálculo se a "Qtd Usada" estiver correta.
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -500,11 +680,9 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                 <CarFront className="h-5 w-5" />
                                                             </div>
                                                             <div className="space-y-1">
-                                                                <h4 className="text-sm font-medium leading-none">Quantidade usada no veículo</h4>
+                                                                <h4 className="text-sm font-medium leading-none">Quantidade Usada (ml)</h4>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    Quanto da mistura pronta (ou do produto puro) é gasto em média por veículo (em ml ou unidades).
-                                                                    <br />
-                                                                    Ex: Utilizou 2 borrifadores de 500ml, então 1000ml.
+                                                                    Volume TOTAL da solução (água + produto) gasto no veículo.
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -550,7 +728,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     </div>
                                                                     <Input
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Proporção de Diluição (1:X)"
+                                                                        placeholder="Proporção (ex: 1:10)"
                                                                         value={sp.dilution_ratio || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { dilution_ratio: e.target.value })}
                                                                     />
@@ -562,7 +740,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     <Input
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Tamanho do Recipiente (ml)"
+                                                                        placeholder="Recipiente Diluição (ml)"
                                                                         value={sp.container_size_ml || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { container_size_ml: Number(e.target.value) })}
                                                                     />
@@ -574,7 +752,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     <Input
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Qtd Usada no Veículo (ml)"
+                                                                        placeholder="Qtd Solução Usada (ml)"
                                                                         value={sp.quantity || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
                                                                     />
@@ -589,7 +767,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     <Input
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Qtd Usada no Veículo (ml/un)"
+                                                                        placeholder="Qtd Usada (ml/un)"
                                                                         value={sp.quantity || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
                                                                     />

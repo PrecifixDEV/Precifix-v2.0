@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag, LayoutGrid, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -54,11 +54,13 @@ export const Products = () => {
     const [productForSale, setProductForSale] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [filterType, setFilterType] = useState<'all' | 'for_sale' | 'zero_stock' | 'incomplete'>('all');
+    const [viewMode, setViewMode] = useState<'standard' | 'compact'>('standard');
     const [companyInfo, setCompanyInfo] = useState<{ name: string; logo: string | null; primaryColor: string }>({
         name: '',
         logo: null,
         primaryColor: '#000000'
     });
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     useEffect(() => {
         fetchProducts();
@@ -250,8 +252,11 @@ export const Products = () => {
 
     return (
         <div className="space-y-6">
-            <div>
+            <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Produtos</h1>
+                <Button onClick={handleCreateNew} size="icon" className="md:hidden h-8 w-8 rounded-full">
+                    <Plus className="h-5 w-5" />
+                </Button>
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -295,15 +300,41 @@ export const Products = () => {
                             </DropdownMenu>
 
                             <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
+                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
                                 <Input
                                     placeholder="Buscar produto..."
-                                    className="pl-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                                    className="pl-8 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                    onFocus={() => setIsSearchFocused(true)}
+                                    onBlur={() => setIsSearchFocused(false)}
                                 />
                             </div>
                         </div>
+
+                        {/* Mobile View Toggle */}
+                        <div className={cn(
+                            "md:hidden bg-slate-100 dark:bg-slate-800 p-1 rounded-md transition-all duration-200",
+                            isSearchFocused ? "hidden" : "flex"
+                        )}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn("h-8 w-8", viewMode === 'standard' ? "bg-white dark:bg-slate-700 shadow-sm" : "hover:bg-transparent")}
+                                onClick={() => setViewMode('standard')}
+                            >
+                                <LayoutGrid className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn("h-8 w-8", viewMode === 'compact' ? "bg-white dark:bg-slate-700 shadow-sm" : "hover:bg-transparent")}
+                                onClick={() => setViewMode('compact')}
+                            >
+                                <Grid3x3 className="h-4 w-4" />
+                            </Button>
+                        </div>
+
                         <div className="flex items-center gap-2">
                             {selectedProducts.length > 0 && (
                                 <>
@@ -327,7 +358,7 @@ export const Products = () => {
                             )}
                             <Button
                                 onClick={handleCreateNew}
-                                variant="outline"
+                                className="hidden md:flex items-center bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Novo Produto
@@ -336,7 +367,8 @@ export const Products = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
                         <Table>
                             <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
                                 <TableRow>
@@ -348,7 +380,6 @@ export const Products = () => {
                                     </TableHead>
                                     <TableHead className="w-[80px]">Foto</TableHead>
                                     <TableHead>Nome do Produto</TableHead>
-                                    <TableHead>Código</TableHead>
                                     <TableHead>Tamanho</TableHead>
                                     <TableHead>Diluição</TableHead>
                                     <TableHead>Estoque</TableHead>
@@ -359,13 +390,13 @@ export const Products = () => {
                             <TableBody>
                                 {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={9} className="h-24 text-center">
+                                        <TableCell colSpan={8} className="h-24 text-center">
                                             Carregando produtos...
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredProducts.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={9} className="h-24 text-center text-slate-500">
+                                        <TableCell colSpan={8} className="h-24 text-center text-slate-500">
                                             Nenhum produto encontrado.
                                         </TableCell>
                                     </TableRow>
@@ -401,10 +432,7 @@ export const Products = () => {
                                                 {product.name}
                                             </TableCell>
                                             <TableCell className="text-slate-600 dark:text-slate-400">
-                                                {product.code || '-'}
-                                            </TableCell>
-                                            <TableCell className="text-slate-600 dark:text-slate-400">
-                                                {product.size || '-'}
+                                                {product.container_size_ml ? `${product.container_size_ml}ml` : '-'}
                                             </TableCell>
                                             <TableCell className="text-slate-600 dark:text-slate-400">
                                                 {product.is_dilutable ? (product.dilution_ratio || '-') : 'Pronto Uso'}
@@ -493,6 +521,160 @@ export const Products = () => {
                                 )}
                             </TableBody>
                         </Table>
+                    </div>
+
+                    {/* Mobile Card Grid View */}
+                    <div className={cn(
+                        "md:hidden grid gap-4",
+                        viewMode === 'compact' ? "grid-cols-4 gap-1" : "grid-cols-2 sm:grid-cols-3"
+                    )}>
+                        {loading ? (
+                            <div className="col-span-full h-24 flex items-center justify-center text-slate-500">
+                                Carregando produtos...
+                            </div>
+                        ) : filteredProducts.length === 0 ? (
+                            <div className="col-span-full h-24 flex items-center justify-center text-slate-500">
+                                Nenhum produto encontrado.
+                            </div>
+                        ) : (
+                            filteredProducts.map((product) => {
+                                const ActionsMenu = (
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(product); }}>
+                                            <Edit2 className="mr-2 h-4 w-4" />
+                                            Alterar
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleClone(product); }}>
+                                            <Copy className="mr-2 h-4 w-4" />
+                                            Clonar Produto
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleToggleForSale(product); }}>
+                                            {product.is_for_sale ? (
+                                                <>
+                                                    <Store className="mr-2 h-4 w-4 opacity-50" />
+                                                    Marcar Uso Próprio
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <DollarSign className="mr-2 h-4 w-4 text-green-600" />
+                                                    Produto para Venda
+                                                </>
+                                            )}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
+                                            className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                        >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Apagar
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                );
+
+                                if (viewMode === 'compact') {
+                                    return (
+                                        <DropdownMenu key={product.id}>
+                                            <DropdownMenuTrigger asChild>
+                                                <div
+                                                    className="aspect-square w-full relative bg-slate-100 dark:bg-slate-800 cursor-pointer overflow-hidden rounded-sm"
+                                                >
+                                                    {product.image_url ? (
+                                                        <img
+                                                            src={product.image_url}
+                                                            alt={product.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                            <Package className="w-6 h-6 opacity-50" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </DropdownMenuTrigger>
+                                            {ActionsMenu}
+                                        </DropdownMenu>
+                                    );
+                                }
+
+                                return (
+                                    <Card
+                                        key={product.id}
+                                        onClick={() => handleEdit(product)}
+                                        className="group relative flex flex-col hover:bg-muted/50 transition-colors duration-200 cursor-pointer overflow-hidden border-slate-200 dark:border-slate-800"
+                                    >
+                                        <div className="absolute top-2 right-2 z-10">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 bg-white/50 backdrop-blur-sm hover:bg-white/80 dark:bg-black/50 dark:hover:bg-black/80 rounded-full"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <span className="sr-only">Abrir menu</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(product); }}>
+                                                        <Edit2 className="mr-2 h-4 w-4" />
+                                                        Alterar
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleClone(product); }}>
+                                                        <Copy className="mr-2 h-4 w-4" />
+                                                        Clonar Produto
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleToggleForSale(product); }}>
+                                                        {product.is_for_sale ? (
+                                                            <>
+                                                                <Store className="mr-2 h-4 w-4 opacity-50" />
+                                                                Marcar Uso Próprio
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <DollarSign className="mr-2 h-4 w-4 text-green-600" />
+                                                                Produto para Venda
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
+                                                        className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Apagar
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+
+                                        <div className="aspect-square w-full relative bg-slate-100 dark:bg-slate-800">
+                                            {product.image_url ? (
+                                                <img
+                                                    src={product.image_url}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                    <Package className="w-10 h-10 opacity-50" />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="p-3 text-center">
+                                            <h3 className="font-medium text-sm text-slate-900 dark:text-white line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
+                                                {product.name}
+                                            </h3>
+                                        </div>
+                                    </Card>
+                                );
+                            })
+                        )}
                     </div>
                 </CardContent>
             </Card>
