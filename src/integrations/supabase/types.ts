@@ -652,6 +652,8 @@ export type Database = {
                     plate: string | null
                     updated_at: string | null
                     year: number | null
+                    type: string | null
+                    user_id: string | null
                 }
                 Insert: {
                     brand: string
@@ -663,6 +665,8 @@ export type Database = {
                     plate?: string | null
                     updated_at?: string | null
                     year?: number | null
+                    type?: string | null
+                    user_id?: string | null
                 }
                 Update: {
                     brand?: string
@@ -674,6 +678,8 @@ export type Database = {
                     plate?: string | null
                     updated_at?: string | null
                     year?: number | null
+                    type?: string | null
+                    user_id?: string | null
                 }
                 Relationships: [
                     {

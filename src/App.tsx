@@ -14,6 +14,8 @@ import AccountsPayable from './pages/AccountsPayable'
 import { MyCompany } from './pages/MyCompany'
 import { Products } from './pages/cadastros/Products'
 import { Services } from './pages/cadastros/Services'
+import { Clients } from './pages/cadastros/Clients'
+import { FinancialOverview } from './pages/FinancialOverview'
 
 
 function App() {
@@ -40,12 +42,12 @@ function App() {
             {/* Cadastros Routes */}
             <Route path="/cadastros/produtos" element={<Products />} />
             <Route path="/cadastros/servicos" element={<Services />} />
-            <Route path="/cadastros/clientes" element={<div className="text-slate-900 dark:text-white p-6">Clientes (Em breve)</div>} />
+            <Route path="/cadastros/clientes" element={<Clients />} />
             <Route path="/cadastros/formas-pagamento" element={<div className="text-slate-900 dark:text-white p-6">Formas de Pagamento (Em breve)</div>} />
 
             <Route path="/sales" element={<div className="text-slate-900 dark:text-white p-6">Vendas (Em breve)</div>} />
             <Route path="/schedule" element={<div className="text-slate-900 dark:text-white p-6">Agenda (Em breve)</div>} />
-            <Route path="/financial" element={<div className="text-slate-900 dark:text-white p-6">Financeiro (Em breve)</div>} />
+            <Route path="/financial" element={<FinancialOverview />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

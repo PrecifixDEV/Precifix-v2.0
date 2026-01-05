@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import {
     Tooltip,
     TooltipContent,
@@ -313,13 +313,30 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         <input type="hidden" {...register("code")} />
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="is_for_sale"
-                            checked={watch("is_for_sale")}
-                            onCheckedChange={(checked) => setValue("is_for_sale", checked as boolean)}
-                        />
-                        <Label htmlFor="is_for_sale">Produto para Venda</Label>
+                    <div className="space-y-2">
+                        <Label>Destinação do Produto</Label>
+                        <div className="flex gap-4 pt-2">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="usageType"
+                                    checked={!watch("is_for_sale")}
+                                    onChange={() => setValue("is_for_sale", false)}
+                                    className="accent-yellow-500 w-4 h-4"
+                                />
+                                <span className="text-sm font-medium">Uso Próprio</span>
+                            </label>
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="usageType"
+                                    checked={watch("is_for_sale")}
+                                    onChange={() => setValue("is_for_sale", true)}
+                                    className="accent-yellow-500 w-4 h-4"
+                                />
+                                <span className="text-sm font-medium">Revenda</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -337,7 +354,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         </div>
                     </div>
 
-                    <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-3" : "grid-cols-2")}>
+                    <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
                         <div className="space-y-2">
                             <Label htmlFor="price" className="!text-foreground">Preço de Custo (R$) *</Label>
                             <TooltipProvider>
@@ -387,7 +404,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="container_size_ml" className="!text-foreground">Tamanho da Embalagem (ml) *</Label>
                             <TooltipProvider>

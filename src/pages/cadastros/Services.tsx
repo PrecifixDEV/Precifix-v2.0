@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Search, CarFront, LayoutGrid, Info, Pencil } from "lucide-react";
+import { Plus, Trash2, Search, CarFront, Info, Pencil, MoreHorizontal, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import {
     Card,
     CardContent,
     CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
 import {
     Table,
@@ -45,9 +44,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/lib/supabase";
-import { Printer, Filter, Grid3x3 } from "lucide-react";
+import { Printer, Filter } from "lucide-react";
 
 import { ServiceFormDialog } from "./ServiceFormDialog";
+import { ServiceAnalysisSheet } from "./ServiceAnalysisSheet";
 import { servicesService } from "@/services/servicesService";
 import type { Service, ServiceWithProductCount } from "@/services/servicesService";
 import { SERVICE_ICONS } from "@/components/services/ServiceIconSelector";
@@ -55,7 +55,7 @@ import { SERVICE_ICONS } from "@/components/services/ServiceIconSelector";
 export const Services = () => {
     const [services, setServices] = useState<ServiceWithProductCount[]>([]);
     const [filteredServices, setFilteredServices] = useState<ServiceWithProductCount[]>([]);
-    const [mobileViewMode, setMobileViewMode] = useState<"standard" | "compact">("standard");
+
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState<"all">("all");
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -65,6 +65,7 @@ export const Services = () => {
     const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
     const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
     const [selectedServiceForProducts, setSelectedServiceForProducts] = useState<ServiceWithProductCount | null>(null);
+    const [selectedServiceForAnalysis, setSelectedServiceForAnalysis] = useState<ServiceWithProductCount | null>(null);
     const [serviceProductsDetails, setServiceProductsDetails] = useState<any[]>([]);
     const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
@@ -267,6 +268,12 @@ export const Services = () => {
 
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2 flex-1 max-w-sm">
+                            <div className="md:hidden flex items-center justify-center mr-1">
+                                <Checkbox
+                                    checked={filteredServices.length > 0 && selectedServices.length === filteredServices.length}
+                                    onCheckedChange={toggleSelectAll}
+                                />
+                            </div>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="icon" title="Filtrar" className={filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}>
@@ -308,27 +315,7 @@ export const Services = () => {
                                 </div>
                             )}
 
-                            {/* Mobile View Toggle */}
-                            <div className="bg-muted/50 p-1 rounded-lg flex items-center gap-1 md:hidden">
-                                <Button
-                                    variant={mobileViewMode === 'standard' ? 'secondary' : 'ghost'}
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => setMobileViewMode('standard')}
-                                    title="Visualização Padrão"
-                                >
-                                    <LayoutGrid className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant={mobileViewMode === 'compact' ? 'secondary' : 'ghost'}
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => setMobileViewMode('compact')}
-                                    title="Visualização Compacta"
-                                >
-                                    <Grid3x3 className="h-4 w-4" />
-                                </Button>
-                            </div>
+
 
                             <Button onClick={handleCreate} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 hidden md:flex">
                                 <Plus className="mr-2 h-4 w-4" /> Novo Serviço
@@ -336,85 +323,93 @@ export const Services = () => {
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0 md:p-6">
                     {filteredServices.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
                             Nenhum serviço encontrado.
                         </div>
                     ) : (
                         <>
-                            {/* Mobile View - Grid (Standard or Compact) */}
-                            <div className="md:hidden">
-                                <div className={`grid gap-4 ${mobileViewMode === 'compact' ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
-                                    {filteredServices.map((service) => {
-                                        const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
+                            {/* Mobile List View */}
+                            <div className="md:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-800">
+                                {filteredServices.map((service) => {
+                                    const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
+                                    return (
+                                        <div key={service.id} className="px-6 py-4 flex items-start gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                                            <Checkbox
+                                                checked={selectedServices.includes(service.id)}
+                                                onCheckedChange={() => toggleSelect(service.id)}
+                                                className="mt-1"
+                                            />
 
-                                        if (mobileViewMode === 'compact') {
-                                            return (
-                                                <Card
-                                                    key={service.id}
-                                                    onClick={() => handleEdit(service)}
-                                                    className="cursor-pointer hover:bg-muted/50 p-4 flex flex-col items-center justify-center gap-2 aspect-square group relative"
-                                                >
-                                                    {/* Mobile Edit/Delete on Press? Or just click to edit. Compact view is for quick look. */}
-                                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
-                                                        <IconComponent className="w-6 h-6" />
+                                            <div className="relative w-10 h-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                <IconComponent className="h-5 w-5" />
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between">
+                                                    <div onClick={() => handleEdit(service)} className="cursor-pointer">
+                                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2">
+                                                            {service.name}
+                                                        </h3>
+                                                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                                                            {service.description || "Sem descrição"}
+                                                        </p>
+
+                                                        <div className="mt-2 flex flex-col gap-0.5 text-xs text-muted-foreground">
+                                                            <div className="font-medium text-slate-900 dark:text-slate-200">
+                                                                Preço: R$ {(service.base_price || 0).toFixed(2)}
+                                                            </div>
+                                                            <div>Duração: {service.duration_minutes} min</div>
+                                                            <div
+                                                                className="flex items-center gap-1 mt-1 font-medium text-blue-600 dark:text-blue-400"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleShowProducts(service);
+                                                                }}
+                                                            >
+                                                                {service.service_products?.length || 0} {service.service_products?.length === 1 ? 'Produto' : 'Produtos'}
+                                                                <Info className="h-3 w-3" />
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs font-medium text-center line-clamp-2 leading-tight">{service.name}</span>
-                                                </Card>
-                                            );
-                                        }
 
-                                        return (
-                                            <Card
-                                                key={service.id}
-                                                onClick={() => handleEdit(service)}
-                                                className="group relative flex flex-col hover:bg-muted/50 transition-colors duration-200 cursor-pointer"
-                                            >
-                                                <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setServiceToDelete(service);
-                                                        }}
-                                                        className="h-8 w-8 text-destructive hover:bg-transparent hover:text-red-600"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-2 text-slate-400">
+                                                                <span className="sr-only">Abrir menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                            <DropdownMenuItem onClick={() => handleEdit(service)}>
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                Editar
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => setSelectedServiceForAnalysis(service)}>
+                                                                <TrendingUp className="mr-2 h-4 w-4" />
+                                                                Análise
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleShowProducts(service)}>
+                                                                <Info className="mr-2 h-4 w-4" />
+                                                                Ver Produtos
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() => setServiceToDelete(service)}
+                                                                className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                            >
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Excluir
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </div>
-                                                <CardHeader className="items-center pb-2 pt-4">
-                                                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3 text-primary">
-                                                        <IconComponent className="w-7 h-7" />
-                                                    </div>
-                                                    <CardTitle className="text-center text-base">{service.name}</CardTitle>
-                                                </CardHeader>
-                                                <CardContent className="flex-1 text-center text-sm text-muted-foreground pb-6">
-                                                    <p className="line-clamp-2 min-h-[2.5rem]">
-                                                        {service.description || "Sem descrição"}
-                                                    </p>
-                                                    <div className="mt-4 flex justify-center gap-2 text-foreground font-medium text-xs">
-                                                        <span className="bg-secondary/50 px-2 py-1 rounded">R$ {(service.base_price || 0).toFixed(2)}</span>
-                                                        <span className="bg-secondary/50 px-2 py-1 rounded">{service.duration_minutes} min</span>
-                                                    </div>
-                                                    <div className="mt-2 flex justify-center">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleShowProducts(service);
-                                                            }}
-                                                            className="bg-secondary/50 px-2 py-1 rounded flex items-center gap-2 hover:bg-secondary/70 transition-colors text-foreground font-medium text-sm"
-                                                        >
-                                                            {service.service_products?.length || 0} {service.service_products?.length === 1 ? 'Produto' : 'Produtos'}
-                                                            <Info className="h-3 w-3 text-muted-foreground" />
-                                                        </button>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        );
-                                    })}
-                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {/* Desktop View - Table */}
@@ -473,24 +468,36 @@ export const Services = () => {
                                                     <TableCell className="text-center">{service.duration_minutes} min</TableCell>
                                                     <TableCell className="text-right">R$ {(service.base_price || 0).toFixed(2)}</TableCell>
                                                     <TableCell className="text-right">
-                                                        <div className="flex justify-end gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => handleEdit(service)}
-                                                                className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                                                            >
-                                                                <Pencil className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => setServiceToDelete(service)}
-                                                                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                                <DropdownMenuItem onClick={() => handleEdit(service)}>
+                                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                                    Editar
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => setSelectedServiceForAnalysis(service)}>
+                                                                    <TrendingUp className="mr-2 h-4 w-4" />
+                                                                    Análise
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleShowProducts(service)}>
+                                                                    <Info className="mr-2 h-4 w-4" />
+                                                                    Ver Produtos
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    onClick={() => setServiceToDelete(service)}
+                                                                    className="text-destructive focus:text-destructive"
+                                                                >
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                                    Excluir
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -568,6 +575,12 @@ export const Services = () => {
                     </div>
                 </SheetContent>
             </Sheet>
+
+            <ServiceAnalysisSheet
+                open={!!selectedServiceForAnalysis}
+                onOpenChange={(open) => !open && setSelectedServiceForAnalysis(null)}
+                service={selectedServiceForAnalysis}
+            />
         </div>
     );
 };

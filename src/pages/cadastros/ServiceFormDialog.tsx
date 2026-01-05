@@ -217,7 +217,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                     ...sp.products,
                     quantity: sp.quantity,
                     dilution_ratio: sp.dilution_ratio || sp.products.dilution_ratio || "",
-                    container_size_ml: sp.container_size_ml || sp.products.container_size_ml || 0,
+                    container_size_ml: sp.container_size_ml || 0, // Load saved container size or 0, don't default to product size
                     concentrate_package_size_ml: sp.products.container_size_ml || 1000, // Preserve original package size
                     use_dilution: !!sp.dilution_ratio, // If it has a ratio saved, assume it uses dilution
                 }));
@@ -247,7 +247,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                 ...product,
                 quantity: 1,
                 dilution_ratio: product.dilution_ratio,
-                container_size_ml: product.container_size_ml,
+                container_size_ml: 0, // Start empty for mixing container
                 concentrate_package_size_ml: product.container_size_ml, // Initialize with product package size
                 use_dilution: !!product.is_dilutable
             }]);
@@ -683,6 +683,8 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                 <h4 className="text-sm font-medium leading-none">Quantidade Usada (ml)</h4>
                                                                 <p className="text-sm text-muted-foreground">
                                                                     Volume TOTAL da solução (água + produto) gasto no veículo.
+                                                                    <br />
+                                                                    Ex: Preparei 500ml, gastei metdade = 250ml.
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -740,7 +742,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     <Input
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Recipiente Diluição (ml)"
+                                                                        placeholder="Recipiente de Diluição (ml)"
                                                                         value={sp.container_size_ml || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { container_size_ml: Number(e.target.value) })}
                                                                     />
@@ -752,7 +754,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                                     <Input
                                                                         type="number"
                                                                         className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Qtd Solução Usada (ml)"
+                                                                        placeholder="Solução Usada (ml)"
                                                                         value={sp.quantity || ""}
                                                                         onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
                                                                     />

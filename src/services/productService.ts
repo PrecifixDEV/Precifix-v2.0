@@ -68,7 +68,8 @@ export const productService = {
         if (error) throw error;
 
         // If update successful and image URL changed, delete old image
-        if (oldProduct?.image_url && oldProduct.image_url !== product.image_url) {
+        // Only if image_url is explicitly provided in the update object (not undefined)
+        if (oldProduct?.image_url && product.image_url !== undefined && oldProduct.image_url !== product.image_url) {
             await deleteStorageImage(oldProduct.image_url);
         }
 
