@@ -107,9 +107,22 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 
     // --- Pricing Logic Start ---
     const { data: operationalCosts } = useQuery({
-        queryKey: ['operational_costs'],
+        queryKey: ['operational_costs_monthly'],
         queryFn: async () => {
-            const { data } = await supabase.from('operational_costs').select('*').eq('user_id', (await supabase.auth.getUser()).data.user!.id);
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            const startStr = startOfMonth.toISOString().split('T')[0];
+
+            const endOfMonth = new Date(startOfMonth);
+            endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+            const endStr = endOfMonth.toISOString().split('T')[0];
+
+            const { data } = await supabase
+                .from('operational_costs')
+                .select('value')
+                .eq('user_id', (await supabase.auth.getUser()).data.user!.id)
+                .gte('expense_date', startStr)
+                .lt('expense_date', endStr);
             return data;
         },
         enabled: open
@@ -127,24 +140,43 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     const calculateSystemHourlyRate = () => {
         if (!operationalCosts || !operationalHours) return 0;
 
-        const totalMonthlyExpenses = operationalCosts.reduce((acc: number, cost: any) => {
-            if (cost.is_recurring) return acc + cost.value;
-            return acc;
-        }, 0);
+        // Sum all costs for the current month (already filtered by query)
+        const totalMonthlyExpenses = operationalCosts.reduce((acc: number, cost: any) => acc + cost.value, 0);
 
         const weekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
         let weeklyMinutes = 0;
+        let activeDaysCount = 0;
+
         weekDays.forEach(day => {
             // @ts-ignore
             const start = operationalHours[`${day}_start`];
             // @ts-ignore
             const end = operationalHours[`${day}_end`];
-            if (start && end) {
-                weeklyMinutes += hhmmToMinutes(end as string) - hhmmToMinutes(start as string);
+
+            if (start && end && start !== '00:00' && end !== '00:00') {
+                const [startH, startM] = (start as string).split(':').map(Number);
+                const [endH, endM] = (end as string).split(':').map(Number);
+
+                let startMinutes = startH * 60 + startM;
+                let endMinutes = endH * 60 + endM;
+
+                if (endMinutes < startMinutes) endMinutes += 24 * 60;
+
+                let diffMinutes = endMinutes - startMinutes;
+
+                // Subtract Lunch (60 mins) as per FinancialOverview
+                const lunchMinutes = 60;
+                let netMinutes = diffMinutes - lunchMinutes;
+                if (netMinutes < 0) netMinutes = 0;
+
+                weeklyMinutes += netMinutes;
+                activeDaysCount++;
             }
         });
 
-        const monthlyHours = (weeklyMinutes * 4.33) / 60;
+        // Use 4.345 weeks per month to match FinancialOverview
+        const monthlyHours = (weeklyMinutes * 4.345) / 60;
+
         if (monthlyHours === 0) return 0;
 
         return totalMonthlyExpenses / monthlyHours;

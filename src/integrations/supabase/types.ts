@@ -373,6 +373,12 @@ export type Database = {
                     updated_at: string
                     website: string | null
                     zip_code: string | null
+                    initial_investment: number | null
+                    investment_return_months: number | null
+                    working_capital_goal: number | null
+                    working_capital_months: number | null
+                    include_investment: boolean | null
+                    include_working_capital: boolean | null
                 }
                 Insert: {
                     address?: string | null
@@ -408,6 +414,10 @@ export type Database = {
                     updated_at?: string
                     website?: string | null
                     zip_code?: string | null
+                    initial_investment?: number | null
+                    investment_return_months?: number | null
+                    working_capital_goal?: number | null
+                    working_capital_months?: number | null
                 }
                 Update: {
                     address?: string | null
@@ -443,6 +453,10 @@ export type Database = {
                     updated_at?: string
                     website?: string | null
                     zip_code?: string | null
+                    initial_investment?: number | null
+                    investment_return_months?: number | null
+                    working_capital_goal?: number | null
+                    working_capital_months?: number | null
                 }
                 Relationships: []
             }

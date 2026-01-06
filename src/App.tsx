@@ -16,6 +16,7 @@ import { Products } from './pages/cadastros/Products'
 import { Services } from './pages/cadastros/Services'
 import { Clients } from './pages/cadastros/Clients'
 import { FinancialOverview } from './pages/FinancialOverview'
+import { DilutionCalculator } from './pages/tools/DilutionCalculator'
 
 
 function App() {
@@ -48,6 +49,9 @@ function App() {
             <Route path="/sales" element={<div className="text-slate-900 dark:text-white p-6">Vendas (Em breve)</div>} />
             <Route path="/schedule" element={<div className="text-slate-900 dark:text-white p-6">Agenda (Em breve)</div>} />
             <Route path="/financial" element={<FinancialOverview />} />
+
+            {/* Tools Routes */}
+            <Route path="/tools/dilution-calculator" element={<DilutionCalculator />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

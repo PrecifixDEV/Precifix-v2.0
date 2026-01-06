@@ -6,6 +6,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+// Removed Popover imports
 import {
     LayoutDashboard,
     ShoppingCart,
@@ -20,7 +21,9 @@ import {
     CreditCard,
     ChevronDown as ChevronDownIcon,
     Building2,
-    FolderPlus
+    FolderPlus,
+    Wrench,
+    Calculator
 } from 'lucide-react'
 import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
@@ -34,6 +37,7 @@ export const MainLayout = () => {
     const [user, setUser] = useState<any>(null)
     const [nickname, setNickname] = useState<string | null>(null)
     const [subscriptionData, setSubscriptionData] = useState<{ status: string | null, trialEndsAt: string | null }>({ status: null, trialEndsAt: null })
+    const [isToolsOpen, setIsToolsOpen] = useState(false)
 
     const location = useLocation()
     const navigate = useNavigate()
@@ -258,6 +262,42 @@ export const MainLayout = () => {
 
                     {/* Footer / Theme Toggle */}
                     <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+                        <div className="mb-4">
+                            <button
+                                onClick={() => setIsToolsOpen(!isToolsOpen)}
+                                className={`
+                                    w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                                    ${isToolsOpen
+                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
+                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    }
+                                `}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Wrench className={`w-5 h-5 ${isToolsOpen ? 'text-yellow-500' : 'text-slate-500'}`} />
+                                    Ferramentas
+                                </div>
+                                <ChevronDownIcon
+                                    className={`w-4 h-4 transition-transform duration-200 ${isToolsOpen ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+
+                            {/* Minicard / App Drawer */}
+                            {isToolsOpen && (
+                                <div className="mt-2 p-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2 duration-200">
+                                    <div className="grid grid-cols-4 gap-2">
+                                        <Link
+                                            to="/tools/dilution-calculator"
+                                            className="flex items-center justify-center p-2 rounded-md bg-white dark:bg-slate-800 hover:bg-primary/10 hover:text-primary border border-slate-200 dark:border-slate-700 transition-all shadow-sm group relative"
+                                            onClick={() => setIsSidebarOpen(false)}
+                                            title="Calculadora de Diluição"
+                                        >
+                                            <Calculator className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <ThemeToggle />
                     </div>
                 </div>
