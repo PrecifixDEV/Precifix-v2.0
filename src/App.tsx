@@ -10,6 +10,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Profile } from './pages/Profile'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ManageCosts } from './pages/ManageCosts'
+import AccountsPage from "./pages/financial/AccountsPage";
 import AccountsPayable from './pages/AccountsPayable'
 import { MyCompany } from './pages/MyCompany'
 import { Products } from './pages/cadastros/Products'
@@ -38,7 +39,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/minha-empresa" element={<MyCompany />} />
             <Route path="/custos" element={<ManageCosts />} />
-            <Route path="/contas-a-pagar" element={<AccountsPayable />} />
+            <Route path="/accounts" element={<AccountsPage />} />
+            <Route path="/accounts-payable" element={<AccountsPayable />} />
 
             {/* Cadastros Routes */}
             <Route path="/cadastros/produtos" element={<Products />} />

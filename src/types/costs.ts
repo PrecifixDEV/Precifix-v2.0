@@ -32,6 +32,7 @@ export interface OperationalHours {
     sunday_end: string;
 }
 
+
 export const daysOfWeek = [
     { key: 'monday', label: 'Seg' },
     { key: 'tuesday', label: 'Ter' },
@@ -41,3 +42,29 @@ export const daysOfWeek = [
     { key: 'saturday', label: 'Sáb' },
     { key: 'sunday', label: 'Dom' },
 ];
+
+export interface FinancialAccount {
+    id: string;
+    user_id: string;
+    name: string;
+    type: 'bank' | 'cash' | 'wallet';
+    bank_code?: string;
+    initial_balance: number;
+    current_balance: number;
+    color?: string;
+    created_at?: string;
+}
+
+export interface FinancialTransaction {
+    id: string;
+    user_id: string;
+    account_id: string | null;
+    amount: number;
+    type: 'credit' | 'debit';
+    description: string;
+    category?: string;
+    transaction_date: string;
+    related_entity_type?: string;
+    related_entity_id?: string;
+    created_at?: string;
+}

@@ -68,6 +68,95 @@ export type Database = {
                 }
                 Relationships: []
             }
+            commercial_accounts: {
+                Row: {
+                    bank_code: string | null
+                    color: string | null
+                    created_at: string | null
+                    current_balance: number | null
+                    id: string
+                    initial_balance: number | null
+                    name: string
+                    type: string | null
+                    updated_at: string | null
+                    user_id: string
+                }
+                Insert: {
+                    bank_code?: string | null
+                    color?: string | null
+                    created_at?: string | null
+                    current_balance?: number | null
+                    id?: string
+                    initial_balance?: number | null
+                    name: string
+                    type?: string | null
+                    updated_at?: string | null
+                    user_id: string
+                }
+                Update: {
+                    bank_code?: string | null
+                    color?: string | null
+                    created_at?: string | null
+                    current_balance?: number | null
+                    id?: string
+                    initial_balance?: number | null
+                    name?: string
+                    type?: string | null
+                    updated_at?: string | null
+                    user_id?: string
+                }
+                Relationships: []
+            }
+            financial_transactions: {
+                Row: {
+                    account_id: string | null
+                    amount: number
+                    category: string | null
+                    created_at: string | null
+                    description: string
+                    id: string
+                    related_entity_id: string | null
+                    related_entity_type: string | null
+                    transaction_date: string | null
+                    type: string
+                    user_id: string
+                }
+                Insert: {
+                    account_id?: string | null
+                    amount: number
+                    category?: string | null
+                    created_at?: string | null
+                    description: string
+                    id?: string
+                    related_entity_id?: string | null
+                    related_entity_type?: string | null
+                    transaction_date?: string | null
+                    type: string
+                    user_id: string
+                }
+                Update: {
+                    account_id?: string | null
+                    amount?: number
+                    category?: string | null
+                    created_at?: string | null
+                    description?: string
+                    id?: string
+                    related_entity_id?: string | null
+                    related_entity_type?: string | null
+                    transaction_date?: string | null
+                    type?: string
+                    user_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "financial_transactions_account_id_fkey"
+                        columns: ["account_id"]
+                        isOneToOne: false
+                        referencedRelation: "commercial_accounts"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
             expenses: {
                 Row: {
                     amount: number

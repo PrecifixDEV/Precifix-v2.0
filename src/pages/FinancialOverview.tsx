@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, DollarSign, Clock, Calculator, ArrowRight, TrendingUp, Info, BarChart3, PiggyBank, CheckCircle2, Circle } from "lucide-react";
+import { MagicCard } from "@/components/ui/magic-card";
 
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -59,7 +60,7 @@ export const FinancialOverview = () => {
             // Fetch profile for investment data
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('initial_investment, investment_return_months, working_capital_goal, working_capital_months')
+                .select('initial_investment, investment_return_months, working_capital_goal, working_capital_months, include_investment, include_working_capital')
                 .eq('id', user.id)
                 .single();
 
@@ -262,24 +263,20 @@ export const FinancialOverview = () => {
         const newInvestment = { ...investment, [field]: value };
         setInvestment(newInvestment);
 
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const updates = {
-                initial_investment: field === 'initialValue' ? value : investment.initialValue,
-                investment_return_months: field === 'returnMonths' ? value : investment.returnMonths,
-                updated_at: new Date().toISOString(),
-            };
-
-            await supabase
-                .from('profiles')
-                .update(updates)
-                .eq('id', user.id);
-
-        } catch (error) {
-            console.error('Error updating investment:', error);
-            toast.error('Erro ao salvar dados de investimento');
+        // If currently included, uncheck it (and sync uncheck to DB)
+        if (includeInvestment) {
+            setIncludeInvestment(false);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await supabase
+                        .from('profiles')
+                        .update({ include_investment: false, updated_at: new Date().toISOString() })
+                        .eq('id', user.id);
+                }
+            } catch (err) {
+                console.error("Error unchecking investment", err);
+            }
         }
     };
 
@@ -287,24 +284,20 @@ export const FinancialOverview = () => {
         const newWC = { ...workingCapital, [field]: value };
         setWorkingCapital(newWC);
 
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const updates = {
-                working_capital_goal: field === 'goal' ? value : workingCapital.goal,
-                working_capital_months: field === 'months' ? value : workingCapital.months,
-                updated_at: new Date().toISOString(),
-            };
-
-            await supabase
-                .from('profiles')
-                .update(updates)
-                .eq('id', user.id);
-
-        } catch (error) {
-            console.error('Error updating working capital:', error);
-            toast.error('Erro ao salvar dados de capital de giro');
+        // If currently included, uncheck it (and sync uncheck to DB)
+        if (includeWorkingCapital) {
+            setIncludeWorkingCapital(false);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await supabase
+                        .from('profiles')
+                        .update({ include_working_capital: false, updated_at: new Date().toISOString() })
+                        .eq('id', user.id);
+                }
+            } catch (err) {
+                console.error("Error unchecking working capital", err);
+            }
         }
     };
 
@@ -319,10 +312,20 @@ export const FinancialOverview = () => {
                 const newValue = !includeInvestment;
                 setIncludeInvestment(newValue);
                 updates.include_investment = newValue;
+                // If turning ON, save the values too
+                if (newValue) {
+                    updates.initial_investment = investment.initialValue;
+                    updates.investment_return_months = investment.returnMonths;
+                }
             } else {
                 const newValue = !includeWorkingCapital;
                 setIncludeWorkingCapital(newValue);
                 updates.include_working_capital = newValue;
+                // If turning ON, save the values too
+                if (newValue) {
+                    updates.working_capital_goal = workingCapital.goal;
+                    updates.working_capital_months = workingCapital.months;
+                }
             }
 
             const { error } = await supabase
@@ -331,6 +334,9 @@ export const FinancialOverview = () => {
                 .eq('id', user.id);
 
             if (error) throw error;
+            if ((type === 'investment' && !includeInvestment) || (type === 'workingCapital' && !includeWorkingCapital)) {
+                toast.success("Valores salvos e adicionados ao cálculo!");
+            }
 
         } catch (error) {
             console.error('Error updating toggle:', error);
@@ -365,44 +371,45 @@ export const FinancialOverview = () => {
 
             {/* Main Highlight Card */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card className="md:col-span-2 border-primary/20 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                            <TrendingUp className="h-5 w-5 text-green-500" />
-                            Seu Custo Hora Calculado
-                        </CardTitle>
-                        <CardDescription>
-                            Este é o valor mínimo que você precisa cobrar por hora apenas para pagar os custos da empresa.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-col md:flex-row items-baseline gap-6 mt-2">
+                <MagicCard className="md:col-span-2 shadow-2xl" gradientColor="#22c55e 55%, transparent 100%">
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+                                <TrendingUp className="h-5 w-5 text-green-500 dark:text-green-400" />
+                                Seu Custo Hora Calculado
+                            </h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                Este é o valor mínimo que você precisa cobrar por hora apenas para pagar os custos da empresa.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row items-baseline gap-6">
                             <span className="text-6xl font-bold text-slate-900 dark:text-white tracking-tight">
                                 {formatMoney(stats.hourlyRate + (includeInvestment ? hourlyAddon : 0) + (includeWorkingCapital ? workingCapitalAddon : 0))}
                             </span>
-                            <div className="flex flex-col text-sm text-slate-500">
+                            <div className="flex flex-col text-sm text-slate-500 dark:text-slate-400">
                                 <span>/ hora trabalhada</span>
                                 <span className="text-xs opacity-70">(100% produtividade)</span>
                             </div>
                         </div>
 
                         {(includeInvestment || includeWorkingCapital) && (
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                <span className="text-xs font-medium text-slate-500 mr-1">Inclui:</span>
+                            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                                <span className="text-xs font-medium text-slate-500 mr-1 mt-1">Inclui:</span>
                                 {includeInvestment && (
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/20">
                                         + {formatMoney(hourlyAddon)} ROI
                                     </span>
                                 )}
                                 {includeWorkingCapital && (
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20">
                                         + {formatMoney(workingCapitalAddon)} Cap. Giro
                                     </span>
                                 )}
                             </div>
                         )}
-                    </CardContent>
-                </Card>
+                    </div>
+                </MagicCard>
 
 
 

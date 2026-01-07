@@ -23,7 +23,8 @@ import {
     Building2,
     FolderPlus,
     Wrench,
-    Calculator
+    Calculator,
+
 } from 'lucide-react'
 import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
@@ -132,7 +133,8 @@ export const MainLayout = () => {
             icon: Wallet,
             children: [
                 { name: 'Visão Geral', href: '/financial' },
-                { name: 'Contas a Pagar', href: '/contas-a-pagar' },
+                { name: 'Caixas e Bancos', href: '/accounts' },
+                { name: 'Contas a Pagar', href: '/accounts-payable' },
                 { name: 'Gerenciar Despesas', href: '/custos' }
             ]
         },
