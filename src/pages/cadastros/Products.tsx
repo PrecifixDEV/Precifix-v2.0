@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag } from 'lucide-react';
+import { Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ResponsiveAddButton } from '@/components/ui/responsive-add-button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -252,9 +253,11 @@ export const Products = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Produtos</h1>
-                <Button onClick={handleCreateNew} size="icon" className="md:hidden h-8 w-8 rounded-full">
-                    <Plus className="h-5 w-5" />
-                </Button>
+                <ResponsiveAddButton
+                    onClick={handleCreateNew}
+                    label="Novo Produto"
+                    className="shrink-0"
+                />
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -337,13 +340,7 @@ export const Products = () => {
                                     </Button>
                                 </>
                             )}
-                            <Button
-                                onClick={handleCreateNew}
-                                className="hidden md:flex items-center bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200"
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Novo Produto
-                            </Button>
+                            {/* Desktop custom button removed - unified in header */}
                         </div>
                     </div>
                 </CardHeader>

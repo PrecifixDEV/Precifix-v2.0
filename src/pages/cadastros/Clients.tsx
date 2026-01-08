@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Search, User, Pencil, Printer, Filter, Car, Bike, Truck, Info, MoreVertical } from "lucide-react";
+import { Trash2, Search, User, Pencil, Printer, Filter, Car, Bike, Truck, Info, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
 import { Input } from "@/components/ui/input";
 import {
     Card,
@@ -243,9 +244,11 @@ export const Clients = () => {
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Clientes</h1>
                     <p className="text-slate-500 dark:text-slate-400">Gerencie seus clientes</p>
                 </div>
-                <Button onClick={handleCreate} size="icon" className="md:hidden h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Plus className="h-5 w-5" />
-                </Button>
+                <ResponsiveAddButton
+                    onClick={handleCreate}
+                    label="Novo Cliente"
+                    className="shrink-0"
+                />
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -298,9 +301,7 @@ export const Clients = () => {
                                 </div>
                             )}
 
-                            <Button onClick={handleCreate} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 hidden md:flex">
-                                <Plus className="mr-2 h-4 w-4" /> Novo Cliente
-                            </Button>
+                            {/* Desktop Button Removed - Unified in Header */}
                         </div>
                     </div>
                 </CardHeader>

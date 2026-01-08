@@ -1,4 +1,27 @@
-# Handoff Log - 2026-01-07
+# Handoff Log - 2026-01-08
+
+## Work Completed
+1.  **UI Standardization (Add Buttons)**:
+    -   Implemented `<ResponsiveAddButton />` component to standardize "Add/New" actions across the app.
+    -   Applied this pattern to: **Clients**, **Products**, **Services**, **Accounts (Caixas e Bancos)**, and **Manage Costs**.
+    -   Pattern: Circular icon button on mobile (header-aligned), Rectangular text button on desktop.
+
+2.  **Bank Logo Refactor**:
+    -   Migrated `BankLogo` component to use local SVGs instead of external APIs.
+    -   Logos are now served from `/public/icons/banks/{code}.svg` based on the bank code.
+    -   Removed complex domain mapping logic.
+
+3.  **Accounts Page (`/accounts`) Enhancements**:
+    -   **Consolidated Balance**: Added a consolidated balance card with a detailed popover for individual account balances.
+    -   **Quick Actions**: Implemented "Transferir" and "Adicionar Valor" with dedicated, user-friendly Dialogs.
+    -   **Mobile Layout**: Fixed grid flattening issues on mobile; restricted Carousel autoplay to mobile only.
+
+4.  **Financial Service Updates**:
+    -   Added `transferFunds` method to handle internal transfers between accounts.
+
+## Previous Logs
+
+### Handoff Log - 2026-01-07
 
 ## Work Completed
 1.  **Refactored Financial Management**:

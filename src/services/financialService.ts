@@ -99,5 +99,32 @@ export const financialService = {
             .from('commercial_accounts')
             .update({ current_balance: newBalance })
             .eq('id', accountId);
+    },
+
+    async transferFunds(fromId: string, toId: string, amount: number) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("User not authenticated");
+
+        // 1. Debit Source
+        await this.createTransaction({
+            description: `Transferência enviada`,
+            amount: amount,
+            type: 'debit',
+            transaction_date: new Date().toISOString(),
+            account_id: fromId,
+        });
+
+        // 2. Credit Destination
+        await this.createTransaction({
+            description: `Transferência recebida`,
+            amount: amount,
+            type: 'credit',
+            transaction_date: new Date().toISOString(),
+            account_id: toId,
+        });
+
+        // Note: createTransaction already calls updateAccountBalance, so balances are updated.
+        // Ideally this should be a DB function (RPC) for transaction safety, 
+        // but for now relying on sequential execution is acceptable given current architecture.
     }
 };

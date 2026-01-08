@@ -29,6 +29,7 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
     const [type, setType] = useState<'bank' | 'cash' | 'wallet'>('bank');
     const [balance, setBalance] = useState("");
     const [selectedBankCode, setSelectedBankCode] = useState("");
+    const [customBankName, setCustomBankName] = useState("");
 
     const handleOpenChange = (newOpen: boolean) => {
         setIsOpen(newOpen);
@@ -37,7 +38,9 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
             setName("");
             setType("bank");
             setBalance("");
+            setBalance("");
             setSelectedBankCode("");
+            setCustomBankName("");
         }
         onOpenChange?.(newOpen);
     };
@@ -55,6 +58,16 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
             return;
         }
 
+        if (type === 'bank' && !selectedBankCode) {
+            toast.error("Selecione o banco");
+            return;
+        }
+
+        if (type === 'bank' && selectedBankCode === 'OTHER' && !customBankName) {
+            toast.error("Digite o nome do banco");
+            return;
+        }
+
         setLoading(true);
         try {
             const numericBalance = parseFloat(balance.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
@@ -64,8 +77,8 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
                 name,
                 type,
                 initial_balance: numericBalance,
-                bank_code: type === 'bank' ? selectedBankCode : undefined,
-                color: bankInfo?.color
+                bank_code: type === 'bank' ? (selectedBankCode === 'OTHER' ? customBankName : selectedBankCode) : undefined,
+                color: selectedBankCode === 'OTHER' ? '#64748b' : bankInfo?.color
             });
 
             toast.success("Conta criada com sucesso!");
@@ -81,6 +94,10 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
 
     const handleBankSelect = (code: string) => {
         setSelectedBankCode(code);
+        if (code === 'OTHER') {
+            setName("");
+            return;
+        }
         const bank = BRAZILIAN_BANKS.find(b => b.code === code);
         if (bank && !name) {
             setName(bank.name); // Auto-fill name if empty
@@ -146,6 +163,21 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
                                     ))}
                                 </SelectContent>
                             </Select>
+
+                            {selectedBankCode === 'OTHER' && (
+                                <div className="mt-2 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <Label htmlFor="custom-bank">Nome do Banco</Label>
+                                    <Input
+                                        id="custom-bank"
+                                        value={customBankName}
+                                        onChange={(e) => {
+                                            setCustomBankName(e.target.value);
+                                            if (!name) setName(e.target.value);
+                                        }}
+                                        placeholder="Ex: Banco Regional"
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
 

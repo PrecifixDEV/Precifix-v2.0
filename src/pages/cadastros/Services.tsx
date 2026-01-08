@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Search, CarFront, Info, Pencil, MoreHorizontal, TrendingUp } from "lucide-react";
+import { Trash2, Search, CarFront, Info, Pencil, MoreHorizontal, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
 import { Input } from "@/components/ui/input";
 import {
     Card,
@@ -258,9 +259,11 @@ export const Services = () => {
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Serviços</h1>
                     <p className="text-slate-500 dark:text-slate-400">Gerencie os serviços oferecidos</p>
                 </div>
-                <Button onClick={handleCreate} size="icon" className="md:hidden h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Plus className="h-5 w-5" />
-                </Button>
+                <ResponsiveAddButton
+                    onClick={handleCreate}
+                    label="Novo Serviço"
+                    className="shrink-0"
+                />
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -317,9 +320,7 @@ export const Services = () => {
 
 
 
-                            <Button onClick={handleCreate} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 hidden md:flex">
-                                <Plus className="mr-2 h-4 w-4" /> Novo Serviço
-                            </Button>
+                            {/* Desktop Button Removed - Moved to Header */}
                         </div>
                     </div>
                 </CardHeader>

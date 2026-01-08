@@ -30,3 +30,10 @@
 - Sempre verifique se o código gerado respeita as políticas de RLS do Supabase.
 - Antes de criar uma nova funcionalidade, verifique se existe lógica similar no `Backup_precifixv1.0`.
 - Mantenha o código modular e com tipagem rigorosa (se aplicável).
+
+## Padrões de UI (Estrita Observância)
+
+1. **Botões de Ação Principal (Adicionar/Novo):**
+   - NUNCA crie botões `Button` manuais para ações de "Adicionar" ou "Novo Item".
+   - SEMPRE use o componente `<ResponsiveAddButton onClick={...} label="..." />`.
+   - Este botão garante o padrão visual: Amarelo, Circular com "+" no Mobile, Retangular com Texto no Desktop.
