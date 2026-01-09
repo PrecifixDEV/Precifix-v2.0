@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Wallet, ArrowRightLeft, MoreHorizontal, Trash2, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { formatMoney } from "../../utils/format";
+import { Plus, ArrowRightLeft, ArrowUpRight, ArrowDownRight } from "lucide-react";
+
 import { financialService } from "@/services/financialService";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { AccountFormDialog } from "@/components/financial/AccountFormDialog";
 import { TransactionList } from "@/components/financial/TransactionList";
 import { TransferDialog } from "@/components/financial/TransferDialog";
