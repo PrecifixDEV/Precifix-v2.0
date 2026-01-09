@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowDownLeft, ArrowUpRight, Search, FileText, Filter, DollarSign, Tag, Landmark, CreditCard, Check, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Search, FileText, DollarSign, Tag, Landmark, CreditCard, X } from "lucide-react";
 import type { FinancialTransaction } from "@/types/costs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatMoney } from "../../utils/format";
@@ -29,19 +29,23 @@ type SearchField = 'description' | 'amount' | 'category' | 'bank' | 'payment_met
 type TypeFilter = 'all' | 'credit' | 'debit';
 
 export function TransactionList({ transactions, isLoading }: TransactionListProps) {
+    // State for Search & Filters
+    const [isExpanded, setIsExpanded] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [activeSearch, setActiveSearch] = useState<{ field: SearchField, term: string } | null>(null);
     const [searchField, setSearchField] = useState<SearchField>('description');
     const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isInputFocused, setIsInputFocused] = useState(false);
 
+    // Filter Logic
     const filteredTransactions = useMemo(() => {
         if (!transactions) return [];
 
         return transactions.filter(t => {
-            // 0. Date Range Filter
+            // 0. Date Range
             if (dateRange?.from) {
-                const transactionDate = new Date(t.transaction_date + 'T00:00:00'); // Assuming YYYY-MM-DD
+                const transactionDate = new Date(t.transaction_date + 'T00:00:00');
                 const start = startOfDay(dateRange.from);
                 const end = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
 
@@ -53,12 +57,11 @@ export function TransactionList({ transactions, isLoading }: TransactionListProp
             // 1. Type Filter
             if (typeFilter !== 'all' && t.type !== typeFilter) return false;
 
-            // 2. Search Filter
-            if (!searchTerm) return true;
+            // 2. Active Search Filter
+            if (!activeSearch) return true;
 
-            const term = searchTerm.toLowerCase();
-
-            switch (searchField) {
+            const term = activeSearch.term.toLowerCase();
+            switch (activeSearch.field) {
                 case 'description':
                     return t.description.toLowerCase().includes(term);
                 case 'category':
@@ -68,14 +71,63 @@ export function TransactionList({ transactions, isLoading }: TransactionListProp
                 case 'bank':
                     return (t.commercial_accounts?.name || '').toLowerCase().includes(term);
                 case 'amount':
-                    // Allow simple number search
                     return t.amount.toString().includes(term);
                 default:
                     return t.description.toLowerCase().includes(term);
             }
         });
-    }, [transactions, searchTerm, searchField, typeFilter, dateRange]);
+    }, [transactions, activeSearch, typeFilter, dateRange]);
 
+
+    const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
+        const date = transaction.transaction_date;
+        if (!groups[date]) {
+            groups[date] = [];
+        }
+        groups[date].push(transaction);
+        return groups;
+    }, {} as Record<string, typeof transactions>);
+
+    const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+    const getSearchFieldLabel = (field: SearchField) => {
+        switch (field) {
+            case 'description': return 'Descrição';
+            case 'amount': return 'Valor';
+            case 'category': return 'Categoria';
+            case 'bank': return 'Banco';
+            case 'payment_method': return 'Forma de Pgto';
+        }
+    };
+
+    const getSearchFieldIcon = (field: SearchField) => {
+        switch (field) {
+            case 'description': return <FileText className="h-4 w-4" />;
+            case 'amount': return <DollarSign className="h-4 w-4" />;
+            case 'category': return <Tag className="h-4 w-4" />;
+            case 'bank': return <Landmark className="h-4 w-4" />;
+            case 'payment_method': return <CreditCard className="h-4 w-4" />;
+        }
+    };
+
+    const handleSearchSubmit = () => {
+        if (searchTerm.trim()) {
+            setActiveSearch({ field: searchField, term: searchTerm });
+            setIsExpanded(false);
+            setSearchTerm("");
+        }
+    };
+
+    const handleClearFilters = () => {
+        setActiveSearch(null);
+        setTypeFilter('all');
+        setSearchField('description');
+        setDateRange(undefined);
+        setSearchTerm("");
+        setIsExpanded(false);
+    };
+
+    const hasActiveFilters = !!(activeSearch || typeFilter !== 'all' || dateRange?.from);
 
     if (isLoading) {
         return (
@@ -98,96 +150,100 @@ export function TransactionList({ transactions, isLoading }: TransactionListProp
         );
     }
 
-    // Group transactions by date
-    const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
-        const date = transaction.transaction_date;
-        if (!groups[date]) {
-            groups[date] = [];
-        }
-        groups[date].push(transaction);
-        return groups;
-    }, {} as Record<string, typeof transactions>);
-
-    const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
-    const getSearchFieldLabel = (field: SearchField) => {
-        switch (field) {
-            case 'description': return 'Descrição';
-            case 'amount': return 'Valor';
-            case 'category': return 'Categoria';
-            case 'bank': return 'Banco';
-            case 'payment_method': return 'Forma de Pgto';
-        }
-    };
-
     return (
         <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
-            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
+            <CardHeader className="flex flex-col md:flex-row items-center justify-between pb-4 gap-4">
                 <CardTitle className="text-lg font-medium flex items-center gap-2">
                     <FileText className="h-5 w-5 text-muted-foreground" />
                     Extrato de Movimentações
                 </CardTitle>
 
-                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                    {/* Search Bar */}
+                <div className="flex items-center justify-end gap-2 w-full md:w-auto overflow-x-auto no-scrollbar">
+
+                    {/* Master Toggle */}
+                    <Button
+                        variant={hasActiveFilters ? "default" : "outline"}
+                        size="icon"
+                        className={cn(
+                            "shrink-0 transition-all",
+                            hasActiveFilters
+                                ? "bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border-yellow-400"
+                                : "bg-slate-50 dark:bg-slate-900/50 border-none"
+                        )}
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        title={isExpanded ? "Recolher Filtros" : "Expandir Filtros"}
+                    >
+                        <Search className="h-4 w-4" />
+                    </Button>
+
+                    {/* Collapsible Toolbar */}
                     <div className={cn(
-                        "relative transition-all duration-300 ease-in-out",
-                        isSearchFocused ? "w-full md:w-[240px] md:flex-none" : "flex-1 md:w-[240px] md:flex-none"
+                        "flex items-center gap-2 overflow-hidden transition-all duration-300 ease-in-out",
+                        isExpanded ? (isInputFocused ? "w-full md:w-auto ml-2" : "w-auto ml-2") : "w-0",
+                        isExpanded ? "opacity-100" : "opacity-0"
                     )}>
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
-                        <Input
-                            placeholder={`Buscar por ${getSearchFieldLabel(searchField).toLowerCase()}...`}
-                            className="pl-9 bg-slate-50 dark:bg-slate-900/50 border-none w-full"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onFocus={() => setIsSearchFocused(true)}
-                            onBlur={() => setIsSearchFocused(false)}
-                        />
-                    </div>
+                        {/* 1. Date Picker */}
+                        <div className={cn("transition-all duration-300", isInputFocused ? "hidden md:block" : "block")}>
+                            <DateRangePicker
+                                date={dateRange}
+                                setDate={(d) => {
+                                    setDateRange(d);
+                                    if (d?.from) setIsExpanded(false);
+                                }}
+                            />
+                        </div>
 
-                    {/* Controls container - hides on mobile when search is focused */}
-                    <div className={cn(
-                        "flex items-center gap-2 flex-wrap sm:flex-nowrap",
-                        isSearchFocused ? "hidden md:flex" : "flex"
-                    )}>
-                        {/* Date Range Picker */}
-                        <DateRangePicker date={dateRange} setDate={setDateRange} className="w-[180px] sm:w-[240px]" />
+                        {/* 2. Filter Type Selector */}
+                        <div className={cn("transition-all duration-300", isInputFocused ? "hidden md:block" : "block")}>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="icon" className="shrink-0 bg-slate-50 dark:bg-slate-900/50 border-none" title="Tipo de Busca">
+                                        {getSearchFieldIcon(searchField)}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start">
+                                    <DropdownMenuLabel>Buscar por</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setSearchField('description')}>
+                                        <FileText className="mr-2 h-4 w-4" /> Descrição
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSearchField('amount')}>
+                                        <DollarSign className="mr-2 h-4 w-4" /> Valor
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSearchField('category')}>
+                                        <Tag className="mr-2 h-4 w-4" /> Categoria
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSearchField('bank')}>
+                                        <Landmark className="mr-2 h-4 w-4" /> Banco
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSearchField('payment_method')}>
+                                        <CreditCard className="mr-2 h-4 w-4" /> Forma de Pagamento
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
 
-                        {/* Field Filter Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon" className="shrink-0 bg-slate-50 dark:bg-slate-900/50 border-none" title="Filtrar por">
-                                    <Filter className="h-4 w-4 text-slate-500" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => setSearchField('description')}>
-                                    <FileText className="mr-2 h-4 w-4" /> Descrição
-                                    {searchField === 'description' && <Check className="ml-auto h-4 w-4" />}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSearchField('amount')}>
-                                    <DollarSign className="mr-2 h-4 w-4" /> Valor
-                                    {searchField === 'amount' && <Check className="ml-auto h-4 w-4" />}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSearchField('category')}>
-                                    <Tag className="mr-2 h-4 w-4" /> Categoria
-                                    {searchField === 'category' && <Check className="ml-auto h-4 w-4" />}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSearchField('bank')}>
-                                    <Landmark className="mr-2 h-4 w-4" /> Banco
-                                    {searchField === 'bank' && <Check className="ml-auto h-4 w-4" />}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSearchField('payment_method')}>
-                                    <CreditCard className="mr-2 h-4 w-4" /> Forma de Pagamento
-                                    {searchField === 'payment_method' && <Check className="ml-auto h-4 w-4" />}
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* 3. Search Input */}
+                        <div className={cn(
+                            "transition-all duration-300 ease-in-out",
+                            isInputFocused ? "w-full md:w-[180px]" : "w-[180px]"
+                        )}>
+                            <Input
+                                placeholder={`Filtrar ${getSearchFieldLabel(searchField).toLowerCase()}...`}
+                                className="h-9 bg-slate-50 dark:bg-slate-900/50 w-full"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                                onFocus={() => setIsInputFocused(true)}
+                                onBlur={() => setIsInputFocused(false)}
+                            />
+                        </div>
 
-                        {/* Type Toggles */}
-                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
+                        {/* 4. Type Toggles */}
+                        <div className={cn(
+                            "flex items-center gap-1 bg-slate-100 dark:bg-slate-900 rounded-lg p-1 shrink-0 transition-all duration-300",
+                            isInputFocused ? "hidden md:flex" : "flex"
+                        )}>
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -195,7 +251,10 @@ export function TransactionList({ transactions, isLoading }: TransactionListProp
                                     "h-8 px-2 hover:bg-white dark:hover:bg-slate-800 transition-all",
                                     typeFilter === 'credit' && "bg-white dark:bg-slate-800 text-emerald-600 shadow-sm"
                                 )}
-                                onClick={() => setTypeFilter(prev => prev === 'credit' ? 'all' : 'credit')}
+                                onClick={() => {
+                                    setTypeFilter(prev => prev === 'credit' ? 'all' : 'credit');
+                                    setIsExpanded(false);
+                                }}
                                 title="Apenas Entradas"
                             >
                                 <ArrowUpRight className={cn("h-4 w-4", typeFilter === 'credit' ? "text-emerald-600" : "text-slate-500")} />
@@ -207,33 +266,72 @@ export function TransactionList({ transactions, isLoading }: TransactionListProp
                                     "h-8 px-2 hover:bg-white dark:hover:bg-slate-800 transition-all",
                                     typeFilter === 'debit' && "bg-white dark:bg-slate-800 text-red-600 shadow-sm"
                                 )}
-                                onClick={() => setTypeFilter(prev => prev === 'debit' ? 'all' : 'debit')}
+                                onClick={() => {
+                                    setTypeFilter(prev => prev === 'debit' ? 'all' : 'debit');
+                                    setIsExpanded(false);
+                                }}
                                 title="Apenas Saídas"
                             >
                                 <ArrowDownLeft className={cn("h-4 w-4", typeFilter === 'debit' ? "text-red-600" : "text-slate-500")} />
                             </Button>
                         </div>
-
-                        {/* Clear Filters Button */}
-                        {(searchTerm || typeFilter !== 'all' || dateRange) && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    setTypeFilter('all');
-                                    setSearchField('description');
-                                    setDateRange(undefined);
-                                }}
-                                title="Limpar Filtros"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        )}
                     </div>
+
+                    {/* Clear Filters (Outside collapsible) */}
+                    {hasActiveFilters && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0 ml-2"
+                            onClick={handleClearFilters}
+                            title="Limpar Filtros"
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             </CardHeader>
+
+            {/* Active Filters Display */}
+            {hasActiveFilters && (
+                <div className="px-6 pb-2 text-xs text-blue-500 italic flex flex-wrap gap-1 items-center">
+                    {dateRange?.from && (
+                        <span>
+                            Filtro: {
+                                (() => {
+                                    const from = dateRange.from;
+                                    const to = dateRange.to || dateRange.from;
+                                    const now = new Date();
+
+                                    const isSameDay = (d1: Date, d2: Date) => format(d1, 'yyyy-MM-dd') === format(d2, 'yyyy-MM-dd');
+
+                                    if (isSameDay(from, now) && isSameDay(to, now)) return "Hoje";
+                                    if (isSameDay(from, subDays(now, 1)) && isSameDay(to, subDays(now, 1))) return "Ontem";
+                                    if (isSameDay(from, subDays(now, 7)) && isSameDay(to, now)) return "Últimos 7 dias";
+                                    if (isSameDay(from, subDays(now, 30)) && isSameDay(to, now)) return "Últimos 30 dias";
+                                    if (isSameDay(from, startOfMonth(now)) && isSameDay(to, endOfMonth(now))) return "Este Mês";
+                                    if (isSameDay(from, startOfMonth(subMonths(now, 1))) && isSameDay(to, endOfMonth(subMonths(now, 1)))) return "Mês Passado";
+
+                                    return `${format(from, "dd/MM/yyyy", { locale: ptBR })} - ${format(to, "dd/MM/yyyy", { locale: ptBR })}`
+                                })()
+                            }
+                        </span>
+                    )}
+                    {activeSearch && (
+                        <span>
+                            {dateRange?.from ? "; " : ""}
+                            Filtro {getSearchFieldLabel(activeSearch.field)}: {activeSearch.term}
+                        </span>
+                    )}
+                    {typeFilter !== 'all' && (
+                        <span>
+                            {(dateRange?.from || activeSearch) ? "; " : ""}
+                            Filtro: {typeFilter === 'credit' ? 'Entradas' : 'Saídas'}
+                        </span>
+                    )}
+                </div>
+            )}
+
             <CardContent className="p-0">
                 {filteredTransactions.length === 0 ? (
                     <div className="py-12 text-center text-muted-foreground">

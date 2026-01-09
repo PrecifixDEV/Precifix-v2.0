@@ -12,10 +12,16 @@
     -   **Desktop Stability**: Fixed search bar jitter on desktop.
     -   **Clear Filters**: Added a "Clear All" (Red X) button to easily reset search and filters.
 
-3.  **Advanced Date Filtering**:
-    -   **New Component**: Created `DateRangePicker` with a dual-calendar view.
-    -   **Presets**: Added sidebar presets for quick selection: "Hoje", "Ontem", "Últimos 7 dias", "Últimos 30 dias", "Este Mês", "Mês Passado".
-    -   **Integration**: Fully integrated into `TransactionList.tsx` to filter transactions by date range.
+2.  **Date Filtering Enhancements**:
+    -   **Mobile UX**: Refined `DateRangePicker` with simplified presets grid and icon-only trigger for better mobile space usage.
+    -   **Integration**: Seamlessly integrated into the new filter toolbar.
+
+3.  **Search & Filter UX Overhaul (Master Toggle)**:
+    -   **Master Toggle**: Implemented a single entry point (Search Icon) for all filters. Buttons turn yellow when filters are active.
+    -   **Collapsed Toolbar**: All filter controls (Date, Search, Type) are hidden by default to keep the UI clean.
+    -   **Mobile Optimization**: Right-aligned toggle on mobile. Search input expands to fill width on focus, temporarily hiding other controls for easier typing.
+    -   **Auto-Collapse**: Toolbar automatically collapses after a search or filter action is applied.
+    -   **Status Text**: Consolidated active filter status (Date + Term + Type) into a single text block.
 
 4.  **UI Enhancements**:
     -   **Consolidated Balance**: Added blue hover effect to match action buttons.
