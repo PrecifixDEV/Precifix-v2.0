@@ -139,7 +139,7 @@ export const MonthlyExpenseFormDialog = ({ isOpen, onClose, monthlyBillingId, ex
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent
+            <DialogContent aria-describedby={undefined}
                 className="sm:max-w-[425px] bg-card"
                 onInteractOutside={(e) => e.preventDefault()}
             >

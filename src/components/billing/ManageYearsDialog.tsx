@@ -86,7 +86,7 @@ export const ManageYearsDialog = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-card">
+            <DialogContent className="sm:max-w-[425px] bg-card" aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle>Gerenciar Anos</DialogTitle>
                 </DialogHeader>

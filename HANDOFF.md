@@ -1,4 +1,29 @@
-# Handoff Log - 2026-01-08
+# Handoff Log - 2026-01-09
+
+## Work Completed
+1.  **Bank Details Page (`/accounts/:id`)**:
+    -   **New Feature**: Implemented a detailed view for individual bank accounts.
+    -   **Components**: Created `AccountDetailsPage`, `FinancialAccountCard` (extracted), and integrated `AreaChart` for income/expense visualization.
+    -   **Functionality**: Filter transactions by month/year, view daily balance evolution, and see a filtered list of transactions for that specific account.
+
+2.  **Search & Filter Polish**:
+    -   **Search Visibility**: Fixed bug where search icons were invisible in light mode (added `z-10`).
+    -   **Responsive Search**: Implemented an expanding search bar on mobile that hides other controls when focused.
+    -   **Desktop Stability**: Fixed search bar jitter on desktop.
+    -   **Clear Filters**: Added a "Clear All" (Red X) button to easily reset search and filters.
+
+3.  **Advanced Date Filtering**:
+    -   **New Component**: Created `DateRangePicker` with a dual-calendar view.
+    -   **Presets**: Added sidebar presets for quick selection: "Hoje", "Ontem", "Últimos 7 dias", "Últimos 30 dias", "Este Mês", "Mês Passado".
+    -   **Integration**: Fully integrated into `TransactionList.tsx` to filter transactions by date range.
+
+4.  **UI Enhancements**:
+    -   **Consolidated Balance**: Added blue hover effect to match action buttons.
+    -   **Transaction List**: Removing unused imports and cleaning up code.
+
+## Previous Logs
+
+### Handoff Log - 2026-01-08
 
 ## Work Completed
 1.  **UI Standardization (Add Buttons)**:
@@ -18,8 +43,6 @@
 
 4.  **Financial Service Updates**:
     -   Added `transferFunds` method to handle internal transfers between accounts.
-
-## Previous Logs
 
 ### Handoff Log - 2026-01-07
 

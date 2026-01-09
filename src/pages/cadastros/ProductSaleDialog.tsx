@@ -73,7 +73,7 @@ export function ProductSaleDialog({ open, onOpenChange, product, onSuccess }: Pr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+            <DialogContent className="sm:max-w-[400px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800" aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle className="text-slate-900 dark:text-white">
                         Configurar Venda

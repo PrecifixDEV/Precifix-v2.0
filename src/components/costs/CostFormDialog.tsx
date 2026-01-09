@@ -111,7 +111,7 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+            <DialogContent className="sm:max-w-[425px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800" aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle className="text-slate-900 dark:text-white">{cost ? 'Editar Custo' : 'Adicionar Novo Custo'}</DialogTitle>
                 </DialogHeader>

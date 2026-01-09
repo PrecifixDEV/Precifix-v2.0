@@ -20,11 +20,11 @@ export const BRAZILIAN_BANKS: Bank[] = [
     { code: '422', name: 'Banco Safra', shortName: 'Safra', color: '#CFA453' },
     { code: '756', name: 'Sicoob', color: '#003641' },
     { code: '748', name: 'Sicredi', color: '#366F31' },
-    { code: '623', name: 'Banco Pan', shortName: 'Pan', color: '#0083CA' },
+    { code: '197', name: 'Stone Pagamentos', shortName: 'Stone', color: '#00A868' },
+    { code: '348', name: 'Banco XP', shortName: 'XP', color: '#000000' },
     { code: '290', name: 'PagSeguro', shortName: 'PagBank', color: '#00C752' }, // Extra popular one
     { code: '380', name: 'PicPay', color: '#11C76F' }, // Extra popular one
     { code: '323', name: 'Mercado Pago', color: '#009EE3' },
-    { code: 'NEXT', name: 'Next', color: '#00FF5F' },
     { code: '637', name: 'Banco Sofisa', shortName: 'Sofisa', color: '#E9530E' },
     { code: 'OTHER', name: 'Outros', color: '#64748b' },
     { code: '999', name: 'Caixa Físico', shortName: 'Dinheiro', color: '#16a34a' }, // Custom for cash

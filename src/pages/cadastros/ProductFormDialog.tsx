@@ -230,7 +230,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto w-[90vw] sm:w-full">
+            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto w-[90vw] sm:w-full" aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle className="text-slate-900 dark:text-white">
                         {productToEdit?.id ? 'Editar Produto' : productToEdit ? 'Clonando Produto Existente' : 'Novo Produto'}

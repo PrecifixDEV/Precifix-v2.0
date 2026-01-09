@@ -5,19 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BankLogo } from "@/components/ui/bank-logo";
-import { Wallet, CheckCircle2, Loader2, ArrowUpRight } from "lucide-react";
+import { Wallet, CheckCircle2, Loader2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { financialService } from "@/services/financialService";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import type { FinancialAccount } from "@/types/costs";
+import { cn } from "@/lib/utils";
 
 interface AddValueDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     accounts: FinancialAccount[];
+    type?: 'credit' | 'debit'; // Default to credit (Entrada)
 }
 
-export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogProps) {
+export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }: AddValueDialogProps) {
     const queryClient = useQueryClient();
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
@@ -26,9 +28,18 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
     const [accountId, setAccountId] = useState<string>("");
     const [amount, setAmount] = useState<string>("");
     const [paymentMethod, setPaymentMethod] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+    const [category, setCategory] = useState<string>("");
+
+    const isCredit = type === 'credit';
+    const title = isCredit ? "Nova Entrada de Valor" : "Nova Saída de Valor";
+    const actionLabel = isCredit ? "Confirmar Entrada" : "Confirmar Saída";
+    const ThemeIcon = isCredit ? ArrowUpRight : ArrowDownRight;
+    const themeColor = isCredit ? "text-emerald-600" : "text-red-600";
+    const themeBg = isCredit ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700";
 
     const handleConfirm = async () => {
-        if (!accountId || !amount || !paymentMethod) {
+        if (!accountId || !amount || !paymentMethod || !description || !category) {
             toast.error("Preencha todos os campos");
             return;
         }
@@ -44,9 +55,11 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
 
             // Create Transaction
             await financialService.createTransaction({
-                description: `Entrada: ${paymentMethod}`,
+                description: description,
+                category: category,
+                payment_method: paymentMethod,
                 amount: numAmount,
-                type: 'credit',
+                type: type,
                 transaction_date: new Date().toISOString(),
                 account_id: accountId,
             });
@@ -61,7 +74,7 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
 
         } catch (error) {
             console.error(error);
-            toast.error("Erro ao adicionar valor");
+            toast.error("Erro ao registrar transação");
         } finally {
             setLoading(false);
         }
@@ -74,6 +87,8 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
             setAccountId("");
             setAmount("");
             setPaymentMethod("");
+            setDescription("");
+            setCategory("");
         }, 300);
     };
 
@@ -84,30 +99,46 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
         setAmount(value);
     };
 
+    // Description limit
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (value.length <= 70) {
+            setDescription(value);
+        }
+    };
+
     const selectedAcc = accounts.find(a => a.id === accountId);
+
+    // Dummy categories for now
+    const categories = isCredit
+        ? ["Vendas", "Serviços", "Investimento", "Outros"]
+        : ["Fornecedores", "Despesas Operacionais", "Impostos", "Manutenção", "Outros"];
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[400px]">
+            <DialogContent className="sm:max-w-[400px]" aria-describedby={undefined}>
                 {step === 'form' ? (
                     <>
                         <DialogHeader>
-                            <DialogTitle className="text-center pb-2 border-b border-slate-100 dark:border-slate-800">Adicionar Valor</DialogTitle>
+                            <DialogTitle className="text-center pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2">
+                                <ThemeIcon className={cn("h-5 w-5", themeColor)} />
+                                {title}
+                            </DialogTitle>
                         </DialogHeader>
 
-                        <div className="flex flex-col items-center py-4 space-y-6">
+                        <div className="flex flex-col items-center py-4 space-y-5">
                             {/* Bank Selector (Visual) */}
                             <div className="w-full space-y-2 text-center">
-                                <Label>Destino</Label>
+                                <Label>Conta de {isCredit ? 'Destino' : 'Origem'}</Label>
                                 <div className="flex justify-center">
                                     {selectedAcc ? (
                                         <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300">
                                             {selectedAcc.type === 'bank' && selectedAcc.bank_code ? (
-                                                <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 dark:border-slate-700 shadow-md mb-2">
-                                                    <BankLogo bankCode={selectedAcc.bank_code} className="h-10 w-10" showName={false} fullBleed />
+                                                <div className="h-14 w-14 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 dark:border-slate-700 shadow-md mb-2">
+                                                    <BankLogo bankCode={selectedAcc.bank_code} className="h-8 w-8" showName={false} fullBleed />
                                                 </div>
                                             ) : (
-                                                <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400 shadow-md border border-emerald-200 dark:border-emerald-800 mb-2">
+                                                <div className="h-14 w-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400 shadow-md border border-emerald-200 dark:border-emerald-800 mb-2">
                                                     <Wallet className="h-8 w-8" />
                                                 </div>
                                             )}
@@ -132,25 +163,49 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
                             </div>
 
                             {/* Inputs */}
-                            <div className="w-full space-y-4">
+                            <div className="w-full space-y-3">
                                 <div className="space-y-1">
-                                    <Label>Forma de Pagamento</Label>
+                                    <Label>Descrição <span className="text-xs text-muted-foreground ml-1">({description.length}/70)</span></Label>
                                     <Input
-                                        placeholder="Ex: PIX, Dinheiro, Cartão"
-                                        value={paymentMethod}
-                                        onChange={e => setPaymentMethod(e.target.value)}
+                                        placeholder="Ex: Pagamento Fornecedor X"
+                                        value={description}
+                                        onChange={handleDescriptionChange}
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <Label>Valor do aporte</Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <Label>Categoria</Label>
+                                        <Select value={category} onValueChange={setCategory}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecionar" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {categories.map(cat => (
+                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label>Forma de Pagamento</Label>
+                                        <Input
+                                            placeholder="Ex: PIX"
+                                            value={paymentMethod}
+                                            onChange={e => setPaymentMethod(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1 pt-2">
+                                    <Label className="text-center block text-slate-500">Valor da transação</Label>
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">R$</span>
+                                        <span className={cn("absolute left-3 top-1/2 -translate-y-1/2 font-bold text-xl", themeColor)}>R$</span>
                                         <Input
                                             value={amount}
                                             onChange={handleAmountChange}
                                             placeholder="0,00"
-                                            className="text-lg font-bold pl-8"
+                                            className={cn("text-2xl font-bold pl-10 h-14", themeColor)}
                                         />
                                     </div>
                                 </div>
@@ -160,13 +215,13 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
                         <DialogFooter className="sm:justify-center">
                             <Button
                                 onClick={handleConfirm}
-                                disabled={!accountId || !amount || !paymentMethod || loading}
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                                disabled={!accountId || !amount || !paymentMethod || !description || !category || loading}
+                                className={cn("w-full text-white transition-colors", themeBg)}
                             >
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
                                     <>
-                                        <ArrowUpRight className="mr-2 h-4 w-4" />
-                                        Confirmar Entrada
+                                        <ThemeIcon className="mr-2 h-4 w-4" />
+                                        {actionLabel}
                                     </>
                                 )}
                             </Button>
@@ -174,12 +229,12 @@ export function AddValueDialog({ open, onOpenChange, accounts }: AddValueDialogP
                     </>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-10 space-y-4 animate-in fade-in zoom-in duration-300">
-                        <div className="h-16 w-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-2">
-                            <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-500" />
+                        <div className={cn("h-16 w-16 rounded-full flex items-center justify-center mb-2", isCredit ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30")}>
+                            <CheckCircle2 className={cn("h-8 w-8", isCredit ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500")} />
                         </div>
-                        <h2 className="text-xl font-bold text-center">Valor Adicionado!</h2>
+                        <h2 className="text-xl font-bold text-center">{isCredit ? "Entrada Registrada!" : "Saída Registrada!"}</h2>
                         <p className="text-center text-muted-foreground text-sm px-4">
-                            Entrada de <strong className="text-slate-900 dark:text-slate-100">R$ {amount}</strong> registrada com sucesso.
+                            {isCredit ? "Entrada" : "Saída"} de <strong className="text-slate-900 dark:text-slate-100">R$ {amount}</strong> registrada com sucesso.
                         </p>
                     </div>
                 )}

@@ -315,7 +315,7 @@ export function ClientFormDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col p-0">
+            <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col p-0" aria-describedby={undefined}>
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-slate-900 dark:text-white">
                         {activeClient ? "Editar Cliente" : "Novo Cliente"}

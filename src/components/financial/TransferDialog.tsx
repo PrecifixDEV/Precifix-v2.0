@@ -27,10 +27,11 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
     const [fromAccount, setFromAccount] = useState<string>("");
     const [toAccount, setToAccount] = useState<string>("");
     const [amount, setAmount] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
 
     const handleTransfer = async () => {
         if (!fromAccount || !toAccount || !amount) {
-            toast.error("Preencha todos os campos");
+            toast.error("Preencha todos os campos obrigatórios");
             return;
         }
         if (fromAccount === toAccount) {
@@ -52,7 +53,7 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
 
         try {
             setLoading(true);
-            await financialService.transferFunds(fromAccount, toAccount, numAmount);
+            await financialService.transferFunds(fromAccount, toAccount, numAmount, description);
             await queryClient.invalidateQueries({ queryKey: ['commercial_accounts'] });
             await queryClient.invalidateQueries({ queryKey: ['financial_transactions'] });
             setStep('success'); // Show success animation
@@ -78,6 +79,7 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
             setFromAccount("");
             setToAccount("");
             setAmount("");
+            setDescription("");
         }, 300);
     };
 
@@ -110,9 +112,11 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
         setAmount(value);
     };
 
+
+
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
                 {step === 'form' ? (
                     <>
                         <DialogHeader>
@@ -189,6 +193,15 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                                 </div>
                             </div>
 
+                            <div className="space-y-1">
+                                <Label>Descrição <span className="text-xs text-muted-foreground ml-1">(Opcional)</span></Label>
+                                <Input
+                                    placeholder="Ex: Reserva de emergência"
+                                    value={description}
+                                    onChange={e => setDescription(e.target.value)}
+                                />
+                            </div>
+
                             <div className="space-y-2">
                                 <Label className="text-center block">Valor a transferir</Label>
                                 <div className="relative">
@@ -227,6 +240,9 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                             <ArrowRight className="h-4 w-4" />
                             <span>{toAccData?.name}</span>
                         </div>
+                        {description && (
+                            <p className="text-xs text-slate-400 mt-2 italic">"{description}"</p>
+                        )}
                     </div>
                 )}
             </DialogContent>

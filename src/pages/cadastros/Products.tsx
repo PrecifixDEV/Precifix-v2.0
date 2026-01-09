@@ -307,7 +307,7 @@ export const Products = () => {
                             </DropdownMenu>
 
                             <div className="relative flex-1">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
+                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400 z-10" />
                                 <Input
                                     placeholder="Buscar produto..."
                                     className="pl-8 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"

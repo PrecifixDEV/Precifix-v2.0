@@ -294,7 +294,7 @@ export const Services = () => {
                             </DropdownMenu>
 
                             <div className={`relative flex-1 transition-all duration-300 ${isSearchFocused ? 'w-full' : 'w-auto'}`}>
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
                                 <Input
                                     placeholder="Buscar serviços..."
                                     value={searchTerm}

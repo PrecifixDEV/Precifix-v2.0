@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Landmark, Wallet, Plus } from "lucide-react";
+import { Loader2, Landmark, Wallet, Plus, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,16 @@ import { financialService } from "@/services/financialService";
 import { BRAZILIAN_BANKS } from "@/constants/banks";
 import { BankLogo } from "@/components/ui/bank-logo";
 import { cn } from "@/lib/utils";
+import type { FinancialAccount } from "@/types/costs";
 
 interface AccountFormDialogProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     trigger?: React.ReactNode;
+    accountToEdit?: FinancialAccount | null;
 }
 
-export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDialogProps) {
+export function AccountFormDialog({ open, onOpenChange, trigger, accountToEdit }: AccountFormDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const queryClient = useQueryClient();
@@ -31,16 +33,51 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
     const [selectedBankCode, setSelectedBankCode] = useState("");
     const [customBankName, setCustomBankName] = useState("");
 
+    const isEditing = !!accountToEdit;
+
+    // Effect to handle open/edit state changes
+    useEffect(() => {
+        const visible = open !== undefined ? open : isOpen;
+
+        if (visible && accountToEdit) {
+            // Populate for Edit
+            setName(accountToEdit.name);
+            setType(accountToEdit.type as any);
+            setBalance(String(accountToEdit.initial_balance).replace('.', ',')); // Display Initial
+            // Determine Bank Code
+            if (accountToEdit.type === 'bank') {
+                // Logic to find if it's a known bank or custom
+                const knownBank = BRAZILIAN_BANKS.find(b => b.code === accountToEdit.bank_code);
+                if (knownBank) {
+                    setSelectedBankCode(accountToEdit.bank_code || "");
+                } else {
+                    setSelectedBankCode('OTHER');
+                    setCustomBankName(accountToEdit.bank_code || "");
+                }
+            } else {
+                setSelectedBankCode("999"); // Cash
+            }
+        } else if (visible && !accountToEdit) {
+            // Reset for Create (if not already handled by onOpenChange)
+            // Check if we need to clear (e.g. if we just closed edit and opened create)
+            if (!name) { // Simple check to avoid clearing if user is typing
+                // Already cleared by handleOpenChange mostly
+            }
+        }
+    }, [open, isOpen, accountToEdit]);
+
+
     const handleOpenChange = (newOpen: boolean) => {
         setIsOpen(newOpen);
         if (!newOpen) {
-            // Reset form
-            setName("");
-            setType("bank");
-            setBalance("");
-            setBalance("");
-            setSelectedBankCode("");
-            setCustomBankName("");
+            // Reset form delayed to avoid flicker
+            setTimeout(() => {
+                setName("");
+                setType("bank");
+                setBalance("");
+                setSelectedBankCode("");
+                setCustomBankName("");
+            }, 300);
         }
         onOpenChange?.(newOpen);
     };
@@ -58,11 +95,6 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
             return;
         }
 
-        if (type === 'bank' && !selectedBankCode) {
-            toast.error("Selecione o banco");
-            return;
-        }
-
         if (type === 'bank' && selectedBankCode === 'OTHER' && !customBankName) {
             toast.error("Digite o nome do banco");
             return;
@@ -72,21 +104,34 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
         try {
             const numericBalance = parseFloat(balance.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
             const bankInfo = BRAZILIAN_BANKS.find(b => b.code === selectedBankCode);
+            const bankName = type === 'bank' ? (selectedBankCode === 'OTHER' ? customBankName : selectedBankCode) : undefined;
+            const color = selectedBankCode === 'OTHER' ? '#64748b' : bankInfo?.color;
 
-            await financialService.createAccount({
-                name,
-                type,
-                initial_balance: numericBalance,
-                bank_code: type === 'bank' ? (selectedBankCode === 'OTHER' ? customBankName : selectedBankCode) : undefined,
-                color: selectedBankCode === 'OTHER' ? '#64748b' : bankInfo?.color
-            });
+            if (isEditing && accountToEdit) {
+                await financialService.updateAccount(accountToEdit.id, {
+                    name,
+                    type,
+                    bank_code: bankName,
+                    color
+                    // We do NOT update initial_balance or current_balance here to avoid data corruption
+                });
+                toast.success("Conta atualizada!");
+            } else {
+                await financialService.createAccount({
+                    name,
+                    type,
+                    initial_balance: numericBalance,
+                    bank_code: bankName,
+                    color
+                });
+                toast.success("Conta criada com sucesso!");
+            }
 
-            toast.success("Conta criada com sucesso!");
             queryClient.invalidateQueries({ queryKey: ['commercial_accounts'] });
             handleOpenChange(false);
         } catch (error) {
             console.error(error);
-            toast.error("Erro ao criar conta");
+            toast.error(isEditing ? "Erro ao atualizar conta" : "Erro ao criar conta");
         } finally {
             setLoading(false);
         }
@@ -95,23 +140,23 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
     const handleBankSelect = (code: string) => {
         setSelectedBankCode(code);
         if (code === 'OTHER') {
-            setName("");
+            if (!isEditing) setName("");
             return;
         }
         const bank = BRAZILIAN_BANKS.find(b => b.code === code);
-        if (bank && !name) {
-            setName(bank.name); // Auto-fill name if empty
+        if (bank && !name && !isEditing) {
+            setName(bank.name); // Auto-fill name only if new
         }
     };
 
     return (
         <Dialog open={open !== undefined ? open : isOpen} onOpenChange={handleOpenChange}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle>Nova Conta</DialogTitle>
+                    <DialogTitle>{isEditing ? "Editar Conta" : "Nova Conta"}</DialogTitle>
                     <DialogDescription>
-                        Cadastre uma nova conta bancária ou caixa físico.
+                        {isEditing ? "Atualize as informações da conta." : "Cadastre uma nova conta bancária ou caixa físico."}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -123,14 +168,16 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
                                 onClick={() => setType('bank')}
                                 className={cn(
                                     "cursor-pointer rounded-lg border p-3 flex flex-col items-center gap-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-900",
-                                    type === 'bank' ? "border-primary bg-primary/5 text-primary" : "border-slate-200 dark:border-slate-800"
+                                    type === 'bank' ? "border-primary bg-primary/5 text-primary" : "border-slate-200 dark:border-slate-800",
+                                    isEditing && "opacity-50 cursor-not-allowed" // Disable changing type logic for simplicity? User only asked for Name.
                                 )}
+                            // Allow type change but might be weird if transactions exist? Let's allow.
                             >
                                 <Landmark className="h-5 w-5" />
                                 <span className="text-sm font-medium">Conta Bancária</span>
                             </div>
                             <div
-                                onClick={() => { setType('cash'); setSelectedBankCode('999'); setName('Caixa Físico'); }}
+                                onClick={() => { setType('cash'); setSelectedBankCode('999'); if (!isEditing) setName('Caixa Físico'); }}
                                 className={cn(
                                     "cursor-pointer rounded-lg border p-3 flex flex-col items-center gap-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-900",
                                     type === 'cash' ? "border-primary bg-primary/5 text-primary" : "border-slate-200 dark:border-slate-800"
@@ -172,7 +219,7 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
                                         value={customBankName}
                                         onChange={(e) => {
                                             setCustomBankName(e.target.value);
-                                            if (!name) setName(e.target.value);
+                                            if (!name && !isEditing) setName(e.target.value);
                                         }}
                                         placeholder="Ex: Banco Regional"
                                     />
@@ -204,10 +251,13 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
                                 }}
                                 className="pl-9"
                                 placeholder="0,00"
+                                disabled={isEditing} // Block balance edit
                             />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            O saldo atual será calculado a partir deste valor somado às transações.
+                            {isEditing
+                                ? "O saldo inicial não pode ser alterado após a criação."
+                                : "O saldo atual será calculado a partir deste valor somado às transações."}
                         </p>
                     </div>
 
@@ -216,8 +266,8 @@ export function AccountFormDialog({ open, onOpenChange, trigger }: AccountFormDi
                             Cancelar
                         </Button>
                         <Button type="submit" disabled={loading}>
-                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                            Criar Conta
+                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (isEditing ? <Save className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />)}
+                            {isEditing ? "Salvar Alterações" : "Criar Conta"}
                         </Button>
                     </DialogFooter>
                 </form>

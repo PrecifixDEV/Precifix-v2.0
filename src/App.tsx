@@ -11,6 +11,7 @@ import { Profile } from './pages/Profile'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ManageCosts } from './pages/ManageCosts'
 import AccountsPage from "./pages/financial/AccountsPage";
+import AccountDetailsPage from "./pages/financial/AccountDetailsPage";
 import AccountsPayable from './pages/AccountsPayable'
 import { MyCompany } from './pages/MyCompany'
 import { Products } from './pages/cadastros/Products'
@@ -40,6 +41,7 @@ function App() {
             <Route path="/minha-empresa" element={<MyCompany />} />
             <Route path="/custos" element={<ManageCosts />} />
             <Route path="/accounts" element={<AccountsPage />} />
+            <Route path="/accounts/:id" element={<AccountDetailsPage />} />
             <Route path="/accounts-payable" element={<AccountsPayable />} />
 
             {/* Cadastros Routes */}

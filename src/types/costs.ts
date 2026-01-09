@@ -63,6 +63,7 @@ export interface FinancialTransaction {
     type: 'credit' | 'debit';
     description: string;
     category?: string;
+    payment_method?: string;
     transaction_date: string;
     related_entity_type?: string;
     related_entity_id?: string;

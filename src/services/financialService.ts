@@ -31,6 +31,15 @@ export const financialService = {
         return data;
     },
 
+    async updateAccount(id: string, updates: Partial<FinancialAccount>) {
+        const { error } = await supabase
+            .from('commercial_accounts')
+            .update(updates)
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
     async deleteAccount(id: string) {
         const { error } = await supabase
             .from('commercial_accounts')
@@ -101,24 +110,30 @@ export const financialService = {
             .eq('id', accountId);
     },
 
-    async transferFunds(fromId: string, toId: string, amount: number) {
+    async transferFunds(fromId: string, toId: string, amount: number, description: string = "") {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("User not authenticated");
 
+        const txDescription = description || "Transferência entre Contas";
+
         // 1. Debit Source
         await this.createTransaction({
-            description: `Transferência enviada`,
+            description: txDescription,
             amount: amount,
             type: 'debit',
+            category: 'Transferência',
+            payment_method: 'Transferência',
             transaction_date: new Date().toISOString(),
             account_id: fromId,
         });
 
         // 2. Credit Destination
         await this.createTransaction({
-            description: `Transferência recebida`,
+            description: txDescription,
             amount: amount,
             type: 'credit',
+            category: 'Transferência',
+            payment_method: 'Transferência',
             transaction_date: new Date().toISOString(),
             account_id: toId,
         });

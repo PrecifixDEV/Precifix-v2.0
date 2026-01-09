@@ -13,7 +13,7 @@ interface ConsolidatedBalanceCardProps {
 
 export function ConsolidatedBalanceCard({ totalBalance, accounts }: ConsolidatedBalanceCardProps) {
     return (
-        <Card className="w-full h-full flex flex-col justify-between border-slate-200 dark:border-slate-800 shadow-xl">
+        <Card className="w-full h-full flex flex-col justify-between border-slate-200 dark:border-slate-800 shadow-xl transition-all hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20">
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Wallet className="h-4 w-4" />

@@ -66,7 +66,7 @@ export const ImageCropper = ({
 
     return (
         <Dialog open={open} onOpenChange={(openState) => !openState && !processing && onClose()}>
-            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0 gap-0 bg-slate-900 border-slate-800 text-white">
+            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0 gap-0 bg-slate-900 border-slate-800 text-white" aria-describedby={undefined}>
                 <DialogHeader className="p-4 border-b border-slate-800">
                     <DialogTitle>Ajustar Imagem</DialogTitle>
                 </DialogHeader>
