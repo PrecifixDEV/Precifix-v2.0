@@ -391,10 +391,13 @@ export const MainLayout = () => {
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem asChild>
-                                    <button className="w-full cursor-pointer flex items-center gap-2">
+                                    <Link
+                                        to="/settings/categories"
+                                        className="w-full cursor-pointer flex items-center gap-2"
+                                    >
                                         <Settings className="w-4 h-4" />
                                         Configurações
-                                    </button>
+                                    </Link>
                                 </DropdownMenuItem>
 
 

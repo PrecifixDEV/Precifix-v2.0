@@ -244,6 +244,7 @@ export default function AccountsPage() {
                     transactions={transactions || []}
                     isLoading={loadingTransactions}
                     consolidatedBalance={totalBalance}
+                    balanceLabel="Saldo Consolidado"
                 />
             </div>
         </div>

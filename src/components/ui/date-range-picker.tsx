@@ -100,12 +100,11 @@ export function DateRangePicker({
                         variant={"outline"}
                         size="icon"
                         className={cn(
-                            "bg-slate-50 dark:bg-slate-900/50 border-none",
-                            !date && "text-muted-foreground"
+                            "bg-slate-50 dark:bg-slate-900/50 border-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         )}
                         title="Selecionar Período"
                     >
-                        <CalendarIcon className="h-4 w-4 text-slate-500" />
+                        <CalendarIcon className="h-4 w-4" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

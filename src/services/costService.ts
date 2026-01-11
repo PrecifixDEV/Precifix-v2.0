@@ -27,6 +27,7 @@ export const costService = {
                 is_recurring: costData.is_recurring,
                 recurrence_frequency: costData.recurrence_frequency,
                 recurrence_end_date: costData.recurrence_end_date,
+                category: costData.category,
                 // Do not change recurrence_group_id on edit of single item for now to avoid breaking groups
                 // user_id: user.id // Usually don't update user_id
             };
@@ -47,6 +48,7 @@ export const costService = {
             description: costData.description,
             value: costData.value,
             type: costData.type,
+            category: costData.category,
             // expense_date will vary
             is_recurring: costData.is_recurring,
             recurrence_frequency: costData.recurrence_frequency,

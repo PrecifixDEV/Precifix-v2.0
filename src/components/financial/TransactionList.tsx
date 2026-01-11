@@ -39,12 +39,13 @@ interface TransactionListProps {
     transactions: (FinancialTransaction & { commercial_accounts: { name: string } | null })[];
     isLoading: boolean;
     consolidatedBalance?: number;
+    balanceLabel?: string;
 }
 
 type SearchField = 'description' | 'amount' | 'category' | 'payment_method';
 type TypeFilter = 'all' | 'credit' | 'debit';
 
-export function TransactionList({ transactions, isLoading, consolidatedBalance }: TransactionListProps) {
+export function TransactionList({ transactions, isLoading, consolidatedBalance, balanceLabel = "Saldo Consolidado" }: TransactionListProps) {
     // State for Search & Filters
 
     const [activeSearch, setActiveSearch] = useState<{ field: SearchField, term: string } | null>(null);
@@ -266,7 +267,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance }
             <div className="hidden print:block mb-8 space-y-4">
                 {consolidatedBalance !== undefined && (
                     <div className="text-left border-b pb-4 border-slate-200">
-                        <p className="text-sm text-slate-500 uppercase tracking-wider font-medium">Saldo Consolidado</p>
+                        <p className="text-sm text-slate-500 uppercase tracking-wider font-medium">{balanceLabel}</p>
                         <h1 className="text-3xl font-bold text-slate-900">{formatMoney(consolidatedBalance)}</h1>
                     </div>
                 )}

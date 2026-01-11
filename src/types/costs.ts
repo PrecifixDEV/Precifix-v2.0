@@ -11,6 +11,7 @@ export interface OperationalCost {
     recurrence_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     recurrence_end_date?: string | null; // YYYY-MM-DD
     recurrence_group_id?: string;
+    category?: string;
 }
 
 export interface OperationalHours {

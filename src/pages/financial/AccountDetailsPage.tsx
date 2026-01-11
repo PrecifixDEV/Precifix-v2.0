@@ -200,6 +200,7 @@ export default function AccountDetailsPage() {
                     transactions={filteredTransactions || []}
                     isLoading={loadingTransactions}
                     consolidatedBalance={account?.current_balance ? Number(account.current_balance) : undefined}
+                    balanceLabel="Saldo em Conta"
                 />
             </div>
         </div>

@@ -9,7 +9,7 @@ import { MainLayout } from './layouts/MainLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Profile } from './pages/Profile'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { ManageCosts } from './pages/ManageCosts'
+import ManageCosts from './pages/ManageCosts';
 import AccountsPage from "./pages/financial/AccountsPage";
 import AccountDetailsPage from "./pages/financial/AccountDetailsPage";
 import AccountsPayable from './pages/AccountsPayable'
@@ -19,6 +19,7 @@ import { Services } from './pages/cadastros/Services'
 import { Clients } from './pages/cadastros/Clients'
 import { FinancialOverview } from './pages/FinancialOverview'
 import { DilutionCalculator } from './pages/tools/DilutionCalculator'
+import FinancialCategories from './pages/settings/FinancialCategories';
 
 
 function App() {
@@ -53,6 +54,8 @@ function App() {
             <Route path="/sales" element={<div className="text-slate-900 dark:text-white p-6">Vendas (Em breve)</div>} />
             <Route path="/schedule" element={<div className="text-slate-900 dark:text-white p-6">Agenda (Em breve)</div>} />
             <Route path="/financial" element={<FinancialOverview />} />
+
+            <Route path="/settings/categories" element={<FinancialCategories />} />
 
             {/* Tools Routes */}
             <Route path="/tools/dilution-calculator" element={<DilutionCalculator />} />
