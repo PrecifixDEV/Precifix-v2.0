@@ -86,7 +86,7 @@ export default function AccountDetailsPage() {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
             {/* Header */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 print:hidden">
                 <Button variant="ghost" size="icon" onClick={() => navigate('/accounts')}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -97,7 +97,7 @@ export default function AccountDetailsPage() {
             </div>
 
             {/* Top Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
                 {/* Account Card (1/3) */}
                 <div className="lg:col-span-1 h-[220px]">
                     <FinancialAccountCard
@@ -199,6 +199,7 @@ export default function AccountDetailsPage() {
                 <TransactionList
                     transactions={filteredTransactions || []}
                     isLoading={loadingTransactions}
+                    consolidatedBalance={account?.current_balance ? Number(account.current_balance) : undefined}
                 />
             </div>
         </div>

@@ -117,7 +117,7 @@ export const financialService = {
         const txDescription = description || "Transferência entre Contas";
 
         // 1. Debit Source
-        await this.createTransaction({
+        const debitTx = await this.createTransaction({
             description: txDescription,
             amount: amount,
             type: 'debit',
@@ -125,10 +125,11 @@ export const financialService = {
             payment_method: 'Transferência',
             transaction_date: new Date().toISOString(),
             account_id: fromId,
+            related_entity_type: 'transfer_pair'
         });
 
         // 2. Credit Destination
-        await this.createTransaction({
+        const creditTx = await this.createTransaction({
             description: txDescription,
             amount: amount,
             type: 'credit',
@@ -136,10 +137,95 @@ export const financialService = {
             payment_method: 'Transferência',
             transaction_date: new Date().toISOString(),
             account_id: toId,
+            related_entity_type: 'transfer_pair'
         });
 
-        // Note: createTransaction already calls updateAccountBalance, so balances are updated.
-        // Ideally this should be a DB function (RPC) for transaction safety, 
-        // but for now relying on sequential execution is acceptable given current architecture.
+        if (debitTx && creditTx) {
+            // Link them
+            await supabase.from('financial_transactions').update({ related_entity_id: creditTx.id }).eq('id', debitTx.id);
+            await supabase.from('financial_transactions').update({ related_entity_id: debitTx.id }).eq('id', creditTx.id);
+        }
+    },
+
+    async deleteTransaction(transactionId: string) {
+        // 1. Fetch transaction
+        const { data: transaction, error: fetchError } = await supabase
+            .from('financial_transactions')
+            .select('*')
+            .eq('id', transactionId)
+            .single();
+
+        if (fetchError || !transaction) throw new Error("Transação não encontrada.");
+        if ((transaction as FinancialTransaction).is_deleted) return; // Already deleted
+
+        // 2. Revert Balance
+        if (transaction.account_id) {
+            const reverseType = transaction.type === 'credit' ? 'debit' : 'credit';
+            await this.updateAccountBalance(transaction.account_id, transaction.amount, reverseType);
+        }
+
+        // 3. Mark as deleted
+        // Don't append "(excluída)" anymore as we are filtering by is_deleted status now
+        // But for backward compatibility we might keep it or clean it up on restore.
+        // The user requirement says "que continuarão com o mesmo visual de agora (riscados e com cor mais apagada)"
+        // so we don't necessarily need to change the description, just the flag.
+
+        const { error: updateError } = await supabase
+            .from('financial_transactions')
+            .update({
+                is_deleted: true
+            } as any)
+            .eq('id', transactionId);
+
+        if (updateError) throw updateError;
+
+        // 4. Delete related transaction if it's a transfer pair
+        if (transaction.related_entity_type === 'transfer_pair' && transaction.related_entity_id) {
+            await this.deleteTransaction(transaction.related_entity_id);
+        }
+    },
+
+    async restoreTransaction(transactionId: string) {
+        // 1. Fetch transaction
+        const { data: transaction, error: fetchError } = await supabase
+            .from('financial_transactions')
+            .select('*')
+            .eq('id', transactionId)
+            .single();
+
+        if (fetchError || !transaction) throw new Error("Transação não encontrada.");
+        if (!(transaction as FinancialTransaction).is_deleted) return; // Already active
+
+        // 2. Re-apply Balance
+        if (transaction.account_id) {
+            await this.updateAccountBalance(
+                transaction.account_id,
+                transaction.amount,
+                transaction.type as 'credit' | 'debit'
+            );
+        }
+
+        // 3. Unmark is_deleted and clean description if needed
+        let newDescription = transaction.description;
+        if (newDescription.endsWith(' (excluída)')) {
+            newDescription = newDescription.replace(' (excluída)', '');
+        } else if (newDescription.endsWith('(excluída)')) {
+            newDescription = newDescription.replace('(excluída)', '');
+        }
+
+        const { error: updateError } = await supabase
+            .from('financial_transactions')
+            .update({
+                is_deleted: false,
+                description: newDescription
+            } as any)
+            .eq('id', transactionId);
+
+        if (updateError) throw updateError;
+
+        // 4. Restore related transaction if it's a transfer pair
+        if (transaction.related_entity_type === 'transfer_pair' && transaction.related_entity_id) {
+            await this.restoreTransaction(transaction.related_entity_id);
+        }
     }
 };

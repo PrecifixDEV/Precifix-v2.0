@@ -170,6 +170,7 @@ export const MainLayout = () => {
                 bg-white dark:bg-slate-900 
                 transform transition-transform duration-200 ease-in-out border-r border-slate-200 dark:border-slate-800
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                print:hidden
             `}>
                 <div className="h-full flex flex-col">
                     {/* Logo area */}
@@ -306,9 +307,9 @@ export const MainLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0 lg:pl-64 transition-all duration-200">
+            <div className="flex-1 flex flex-col min-w-0 lg:pl-64 transition-all duration-200 print:pl-0">
                 {/* Header */}
-                <header className="h-16 bg-primary dark:bg-slate-900 dark:border-b dark:border-primary shadow-md flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
+                <header className="h-16 bg-primary dark:bg-slate-900 dark:border-b dark:border-primary shadow-md flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 print:hidden">
                     <button
                         className="lg:hidden p-2 text-slate-900 dark:text-slate-400 hover:text-white"
                         onClick={() => setIsSidebarOpen(true)}

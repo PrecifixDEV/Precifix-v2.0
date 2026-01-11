@@ -67,5 +67,6 @@ export interface FinancialTransaction {
     transaction_date: string;
     related_entity_type?: string;
     related_entity_id?: string;
+    is_deleted?: boolean;
     created_at?: string;
 }

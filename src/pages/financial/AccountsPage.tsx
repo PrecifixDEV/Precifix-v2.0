@@ -98,7 +98,7 @@ export default function AccountsPage() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
             {/* Header */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-4 print:hidden">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Caixas e Bancos</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">
@@ -131,7 +131,7 @@ export default function AccountsPage() {
 
             {/* Top Grid: Total & Actions */}
             {/* Fix: changed h-[200px] to lg:h-[200px] to allow auto height on mobile, preventing flattening */}
-            <div className="flex flex-col lg:flex-row gap-6 lg:items-center lg:h-[200px] mb-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:items-center lg:h-[200px] mb-8 print:hidden">
                 <div className="w-full lg:w-1/2 h-full">
                     <ConsolidatedBalanceCard totalBalance={totalBalance} accounts={accounts} />
                 </div>
@@ -183,7 +183,7 @@ export default function AccountsPage() {
             </div>
 
             {/* Carousel Section */}
-            <div className="space-y-4">
+            <div className="space-y-4 print:hidden">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Contas</h2>
                 </div>
@@ -243,6 +243,7 @@ export default function AccountsPage() {
                 <TransactionList
                     transactions={transactions || []}
                     isLoading={loadingTransactions}
+                    consolidatedBalance={totalBalance}
                 />
             </div>
         </div>
