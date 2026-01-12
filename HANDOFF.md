@@ -1,3 +1,22 @@
+# Handoff Log - 2026-01-12
+
+## Work Completed
+1.  **Financial Categories Hierarchy (`/settings/categories`)**:
+    -   **Refactor**: Transitioned to a hierarchical category structure (Parent -> Child).
+    -   **Schema**: Added `parent_id` and `scope` (INCOME/EXPENSE) to `financial_categories`.
+    -   **Migration**: Successfully migrated flat categories to the new structure.
+    -   **UI**: Rebuilt the settings interface to manage nested categories and scopes.
+
+2.  **Expense Creation Flow (`NewCostDialog`)**:
+    -   **Layout Refinement**: Compacted the form layout. Placed "Vencimento" next to Description and simplified "Recurring"/"Paid" switches.
+    -   **New Features**: Added an "Observações" textarea (mapped to new `observation` DB column).
+    -   **Simplification**: Removing user-facing "Type" selection (auto-defaults to 'variable').
+    -   **Logic Fix**: Fixed "Paid" visibility when "Recurring" is active (now handles first installment payment).
+    -   **Type Safety**: Resolved `user_id` TypeScript errors.
+
+3.  **General Improvements**:
+    -   **Cleanliness**: Refactored `ManageCosts.tsx` to remove deprecated drawer logic.
+
 # Handoff Log - 2026-01-09
 
 ## Work Completed

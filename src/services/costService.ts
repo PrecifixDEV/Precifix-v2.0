@@ -49,6 +49,7 @@ export const costService = {
             value: costData.value,
             type: costData.type,
             category: costData.category,
+            observation: costData.observation ?? null, // Add observation
             // expense_date will vary
             is_recurring: costData.is_recurring,
             recurrence_frequency: costData.recurrence_frequency,

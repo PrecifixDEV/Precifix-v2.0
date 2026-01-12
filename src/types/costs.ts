@@ -14,6 +14,7 @@ export interface OperationalCost {
     category?: string;
     /** 'PAID' | 'PENDING' | null */
     status?: string | null;
+    observation?: string | null;
 }
 
 export interface OperationalHours {

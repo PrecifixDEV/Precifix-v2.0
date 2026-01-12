@@ -57,7 +57,6 @@ import {
 import { NewCostDialog } from '@/components/costs/NewCostDialog';
 import { CostHistorySheet } from '@/components/costs/CostHistorySheet';
 import { costService } from '@/services/costService';
-import { financialCategoriesService, type FinancialCategory } from '@/services/financialCategoriesService';
 import type { OperationalCost } from '@/types/costs';
 import { formatMoney } from '@/utils/format';
 import { format, subMonths, isSameMonth, parseISO } from 'date-fns';
@@ -97,30 +96,7 @@ export const ManageCosts = () => {
     });
 
     // Fetch configured categories to suggest even unused ones
-    const { data: configuredCategories = [] } = useQuery({
-        queryKey: ['financialCategories'],
-        queryFn: financialCategoriesService.getAll
-    });
 
-    const categoryTree = useMemo(() => {
-        const cats = configuredCategories as FinancialCategory[];
-        if (!cats?.length) return [];
-
-        // Roots are those without parent_id
-        const roots = cats.filter(c => !c.parent_id);
-
-        return roots.map(root => {
-            const children = cats.filter(c => c.parent_id === root.id);
-            return {
-                id: root.id,
-                label: root.name,
-                subcategories: children.map(child => ({
-                    id: child.id,
-                    label: child.name
-                })).sort((a, b) => a.label.localeCompare(b.label))
-            };
-        }).sort((a, b) => a.label.localeCompare(b.label));
-    }, [configuredCategories]);
 
     // --- Derived Data Processing ---
 
@@ -492,7 +468,6 @@ export const ManageCosts = () => {
             <NewCostDialog
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
-                categoryTree={categoryTree}
             />
 
             <CostHistorySheet

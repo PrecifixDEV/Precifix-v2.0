@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CategoryTreeSelect, type CategoryNode } from "@/components/ui/category-tree-select";
@@ -39,18 +40,37 @@ import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 import { costService } from "@/services/costService";
+import { financialCategoriesService, type FinancialCategory } from "@/services/financialCategoriesService";
+import { paymentMethodsService } from "@/services/paymentMethodsService";
+import { financialService } from "@/services/financialService";
 
 const costSchema = z.object({
     description: z.string().min(1, "Descrição é obrigatória"),
+    observation: z.string().max(500, "Máximo de 500 caracteres").optional(),
     value: z.string().min(1, "Valor é obrigatório"),
-    type: z.enum(["fixed", "variable"]),
+    // type: z.enum(["fixed", "variable"]), // Hidden/Hardcoded
     expense_date: z.date(),
     category: z.string().min(1, "Categoria é obrigatória"),
     is_recurring: z.boolean().default(false),
     recurrence_frequency: z.enum(["daily", "weekly", "monthly", "yearly"]).optional(),
     recurrence_end_date: z.date().optional(),
+    // Logic for "Paid"
+    is_paid: z.boolean().default(false),
+    payment_date: z.date().optional(),
+    payment_method: z.string().optional(),
+    account_id: z.string().optional(),
+}).refine((data) => {
+    // If paid is checked, we need payment details regardless of recurrence
+    if (data.is_paid) {
+        return !!data.payment_method && !!data.account_id && !!data.payment_date;
+    }
+    return true;
+}, {
+    message: "Preencha os dados do pagamento",
+    path: ["account_id"], // Highlight one field
 });
 
 type CostFormValues = z.infer<typeof costSchema>;
@@ -58,61 +78,151 @@ type CostFormValues = z.infer<typeof costSchema>;
 interface NewCostDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    categoryTree?: CategoryNode[];
 }
 
-export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCostDialogProps) {
+export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
     const queryClient = useQueryClient();
+
+    // --- Data Fetching ---
+    const { data: configuredCategories } = useQuery({
+        queryKey: ['financial_categories'],
+        queryFn: financialCategoriesService.getAll,
+        staleTime: 1000 * 60 * 5
+    });
+
+    const { data: paymentMethods } = useQuery({
+        queryKey: ['payment_methods'],
+        queryFn: paymentMethodsService.getAll,
+        staleTime: 1000 * 60 * 30
+    });
+
+    const { data: accounts } = useQuery({
+        queryKey: ['commercial_accounts'],
+        queryFn: financialService.getAccounts,
+        staleTime: 1000 * 60 * 5
+    });
+
+    const categoryTree = useMemo<CategoryNode[]>(() => {
+        const cats = (configuredCategories || []) as FinancialCategory[];
+        if (!cats.length) return [];
+        const roots = cats.filter(c => !c.parent_id && c.scope === 'EXPENSE');
+        return roots.map(root => {
+            const children = cats.filter(c => c.parent_id === root.id);
+            return {
+                id: root.id,
+                label: root.name,
+                subcategories: children.map(child => ({
+                    id: child.id,
+                    label: child.name
+                })).sort((a, b) => a.label.localeCompare(b.label))
+            };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [configuredCategories]);
+
 
     const form = useForm<CostFormValues>({
         resolver: zodResolver(costSchema) as any,
         defaultValues: {
             description: "",
+            observation: "",
             value: "",
-            type: "fixed",
+            // type: "variable",
             expense_date: new Date(),
             category: "",
             is_recurring: false,
             recurrence_frequency: "monthly",
             recurrence_end_date: undefined,
+            is_paid: false,
+            payment_date: new Date(),
+            payment_method: "",
+            account_id: "",
         },
     });
 
     const isRecurring = form.watch("is_recurring");
+    const isPaid = form.watch("is_paid");
 
     // Reset form when opening
     useEffect(() => {
         if (open) {
             form.reset({
                 description: "",
+                observation: "",
                 value: "",
-                type: "fixed",
+                // type: "variable",
                 expense_date: new Date(),
                 category: "",
                 is_recurring: false,
                 recurrence_frequency: "monthly",
+                is_paid: false,
+                payment_date: new Date(),
+                payment_method: "",
+                account_id: "",
             });
         }
     }, [open, form]);
 
     const { mutate: saveCost, isPending } = useMutation({
         mutationFn: async (values: CostFormValues) => {
-            const formattedValue = parseFloat(values.value.replace(',', '.'));
+            const formattedValue = parseFloat(values.value.replace(/\./g, '').replace(',', '.')); // Handle pt-BR currency
+            const numValue = isNaN(formattedValue) ? 0 : formattedValue;
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Usuário não autenticado");
 
-            await costService.saveCost({
+            // 1. Create Cost
+            const savedCosts = await costService.saveCost({
                 description: values.description,
-                value: isNaN(formattedValue) ? 0 : formattedValue,
-                type: values.type,
-                expense_date: format(values.expense_date, "yyyy-MM-dd"), // Format ensuring local YYYY-MM-DD
-                category: values.category, // Pass category
+                observation: values.observation,
+                value: numValue,
+                type: 'variable', // Hardcoded as requested
+                expense_date: format(values.expense_date, "yyyy-MM-dd"),
+                category: values.category,
                 is_recurring: values.is_recurring,
                 recurrence_frequency: values.is_recurring ? values.recurrence_frequency : undefined,
                 recurrence_end_date: values.is_recurring && values.recurrence_end_date ? format(values.recurrence_end_date, "yyyy-MM-dd") : undefined,
-            } as any); // Type cast due to category missing in strict type if not updated yet
+            } as any);
+
+            // 2. If Paid -> Create Transaction AND Payment Record for the FIRST item
+            // Used to be (!values.is_recurring && values.is_paid ...), now we allow recurring too
+            if (values.is_paid && savedCosts && Array.isArray(savedCosts) && savedCosts.length > 0) {
+                const cost = savedCosts[0]; // The first installment (or the only one)
+
+                // A. Financial Transaction (Money leaving the account)
+                await financialService.createTransaction({
+                    description: `Pgto: ${values.description}`,
+                    category: values.category,
+                    payment_method: values.payment_method,
+                    amount: numValue,
+                    type: 'debit',
+                    transaction_date: values.payment_date ? values.payment_date.toISOString() : new Date().toISOString(),
+                    account_id: values.account_id || null,
+                    related_entity_type: 'operational_cost',
+                    related_entity_id: cost.id,
+                });
+
+                // B. Operational Cost Payment Record
+                const { error: paymentError } = await supabase.from('operational_cost_payments').insert({
+                    user_id: user?.id,
+                    operational_cost_id: cost.id,
+                    description: values.description,
+                    due_date: format(values.expense_date, 'yyyy-MM-dd'),
+                    amount_original: numValue,
+                    amount_paid: numValue,
+                    payment_date: values.payment_date ? values.payment_date.toISOString() : new Date().toISOString(),
+                    status: 'paid'
+                });
+
+                if (paymentError) {
+                    console.error("Error creating payment record:", paymentError);
+                    toast.error("Erro ao registrar status de pagamento.");
+                }
+            }
         },
         onSuccess: () => {
             toast.success("Despesa salva com sucesso!");
             queryClient.invalidateQueries({ queryKey: ["operationalCosts"] });
+            queryClient.invalidateQueries({ queryKey: ["financial_transactions"] });
+            queryClient.invalidateQueries({ queryKey: ["operationalCostPayments"] });
             onOpenChange(false);
         },
         onError: (error) => {
@@ -131,7 +241,7 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                 <DialogHeader>
                     <DialogTitle>Nova Despesa</DialogTitle>
                     <DialogDescription>
-                        Adicione uma nova despesa ou custo operacional.
+                        Lançamento de contas a pagar ou despesas avulsas.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -139,32 +249,15 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
 
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Descrição</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ex: Aluguel do Galpão" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="flex gap-3">
                                 <FormField
                                     control={form.control}
-                                    name="value"
+                                    name="description"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Valor (R$)</FormLabel>
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Descrição</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    placeholder="0,00"
-                                                    {...field}
-                                                />
+                                                <Input placeholder="Ex: Mercado, Aluguel" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -173,34 +266,10 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
 
                                 <FormField
                                     control={form.control}
-                                    name="type"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Tipo</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Selecione" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="fixed">Fixo</SelectItem>
-                                                    <SelectItem value="variable">Variável</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
                                     name="expense_date"
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Data da Despesa</FormLabel>
+                                        <FormItem className="flex flex-col w-[150px]">
+                                            <FormLabel>Vencimento</FormLabel>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
@@ -214,13 +283,13 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                                                             {field.value ? (
                                                                 format(field.value, "dd/MM/yyyy")
                                                             ) : (
-                                                                <span>Selecione a data</span>
+                                                                <span>Data</span>
                                                             )}
                                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                         </Button>
                                                     </FormControl>
                                                 </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
+                                                <PopoverContent className="w-auto p-0" align="end">
                                                     <Calendar
                                                         mode="single"
                                                         selected={field.value}
@@ -230,6 +299,34 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                                                     />
                                                 </PopoverContent>
                                             </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="value"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Valor (R$)</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="0,00"
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value.replace(/\D/g, "");
+                                                        const floatValue = Number(value) / 100;
+                                                        const formatted = floatValue.toLocaleString("pt-BR", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        });
+                                                        field.onChange(formatted);
+                                                    }}
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -244,8 +341,8 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                                             <CategoryTreeSelect
                                                 data={categoryTree}
                                                 value={field.value}
-                                                onSelect={(val) => field.onChange(val)}
-                                                placeholder="Selecione a categoria..."
+                                                onSelect={field.onChange}
+                                                placeholder="Selecione..."
                                             />
                                             <FormMessage />
                                         </FormItem>
@@ -253,31 +350,48 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                                 />
                             </div>
 
+                            <FormField
+                                control={form.control}
+                                name="observation"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Observações</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Opcional"
+                                                className="resize-y min-h-[60px]"
+                                                maxLength={500}
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
                             <Separator className="my-2" />
 
                             <FormField
                                 control={form.control}
                                 name="is_recurring"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                        <div className="space-y-0.5">
-                                            <FormLabel>Despesa Recorrente?</FormLabel>
-                                            <div className="text-[0.8rem] text-muted-foreground">
-                                                Criar automaticamente para o futuro.
-                                            </div>
-                                        </div>
+                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-slate-50 dark:bg-slate-900/50">
+                                        <FormLabel className="text-base">Despesa Recorrente?</FormLabel>
                                         <FormControl>
                                             <Switch
                                                 checked={field.value}
-                                                onCheckedChange={field.onChange}
+                                                onCheckedChange={(val) => {
+                                                    field.onChange(val);
+                                                }}
                                             />
                                         </FormControl>
                                     </FormItem>
                                 )}
                             />
 
+                            {/* Recurring Options */}
                             {isRecurring && (
-                                <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                                <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border rounded-md border-t-0 rounded-t-none -mt-3 bg-slate-50 dark:bg-slate-900/50 mb-2">
                                     <FormField
                                         control={form.control}
                                         name="recurrence_frequency"
@@ -296,32 +410,26 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                                                         <SelectItem value="yearly">Anual</SelectItem>
                                                     </SelectContent>
                                                 </Select>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-
                                     <FormField
                                         control={form.control}
                                         name="recurrence_end_date"
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col">
-                                                <FormLabel>Repetir até</FormLabel>
+                                                <FormLabel>Repetir até (Opcional)</FormLabel>
                                                 <Popover>
                                                     <PopoverTrigger asChild>
                                                         <FormControl>
                                                             <Button
                                                                 variant={"outline"}
                                                                 className={cn(
-                                                                    "w-full pl-3 text-left font-normal",
+                                                                    "w-full pl-3 text-left font-normal bg-white dark:bg-slate-950",
                                                                     !field.value && "text-muted-foreground"
                                                                 )}
                                                             >
-                                                                {field.value ? (
-                                                                    format(field.value, "dd/MM/yyyy")
-                                                                ) : (
-                                                                    <span>Selecione a data</span>
-                                                                )}
+                                                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Indefinido</span>}
                                                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                             </Button>
                                                         </FormControl>
@@ -332,24 +440,114 @@ export function NewCostDialog({ open, onOpenChange, categoryTree = [] }: NewCost
                                                             selected={field.value}
                                                             onSelect={field.onChange}
                                                             disabled={(date) => date < new Date()}
-                                                            locale={ptBR}
                                                             initialFocus
                                                         />
                                                     </PopoverContent>
                                                 </Popover>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
                                 </div>
                             )}
 
+                            <div className="space-y-3">
+                                <FormField
+                                    control={form.control}
+                                    name="is_paid"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800">
+                                            <FormLabel className="text-base text-emerald-700 dark:text-emerald-400">
+                                                {isRecurring ? "Primeira fatura paga?" : "Já está pago?"}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {isPaid && (
+                                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border border-emerald-100 dark:border-emerald-800 rounded-md bg-emerald-50/50 dark:bg-emerald-900/5 -mt-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="payment_date"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormLabel>Data Pagamento</FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-white dark:bg-slate-950", !field.value && "text-muted-foreground")}>
+                                                                    {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione</span>}
+                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0" align="start">
+                                                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="payment_method"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Meio Pgto</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="bg-white dark:bg-slate-950">
+                                                                <SelectValue placeholder="Selecione" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {paymentMethods?.map(pm => (
+                                                                <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="account_id"
+                                            render={({ field }) => (
+                                                <FormItem className="col-span-2">
+                                                    <FormLabel>Conta de Origem</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="bg-white dark:bg-slate-950">
+                                                                <SelectValue placeholder="Selecione a conta" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {accounts?.map(acc => (
+                                                                <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
                         </form>
                     </Form>
                 </div>
 
-                <DialogFooter className="flex-row justify-end gap-2 pt-2">
-                    <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none">Cancelar</Button>
+                <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t mt-auto p-4 bg-slate-50 dark:bg-slate-900/50">
+                    <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none bg-white dark:bg-slate-950">Cancelar</Button>
                     <Button
                         className="flex-1 sm:flex-none"
                         onClick={form.handleSubmit(onSubmit)}

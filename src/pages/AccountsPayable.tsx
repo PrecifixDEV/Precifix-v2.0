@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AccountsPayableTable } from '@/components/billing/AccountsPayableTable';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { NewCostDialog } from '@/components/costs/NewCostDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -11,6 +14,7 @@ const AccountsPayable = () => {
 
     const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth_initial);
     const [selectedYear, setSelectedYear] = useState<number>(currentYear_initial);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Generate recent years (e.g., current year +/- 2)
     const years = Array.from({ length: 5 }, (_, i) => currentYear_initial - 2 + i).sort((a, b) => b - a);
@@ -22,11 +26,17 @@ const AccountsPayable = () => {
 
     return (
         <div className="container mx-auto px-4 py-8 space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Contas a Pagar</h1>
-                <p className="text-slate-500 dark:text-slate-400">
-                    Visualize e gerencie seus pagamentos mensais.
-                </p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Contas a Pagar</h1>
+                    <p className="text-slate-500 dark:text-slate-400">
+                        Visualize e gerencie seus pagamentos mensais.
+                    </p>
+                </div>
+                <Button onClick={() => setIsDialogOpen(true)} className="gap-2 shadow-lg shadow-primary/20">
+                    <Plus className="h-4 w-4" />
+                    Nova Despesa
+                </Button>
             </div>
 
             <Card className="bg-gradient-to-br from-card to-card/50 border-border/50 shadow-[var(--shadow-elegant)]">
@@ -76,6 +86,11 @@ const AccountsPayable = () => {
                     />
                 </CardContent>
             </Card>
+
+            <NewCostDialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+            />
         </div>
     );
 };
