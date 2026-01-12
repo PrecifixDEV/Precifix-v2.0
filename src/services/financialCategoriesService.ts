@@ -26,40 +26,40 @@ export const CATEGORY_TYPES = [
 
 export const DEFAULT_CATEGORIES: Pick<FinancialCategory, 'type' | 'name' | 'description'>[] = [
     // 1. Receitas (Entradas)
-    { type: 'Receitas (Entradas)', name: 'Serviços Prestados', description: 'O core business (Polimento, Higienização, PPF, etc).' },
-    { type: 'Receitas (Entradas)', name: 'Venda de Produtos (Revenda)', description: 'Shampoos, ceras ou cheirinhos vendidos ao cliente final.' },
-    { type: 'Receitas (Entradas)', name: 'Outras Receitas', description: 'Venda de sucata, equipamentos velhos (antigo "Venda de ativo").' },
+    { type: 'Receitas (Entradas)', name: 'Serviços Prestados', description: 'Ex: Polimento, Higienização, PPF, etc.' },
+    { type: 'Receitas (Entradas)', name: 'Venda de Produtos (Revenda)', description: 'Ex: Shampoos, ceras ou cheirinhos vendidos ao cliente final.' },
+    { type: 'Receitas (Entradas)', name: 'Outras Receitas', description: 'Ex: Venda de sucata, equipamentos velhos.' },
 
     // 2. Custos Diretos (Variáveis do Serviço)
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Insumos Químicos', description: 'Compostos polidores, APC, ceras, vitrificadores.' },
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Materiais de Consumo/Desgaste', description: 'Boinas, flanelas de microfibra, lixas, fitas.' },
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'EPIs e Uniformes', description: 'Luvas nitrílicas, máscaras, botas.' },
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Terceirização Operacional', description: 'Martelinho de ouro ou pintor parceiro (se houver repasse).' },
+    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Insumos Químicos', description: 'Ex: Compostos polidores, APC, ceras, vitrificadores.' },
+    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Materiais de Consumo/Desgaste', description: 'Ex: Boinas, flanelas de microfibra, lixas, fitas.' },
+    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'EPIs e Uniformes', description: 'Ex: Luvas nitrílicas, máscaras, botas.' },
+    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Terceirização Operacional', description: 'Ex: Martelinho de ouro, pintor parceiro.' },
 
     // 3. Despesas Operacionais (Fixas e Manutenção)
     { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Aluguel e Condomínio', description: 'Despesa fixa do imóvel.' }, // Description inferred/added based on list context
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Manutenção de Maquinário', description: 'Politrizes, compressores e extratoras quebram com frequência.' },
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Manutenção Predial', description: 'Box de lavagem, calhas, elétrica (alta carga).' },
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Água e Esgoto', description: 'Custo crítico para lavagens.' },
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Energia Elétrica', description: 'Iluminação forte e máquinas ligadas o dia todo.' },
+    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Manutenção de Maquinário', description: 'Ex: Politrizes, compressores e extratoras.' },
+    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Manutenção Predial', description: 'Ex: Box de lavagem, calhas, elétrica.' },
+    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Água e Esgoto', description: 'Companhias de Água e Esgoto.' },
+    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Energia Elétrica', description: 'Companhias de Eletricidade.' },
 
     // 4. Despesas Administrativas
-    { type: 'Despesas Administrativas', name: 'Software e Sistemas', description: '(Precifix, CRM).' },
-    { type: 'Despesas Administrativas', name: 'Marketing e Tráfego Pago', description: 'Separar o investimento em anúncios da gestão de redes sociais.' },
-    { type: 'Despesas Administrativas', name: 'Material de Escritório/Limpeza', description: 'Papelaria, café, produtos de limpeza do chão (não do carro).' },
-    { type: 'Despesas Administrativas', name: 'Telecomunicações', description: 'Internet e Celular.' },
-    { type: 'Despesas Administrativas', name: 'Contabilidade e Legal', description: 'Honorários e taxas.' },
-    { type: 'Despesas Administrativas', name: 'Taxas Bancárias/Maquininha', description: 'Antecipação e taxas de cartão.' },
+    { type: 'Despesas Administrativas', name: 'Software e Sistemas', description: 'Ex: Precifix, CRM.' },
+    { type: 'Despesas Administrativas', name: 'Marketing e Tráfego Pago', description: 'Ex: Anúncios da gestão de redes sociais.' },
+    { type: 'Despesas Administrativas', name: 'Material de Escritório/Limpeza', description: 'Ex: Papelaria, café, produtos de limpeza do chão (não do carro).' },
+    { type: 'Despesas Administrativas', name: 'Telecomunicações', description: 'Ex: Internet e Celular.' },
+    { type: 'Despesas Administrativas', name: 'Contabilidade e Legal', description: 'Ex: Honorários e taxas.' },
+    { type: 'Despesas Administrativas', name: 'Taxas Bancárias/Maquininha', description: 'Ex: Antecipação e taxas de cartão.' },
 
     // 5. Despesas com Pessoal
-    { type: 'Despesas com Pessoal', name: 'Salários Fixos', description: 'CLT ou fixo combinado.' },
-    { type: 'Despesas com Pessoal', name: 'Comissões/Produção', description: 'O valor variável pago por carro feito (muito comum no setor).' },
-    { type: 'Despesas com Pessoal', name: 'Benefícios', description: 'Vale transporte, alimentação.' },
+    { type: 'Despesas com Pessoal', name: 'Salários Fixos', description: 'Ex: CLT ou fixo combinado.' },
+    { type: 'Despesas com Pessoal', name: 'Comissões/Produção', description: 'Ex: O valor variável pago por carro feito.' },
+    { type: 'Despesas com Pessoal', name: 'Benefícios', description: 'Ex: Vale transporte, alimentação.' },
     { type: 'Despesas com Pessoal', name: 'Pró-labore', description: 'Retirada dos sócios.' },
 
     // 6. Financeiro/Fiscal
-    { type: 'Financeiro/Fiscal', name: 'Impostos sobre Nota Fiscal', description: 'Simples Nacional, ISS.' },
-    { type: 'Financeiro/Fiscal', name: 'Investimentos/Obras', description: 'Reformas no estúdio' }
+    { type: 'Financeiro/Fiscal', name: 'Impostos sobre Nota Fiscal', description: 'Ex: Simples Nacional, ISS.' },
+    { type: 'Financeiro/Fiscal', name: 'Investimentos/Obras', description: 'Ex: Reformas no estúdio' }
 ];
 
 export const financialCategoriesService = {
