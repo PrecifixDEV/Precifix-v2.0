@@ -1,71 +1,86 @@
 import { supabase } from "@/lib/supabase";
 
+export type FinancialScope = 'INCOME' | 'EXPENSE';
+
 export interface FinancialCategory {
     id: string;
     user_id: string;
     name: string;
-    type:
-    | 'Receitas (Entradas)'
-    | 'Custos Diretos (Variáveis do Serviço)'
-    | 'Despesas Operacionais (Fixas e Manutenção)'
-    | 'Despesas Administrativas'
-    | 'Despesas com Pessoal'
-    | 'Financeiro/Fiscal';
+    scope?: FinancialScope; // Only for root categories
+    parent_id?: string | null; // If null, it's a Root Category (Group). If set, it's a Subcategory.
     description?: string;
     created_at: string;
+
+    // Virtual field for UI convenience (optional, might not be returned by DB)
+    children?: FinancialCategory[];
 }
 
-export const CATEGORY_TYPES = [
-    'Receitas (Entradas)',
-    'Custos Diretos (Variáveis do Serviço)',
-    'Despesas Operacionais (Fixas e Manutenção)',
-    'Despesas Administrativas',
-    'Despesas com Pessoal',
-    'Financeiro/Fiscal'
-] as const;
-
-export const DEFAULT_CATEGORIES: Pick<FinancialCategory, 'type' | 'name' | 'description'>[] = [
-    // 1. Receitas (Entradas)
-    { type: 'Receitas (Entradas)', name: 'Serviços Prestados', description: 'Ex: Polimento, Higienização, PPF, etc.' },
-    { type: 'Receitas (Entradas)', name: 'Venda de Produtos (Revenda)', description: 'Ex: Shampoos, ceras ou cheirinhos vendidos ao cliente final.' },
-    { type: 'Receitas (Entradas)', name: 'Outras Receitas', description: 'Ex: Venda de sucata, equipamentos velhos.' },
-
-    // 2. Custos Diretos (Variáveis do Serviço)
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Insumos Químicos', description: 'Ex: Compostos polidores, APC, ceras, vitrificadores.' },
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Materiais de Consumo/Desgaste', description: 'Ex: Boinas, flanelas de microfibra, lixas, fitas.' },
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'EPIs e Uniformes', description: 'Ex: Luvas nitrílicas, máscaras, botas.' },
-    { type: 'Custos Diretos (Variáveis do Serviço)', name: 'Terceirização Operacional', description: 'Ex: Martelinho de ouro, pintor parceiro.' },
-
-    // 3. Despesas Operacionais (Fixas e Manutenção)
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Aluguel e Condomínio', description: 'Despesa fixa do imóvel.' }, // Description inferred/added based on list context
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Manutenção de Maquinário', description: 'Ex: Politrizes, compressores e extratoras.' },
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Manutenção Predial', description: 'Ex: Box de lavagem, calhas, elétrica.' },
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Água e Esgoto', description: 'Companhias de Água e Esgoto.' },
-    { type: 'Despesas Operacionais (Fixas e Manutenção)', name: 'Energia Elétrica', description: 'Companhias de Eletricidade.' },
-
-    // 4. Despesas Administrativas
-    { type: 'Despesas Administrativas', name: 'Software e Sistemas', description: 'Ex: Precifix, CRM.' },
-    { type: 'Despesas Administrativas', name: 'Marketing e Tráfego Pago', description: 'Ex: Anúncios da gestão de redes sociais.' },
-    { type: 'Despesas Administrativas', name: 'Material de Escritório/Limpeza', description: 'Ex: Papelaria, café, produtos de limpeza do chão (não do carro).' },
-    { type: 'Despesas Administrativas', name: 'Telecomunicações', description: 'Ex: Internet e Celular.' },
-    { type: 'Despesas Administrativas', name: 'Contabilidade e Legal', description: 'Ex: Honorários e taxas.' },
-    { type: 'Despesas Administrativas', name: 'Taxas Bancárias/Maquininha', description: 'Ex: Antecipação e taxas de cartão.' },
-
-    // 5. Despesas com Pessoal
-    { type: 'Despesas com Pessoal', name: 'Salários Fixos', description: 'Ex: CLT ou fixo combinado.' },
-    { type: 'Despesas com Pessoal', name: 'Comissões/Produção', description: 'Ex: O valor variável pago por carro feito.' },
-    { type: 'Despesas com Pessoal', name: 'Benefícios', description: 'Ex: Vale transporte, alimentação.' },
-    { type: 'Despesas com Pessoal', name: 'Pró-labore', description: 'Retirada dos sócios.' },
-
-    // 6. Financeiro/Fiscal
-    { type: 'Financeiro/Fiscal', name: 'Impostos sobre Nota Fiscal', description: 'Ex: Simples Nacional, ISS.' },
-    { type: 'Financeiro/Fiscal', name: 'Investimentos/Obras', description: 'Ex: Reformas no estúdio' }
+// Default Seed Data (Hierarchical)
+export const DEFAULT_CATEGORIES_TREE = [
+    {
+        name: 'Receitas (Entradas)',
+        scope: 'INCOME' as FinancialScope,
+        subcategories: [
+            { name: 'Serviços Prestados', description: 'Ex: Polimento, Higienização, PPF, etc.' },
+            { name: 'Venda de Produtos (Revenda)', description: 'Ex: Shampoos, ceras ou cheirinhos vendidos ao cliente final.' },
+            { name: 'Outras Receitas', description: 'Ex: Venda de sucata, equipamentos velhos.' }
+        ]
+    },
+    {
+        name: 'Custos Diretos (Variáveis)',
+        scope: 'EXPENSE' as FinancialScope,
+        subcategories: [
+            { name: 'Insumos Químicos', description: 'Ex: Compostos polidores, APC, ceras, vitrificadores.' },
+            { name: 'Materiais de Consumo/Desgaste', description: 'Ex: Boinas, flanelas de microfibra, lixas, fitas.' },
+            { name: 'EPIs e Uniformes', description: 'Ex: Luvas nitrílicas, máscaras, botas.' },
+            { name: 'Terceirização Operacional', description: 'Ex: Martelinho de ouro, pintor parceiro.' }
+        ]
+    },
+    {
+        name: 'Despesas Operacionais (Fixas)',
+        scope: 'EXPENSE' as FinancialScope,
+        subcategories: [
+            { name: 'Aluguel e Condomínio', description: 'Despesa fixa do imóvel.' },
+            { name: 'Manutenção de Maquinário', description: 'Ex: Politrizes, compressores e extratoras.' },
+            { name: 'Manutenção Predial', description: 'Ex: Box de lavagem, calhas, elétrica.' },
+            { name: 'Água e Esgoto', description: 'Companhias de Água e Esgoto.' },
+            { name: 'Energia Elétrica', description: 'Companhias de Eletricidade.' }
+        ]
+    },
+    {
+        name: 'Despesas Administrativas',
+        scope: 'EXPENSE' as FinancialScope,
+        subcategories: [
+            { name: 'Software e Sistemas', description: 'Ex: Precifix, CRM.' },
+            { name: 'Marketing e Tráfego Pago', description: 'Ex: Anúncios da gestão de redes sociais.' },
+            { name: 'Material de Escritório/Limpeza', description: 'Ex: Papelaria, café, produtos de limpeza do chão.' },
+            { name: 'Telecomunicações', description: 'Ex: Internet e Celular.' },
+            { name: 'Contabilidade e Legal', description: 'Ex: Honorários e taxas.' },
+            { name: 'Taxas Bancárias/Maquininha', description: 'Ex: Antecipação e taxas de cartão.' }
+        ]
+    },
+    {
+        name: 'Despesas com Pessoal',
+        scope: 'EXPENSE' as FinancialScope,
+        subcategories: [
+            { name: 'Salários Fixos', description: 'Ex: CLT ou fixo combinado.' },
+            { name: 'Comissões/Produção', description: 'Ex: O valor variável pago por carro feito.' },
+            { name: 'Benefícios', description: 'Ex: Vale transporte, alimentação.' },
+            { name: 'Pró-labore', description: 'Retirada dos sócios.' }
+        ]
+    },
+    {
+        name: 'Financeiro/Fiscal',
+        scope: 'EXPENSE' as FinancialScope,
+        subcategories: [
+            { name: 'Impostos sobre Nota Fiscal', description: 'Ex: Simples Nacional, ISS.' },
+            { name: 'Investimentos/Obras', description: 'Ex: Reformas no estúdio' }
+        ]
+    }
 ];
 
 export const financialCategoriesService = {
     async getAll() {
-        // Initialize defaults if empty check is implicit in logic below or we do explicit check?
-        // Better to check and seed if mostly empty. But let's just fetch first.
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("User not authenticated");
 
@@ -73,7 +88,6 @@ export const financialCategoriesService = {
             // @ts-ignore
             .from('financial_categories')
             .select('*')
-            .order('type')
             .order('name');
 
         if (error) throw error;
@@ -92,24 +106,50 @@ export const financialCategoriesService = {
 
         if (error) throw error;
 
+        // Only seed if absolutely empty
         if (count === 0) {
-            const displayCategories = DEFAULT_CATEGORIES.map(c => ({
-                ...c,
-                user_id: user.id
-            }));
+            for (const group of DEFAULT_CATEGORIES_TREE) {
+                // Create Parent
+                const { data: parent, error: parentError } = await supabase
+                    // @ts-ignore
+                    .from('financial_categories')
+                    .insert({
+                        user_id: user.id,
+                        name: group.name,
+                        scope: group.scope,
+                        description: 'Grupo Padrão',
+                        parent_id: null
+                    })
+                    .select()
+                    .single();
 
-            const { error: insertError } = await supabase
-                // @ts-ignore
-                .from('financial_categories')
-                .insert(displayCategories);
+                if (parentError || !parent) {
+                    console.error("Error creating parent category", parentError);
+                    continue;
+                }
 
-            if (insertError) throw insertError;
+                // Create Children
+                const childrenData = group.subcategories.map(sub => ({
+                    user_id: user.id,
+                    name: sub.name,
+                    description: sub.description,
+                    parent_id: parent.id,
+                    scope: null // Subcategories inherit scope logically, but column can be null
+                }));
+
+                const { error: childrenError } = await supabase
+                    // @ts-ignore
+                    .from('financial_categories')
+                    .insert(childrenData);
+
+                if (childrenError) console.error("Error creating subcategories", childrenError);
+            }
             return true; // Seeded
         }
         return false; // Already exists
     },
 
-    async create(category: Pick<FinancialCategory, 'name' | 'type' | 'description'>) {
+    async create(category: Pick<FinancialCategory, 'name' | 'scope' | 'parent_id' | 'description'>) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("User not authenticated");
 

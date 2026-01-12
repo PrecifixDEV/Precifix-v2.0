@@ -12,6 +12,8 @@ export interface OperationalCost {
     recurrence_end_date?: string | null; // YYYY-MM-DD
     recurrence_group_id?: string;
     category?: string;
+    /** 'PAID' | 'PENDING' | null */
+    status?: string | null;
 }
 
 export interface OperationalHours {

@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BankLogo } from "@/components/ui/bank-logo";
-import { Wallet, CheckCircle2, Loader2, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Wallet, CheckCircle2, Loader2, ArrowUpRight, ArrowDownRight, Calendar as CalendarIcon } from "lucide-react";
 import { financialService } from "@/services/financialService";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FinancialAccount } from "@/types/costs";
 import { cn } from "@/lib/utils";
+import { CategoryTreeSelect, type CategoryNode } from "@/components/ui/category-tree-select";
+import { financialCategoriesService, type FinancialCategory } from "@/services/financialCategoriesService";
+import { paymentMethodsService } from "@/services/paymentMethodsService";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface AddValueDialogProps {
     open: boolean;
@@ -24,12 +31,13 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
     const [step, setStep] = useState<'form' | 'success'>('form');
     const [loading, setLoading] = useState(false);
 
-    // State
+    // Form State
     const [accountId, setAccountId] = useState<string>("");
     const [amount, setAmount] = useState<string>("");
     const [paymentMethod, setPaymentMethod] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [category, setCategory] = useState<string>("");
+    const [transactionDate, setTransactionDate] = useState<Date | undefined>(new Date());
 
     const isCredit = type === 'credit';
     const title = isCredit ? "Nova Entrada de Valor" : "Nova Saída de Valor";
@@ -38,8 +46,47 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
     const themeColor = isCredit ? "text-emerald-600" : "text-red-600";
     const themeBg = isCredit ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700";
 
+    // --- Data Fetching ---
+    const { data: configuredCategories } = useQuery({
+        queryKey: ['financial_categories'],
+        queryFn: financialCategoriesService.getAll,
+        staleTime: 1000 * 60 * 5 // 5 minutes
+    });
+
+    const { data: paymentMethods } = useQuery({
+        queryKey: ['payment_methods'],
+        queryFn: paymentMethodsService.getAll,
+        staleTime: 1000 * 60 * 60 // 1 hour
+    });
+
+    // --- Derived Data ---
+    const categoryTree = useMemo(() => {
+        const cats = (configuredCategories || []) as FinancialCategory[];
+        if (!cats.length) return [];
+
+        // Filter by Scope (INCOME for credit, EXPENSE for debit)
+        const targetScope = isCredit ? 'INCOME' : 'EXPENSE';
+        const scopedCats = cats.filter(c => c.scope === targetScope);
+
+        // Roots are those without parent_id (or parent not in filtered list? No, parent should match scope usually)
+        // Adjust: Ensure parents have correct scope too.
+        const roots = scopedCats.filter(c => !c.parent_id);
+
+        return roots.map(root => {
+            const children = scopedCats.filter(c => c.parent_id === root.id);
+            return {
+                id: root.id,
+                label: root.name,
+                subcategories: children.map(child => ({
+                    id: child.id,
+                    label: child.name
+                })).sort((a, b) => a.label.localeCompare(b.label))
+            };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [configuredCategories, isCredit]);
+
     const handleConfirm = async () => {
-        if (!accountId || !amount || !paymentMethod || !description || !category) {
+        if (!accountId || !amount || !paymentMethod || !description || !category || !transactionDate) {
             toast.error("Preencha todos os campos");
             return;
         }
@@ -60,7 +107,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                 payment_method: paymentMethod,
                 amount: numAmount,
                 type: type,
-                transaction_date: new Date().toISOString(),
+                transaction_date: transactionDate.toISOString(),
                 account_id: accountId,
             });
 
@@ -89,6 +136,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
             setPaymentMethod("");
             setDescription("");
             setCategory("");
+            setTransactionDate(new Date());
         }, 300);
     };
 
@@ -99,7 +147,6 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
         setAmount(value);
     };
 
-    // Description limit
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (value.length <= 70) {
@@ -109,14 +156,9 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
 
     const selectedAcc = accounts.find(a => a.id === accountId);
 
-    // Dummy categories for now
-    const categories = isCredit
-        ? ["Vendas", "Serviços", "Investimento", "Outros"]
-        : ["Fornecedores", "Despesas Operacionais", "Impostos", "Manutenção", "Outros"];
-
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[400px]" aria-describedby={undefined}>
+            <DialogContent className="sm:max-w-[500px]" aria-describedby={undefined}>
                 {step === 'form' ? (
                     <>
                         <DialogHeader>
@@ -126,7 +168,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                             </DialogTitle>
                         </DialogHeader>
 
-                        <div className="flex flex-col items-center py-4 space-y-5">
+                        <div className="flex flex-col py-4 space-y-5">
                             {/* Bank Selector (Visual) */}
                             <div className="w-full space-y-2 text-center">
                                 <Label>Conta de {isCredit ? 'Destino' : 'Origem'}</Label>
@@ -163,7 +205,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                             </div>
 
                             {/* Inputs */}
-                            <div className="w-full space-y-3">
+                            <div className="w-full space-y-4">
                                 <div className="space-y-1">
                                     <Label>Descrição <span className="text-xs text-muted-foreground ml-1">({description.length}/70)</span></Label>
                                     <Input
@@ -173,40 +215,68 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <Label>Categoria</Label>
-                                        <Select value={category} onValueChange={setCategory}>
+                                        <CategoryTreeSelect
+                                            data={categoryTree}
+                                            value={category}
+                                            onSelect={setCategory}
+                                            placeholder="Selecione..."
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label>Data da Transação</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !transactionDate && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {transactionDate ? format(transactionDate, "dd/MM/yyyy") : <span>Selecione</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0 z-[9999]">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={transactionDate}
+                                                    onSelect={setTransactionDate}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <Label>Forma de Pagamento</Label>
+                                        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecionar" />
+                                                <SelectValue placeholder="Selecione..." />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {categories.map(cat => (
-                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                {paymentMethods?.map(pm => (
+                                                    <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label>Forma de Pagamento</Label>
-                                        <Input
-                                            placeholder="Ex: PIX"
-                                            value={paymentMethod}
-                                            onChange={e => setPaymentMethod(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1 pt-2">
-                                    <Label className="text-center block text-slate-500">Valor da transação</Label>
-                                    <div className="relative">
-                                        <span className={cn("absolute left-3 top-1/2 -translate-y-1/2 font-bold text-xl", themeColor)}>R$</span>
-                                        <Input
-                                            value={amount}
-                                            onChange={handleAmountChange}
-                                            placeholder="0,00"
-                                            className={cn("text-2xl font-bold pl-10 h-14", themeColor)}
-                                        />
+                                    <div className="space-y-1 relative">
+                                        <Label className="block text-slate-500">Valor</Label>
+                                        <div className="relative">
+                                            <span className={cn("absolute left-3 top-1/2 -translate-y-1/2 font-bold text-lg", themeColor)}>R$</span>
+                                            <Input
+                                                value={amount}
+                                                onChange={handleAmountChange}
+                                                placeholder="0,00"
+                                                className={cn("text-lg font-bold pl-10 h-10", themeColor)}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -215,7 +285,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                         <DialogFooter className="sm:justify-center">
                             <Button
                                 onClick={handleConfirm}
-                                disabled={!accountId || !amount || !paymentMethod || !description || !category || loading}
+                                disabled={!accountId || !amount || !paymentMethod || !description || !category || !transactionDate || loading}
                                 className={cn("w-full text-white transition-colors", themeBg)}
                             >
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (

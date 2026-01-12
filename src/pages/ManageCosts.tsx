@@ -9,7 +9,8 @@ import {
     CalendarRange,
     Search,
     PieChart,
-    Plus
+    Plus,
+    Info
 } from 'lucide-react';
 import {
     Card,
@@ -42,8 +43,21 @@ import {
     AreaChart,
 } from 'recharts';
 
-import { NewCostDrawer } from '@/components/costs/NewCostDrawer';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import { NewCostDialog } from '@/components/costs/NewCostDialog';
+import { CostHistorySheet } from '@/components/costs/CostHistorySheet';
 import { costService } from '@/services/costService';
+import { financialCategoriesService, type FinancialCategory } from '@/services/financialCategoriesService';
 import type { OperationalCost } from '@/types/costs';
 import { formatMoney } from '@/utils/format';
 import { format, subMonths, isSameMonth, parseISO } from 'date-fns';
@@ -52,7 +66,9 @@ import { toast } from 'sonner';
 
 export const ManageCosts = () => {
     const queryClient = useQueryClient();
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [costToDelete, setCostToDelete] = useState<string | null>(null);
+    const [historyCostId, setHistoryCostId] = useState<string | null>(null);
 
     // Date Filters
     const currentMonth = new Date().getMonth() + 1;
@@ -80,11 +96,31 @@ export const ManageCosts = () => {
         }
     });
 
-    const categories = useMemo(() => {
-        if (!costs) return [];
-        const cats = costs.map(c => c.category).filter((c): c is string => !!c);
-        return [...new Set(cats)];
-    }, [costs]);
+    // Fetch configured categories to suggest even unused ones
+    const { data: configuredCategories = [] } = useQuery({
+        queryKey: ['financialCategories'],
+        queryFn: financialCategoriesService.getAll
+    });
+
+    const categoryTree = useMemo(() => {
+        const cats = configuredCategories as FinancialCategory[];
+        if (!cats?.length) return [];
+
+        // Roots are those without parent_id
+        const roots = cats.filter(c => !c.parent_id);
+
+        return roots.map(root => {
+            const children = cats.filter(c => c.parent_id === root.id);
+            return {
+                id: root.id,
+                label: root.name,
+                subcategories: children.map(child => ({
+                    id: child.id,
+                    label: child.name
+                })).sort((a, b) => a.label.localeCompare(b.label))
+            };
+        }).sort((a, b) => a.label.localeCompare(b.label));
+    }, [configuredCategories]);
 
     // --- Derived Data Processing ---
 
@@ -162,6 +198,7 @@ export const ManageCosts = () => {
         mutationFn: async (id: string) => costService.deleteCost(id),
         onSuccess: () => {
             toast.success("Despesa removida");
+            setCostToDelete(null);
             queryClient.invalidateQueries({ queryKey: ["operationalCosts"] });
         }
     });
@@ -212,7 +249,7 @@ export const ManageCosts = () => {
                         </SelectContent>
                     </Select>
 
-                    <Button onClick={() => setIsDrawerOpen(true)} className="gap-2 shadow-lg shadow-primary/20">
+                    <Button onClick={() => setIsDialogOpen(true)} className="gap-2 shadow-lg shadow-primary/20">
                         <Plus className="h-4 w-4" />
                         Nova Despesa
                     </Button>
@@ -357,18 +394,25 @@ export const ManageCosts = () => {
                                                                 <span className="text-slate-700 dark:text-slate-300 font-medium">
                                                                     {formatMoney(cost.value)}
                                                                 </span>
-                                                                <Button
-                                                                    size="icon"
-                                                                    variant="ghost"
-                                                                    className="h-6 w-6 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                                                                    onClick={() => {
-                                                                        if (confirm('Tem certeza que deseja remover esta despesa?')) {
-                                                                            deleteCost(cost.id);
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <Plus className="h-3 w-3 rotate-45" /> {/* Delete Icon X */}
-                                                                </Button>
+                                                                <div className="flex items-center">
+                                                                    <Button
+                                                                        size="icon"
+                                                                        variant="ghost"
+                                                                        className="h-8 w-8 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                                        onClick={() => setHistoryCostId(cost.id)}
+                                                                        title="Ver Histórico"
+                                                                    >
+                                                                        <Info className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="icon"
+                                                                        variant="ghost"
+                                                                        className="h-6 w-6 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all ml-1"
+                                                                        onClick={() => setCostToDelete(cost.id)}
+                                                                    >
+                                                                        <Plus className="h-3 w-3 rotate-45" /> {/* Delete Icon X */}
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -445,11 +489,40 @@ export const ManageCosts = () => {
                 </div>
             </div>
 
-            <NewCostDrawer
-                open={isDrawerOpen}
-                onOpenChange={setIsDrawerOpen}
-                categories={categories}
+            <NewCostDialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+                categoryTree={categoryTree}
             />
+
+            <CostHistorySheet
+                open={!!historyCostId}
+                onOpenChange={(open) => !open && setHistoryCostId(null)}
+                costId={historyCostId}
+                allCosts={costs}
+            />
+
+            <AlertDialog open={!!costToDelete} onOpenChange={(open) => !open && setCostToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir Despesa?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tem certeza que deseja excluir esta despesa?
+                            <br /><br />
+                            <strong>Atenção:</strong> A despesa e todas as contas associadas a ela serão apagadas permanentemente. Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => costToDelete && deleteCost(costToDelete)}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600 text-white"
+                        >
+                            Excluir Permanentemente
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
