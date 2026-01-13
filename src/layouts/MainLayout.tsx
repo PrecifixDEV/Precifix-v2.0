@@ -24,6 +24,7 @@ import {
     FolderPlus,
     Wrench,
     Calculator,
+    Loader2,
 
 } from 'lucide-react'
 import { SubscriptionTag } from '../components/SubscriptionTag'
@@ -35,6 +36,7 @@ import logo from '../assets/precifix-logo.png'
 
 export const MainLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [user, setUser] = useState<any>(null)
     const [nickname, setNickname] = useState<string | null>(null)
     const [subscriptionData, setSubscriptionData] = useState<{ status: string | null, trialEndsAt: string | null }>({ status: null, trialEndsAt: null })
@@ -77,22 +79,33 @@ export const MainLayout = () => {
         window.addEventListener('profile-updated', handleProfileUpdate)
 
         // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
+        const checkSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
+                if (!session) {
+                    navigate('/login')
+                } else {
+                    setUser(session.user)
+                    await fetchProfile(session.user.id)
+                }
+            } catch (error) {
+                console.error("Session check failed", error)
                 navigate('/login')
-            } else {
-                setUser(session.user)
-                fetchProfile(session.user.id)
+            } finally {
+                setIsLoading(false)
             }
-        })
+        }
+
+        checkSession()
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!session) {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT' || !session) {
                 navigate('/login')
-            } else {
+                setUser(null)
+            } else if (event === 'SIGNED_IN' || session) {
                 setUser(session.user)
-                fetchProfile(session.user.id)
+                if (event === 'SIGNED_IN') fetchProfile(session.user.id)
             }
         })
 
@@ -152,6 +165,14 @@ export const MainLayout = () => {
 
     const isSubmenuActive = (children: any[]) => {
         return children.some(child => location.pathname === child.href)
+    }
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        )
     }
 
     return (
