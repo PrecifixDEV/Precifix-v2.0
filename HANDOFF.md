@@ -1,3 +1,18 @@
+# Handoff Log - 2026-01-13
+
+## Work Completed
+1.  **Service Management Refactoring (`ServiceFormDialog.tsx`, `ServiceAnalysisSheet.tsx`)**:
+    -   **Consolidated Tabs**: Merged "Produtos" into "Detalhes" tab in Service Form. Removed separate "Custo" tab.
+    -   **Decoupled Product Costs**: Removed product costs from the service net profit calculation in `ServiceAnalysisSheet`. Product costs are now informational only, treated as operational overhead.
+    -   **Sales Metrics**: Added "Qtd. Vendas" and "Total Vendido" to the Services table (`Services.tsx`), backed by aggregated data in `servicesService.ts`.
+
+2.  **Product Cost Calculator (`ProductCostCalculator.tsx`)**:
+    -   **New Tool**: Created a dedicated calculator for analyzing specific product costs (dilution, price per ml/application).
+    -   **Integration**: Added route `/tools/product-cost` and linked it from the Dilution Calculator page.
+
+3.  **Financial Overview Repairs (`FinancialOverview.tsx`)**:
+    -   **Type Fixes**: Manually updated `types.ts` to include missing `is_operational`, `category`, and `include_investment` fields to resolve TypeScript errors.
+
 # Handoff Log - 2026-01-12
 
 ## Work Completed

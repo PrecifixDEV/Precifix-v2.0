@@ -427,6 +427,8 @@ export const Services = () => {
                                             <TableHead className="w-[80px] text-center">Ícone</TableHead>
                                             <TableHead>Nome</TableHead>
                                             <TableHead>Descrição</TableHead>
+                                            <TableHead className="text-center">Qtd. Vendas</TableHead>
+                                            <TableHead className="text-right">Total Vendido</TableHead>
                                             <TableHead className="text-center">Produtos</TableHead>
                                             <TableHead className="text-center">Duração</TableHead>
                                             <TableHead className="text-right">Preço</TableHead>
@@ -452,6 +454,14 @@ export const Services = () => {
                                                     <TableCell className="font-medium">{service.name}</TableCell>
                                                     <TableCell className="text-slate-500 max-w-[200px] truncate" title={service.description || ""}>
                                                         {service.description || "-"}
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
+                                                        <div className="inline-flex items-center justify-center px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-medium">
+                                                            {service.total_sales_count || 0}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-medium text-slate-700 dark:text-slate-300">
+                                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(service.total_sales_value || 0)}
                                                     </TableCell>
                                                     <TableCell className="text-center">
                                                         <div className="flex items-center justify-center gap-2">

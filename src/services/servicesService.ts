@@ -4,6 +4,8 @@ import type { Database } from "@/integrations/supabase/types";
 export type Service = Database["public"]["Tables"]["services"]["Row"];
 export type ServiceWithProductCount = Service & {
     service_products: { id: string }[];
+    total_sales_count?: number;
+    total_sales_value?: number;
 };
 export type NewService = Database["public"]["Tables"]["services"]["Insert"];
 export type UpdateService = Database["public"]["Tables"]["services"]["Update"];
@@ -22,13 +24,47 @@ export interface ServiceProductInput {
 
 export const servicesService = {
     async getServices() {
-        const { data, error } = await supabase
+        const { data: services, error } = await supabase
             .from("services")
             .select("*, service_products(id)")
             .order("name");
 
         if (error) throw error;
-        return data as unknown as ServiceWithProductCount[];
+
+        // Fetch sales data to aggregate
+        const { data: salesItems, error: salesError } = await supabase
+            .from("service_order_items")
+            .select("service_id, quantity, price");
+
+        if (salesError) {
+            console.error("Error fetching sales items:", salesError);
+            // Return services without sales data if error (or handle differently)
+            return services as unknown as ServiceWithProductCount[];
+        }
+
+        // Aggregate sales data
+        const salesMap = new Map<string, { count: number; value: number }>();
+
+        salesItems?.forEach(item => {
+            if (item.service_id) {
+                const current = salesMap.get(item.service_id) || { count: 0, value: 0 };
+                salesMap.set(item.service_id, {
+                    count: current.count + (item.quantity || 0),
+                    value: current.value + ((item.quantity || 0) * (item.price || 0))
+                });
+            }
+        });
+
+        const servicesWithSales = services.map(service => {
+            const stats = salesMap.get(service.id) || { count: 0, value: 0 };
+            return {
+                ...service,
+                total_sales_count: stats.count,
+                total_sales_value: stats.value
+            };
+        });
+
+        return servicesWithSales as unknown as ServiceWithProductCount[];
     },
 
     async getService(id: string) {

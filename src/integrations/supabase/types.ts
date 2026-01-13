@@ -280,6 +280,8 @@ export type Database = {
                     type: string
                     user_id: string
                     value: number
+                    category: string | null
+                    is_operational: boolean | null
                 }
                 Insert: {
                     created_at?: string
@@ -292,6 +294,8 @@ export type Database = {
                     type: string
                     user_id: string
                     value: number
+                    category?: string | null
+                    is_operational?: boolean | null
                 }
                 Update: {
                     created_at?: string
@@ -304,6 +308,8 @@ export type Database = {
                     type?: string
                     user_id?: string
                     value?: number
+                    category?: string | null
+                    is_operational?: boolean | null
                 }
                 Relationships: []
             }
@@ -528,6 +534,8 @@ export type Database = {
                     investment_return_months?: number | null
                     working_capital_goal?: number | null
                     working_capital_months?: number | null
+                    include_investment?: boolean | null
+                    include_working_capital?: boolean | null
                 }
                 Update: {
                     address?: string | null
@@ -567,6 +575,8 @@ export type Database = {
                     investment_return_months?: number | null
                     working_capital_goal?: number | null
                     working_capital_months?: number | null
+                    include_investment?: boolean | null
+                    include_working_capital?: boolean | null
                 }
                 Relationships: []
             }

@@ -9,6 +9,7 @@ export interface FinancialCategory {
     scope?: FinancialScope; // Only for root categories
     parent_id?: string | null; // If null, it's a Root Category (Group). If set, it's a Subcategory.
     description?: string;
+    is_operational?: boolean;
     created_at: string;
 
     // Virtual field for UI convenience (optional, might not be returned by DB)
@@ -20,61 +21,75 @@ export const DEFAULT_CATEGORIES_TREE = [
     {
         name: 'Receitas (Entradas)',
         scope: 'INCOME' as FinancialScope,
+        is_operational: true,
         subcategories: [
-            { name: 'Serviços Prestados', description: 'Ex: Polimento, Higienização, PPF, etc.' },
+            { name: 'Serviços Prestados', description: 'Serviços de detalhamento, lavagem, etc.' },
             { name: 'Venda de Produtos (Revenda)', description: 'Ex: Shampoos, ceras ou cheirinhos vendidos ao cliente final.' },
-            { name: 'Outras Receitas', description: 'Ex: Venda de sucata, equipamentos velhos.' }
+            { name: 'Outras Entradas', description: 'Ex: Venda de sucata, equipamentos velhos.' }
         ]
     },
     {
-        name: 'Custos Diretos (Variáveis)',
+        name: 'Produtos e Materiais',
         scope: 'EXPENSE' as FinancialScope,
+        is_operational: true,
         subcategories: [
-            { name: 'Insumos Químicos', description: 'Ex: Compostos polidores, APC, ceras, vitrificadores.' },
-            { name: 'Materiais de Consumo/Desgaste', description: 'Ex: Boinas, flanelas de microfibra, lixas, fitas.' },
-            { name: 'EPIs e Uniformes', description: 'Ex: Luvas nitrílicas, máscaras, botas.' },
-            { name: 'Terceirização Operacional', description: 'Ex: Martelinho de ouro, pintor parceiro.' }
+            { name: 'Produtos Químicos', description: 'Shampoos, Ceras, APC, etc.' },
+            { name: 'Acessórios e Consumíveis', description: 'Boinas, Flanelas, Lixas, Fitas.' },
+            { name: 'EPIs e Uniformes', description: 'Luvas, máscaras, camisetas da empresa.' },
+            { name: 'Serviços de Terceiros', description: 'Funilaria, Pintura terceirizada, etc.' }
         ]
     },
     {
-        name: 'Despesas Operacionais (Fixas)',
+        name: 'Estrutura da Loja',
         scope: 'EXPENSE' as FinancialScope,
+        is_operational: true,
         subcategories: [
-            { name: 'Aluguel e Condomínio', description: 'Despesa fixa do imóvel.' },
-            { name: 'Manutenção de Maquinário', description: 'Ex: Politrizes, compressores e extratoras.' },
-            { name: 'Manutenção Predial', description: 'Ex: Box de lavagem, calhas, elétrica.' },
-            { name: 'Água e Esgoto', description: 'Companhias de Água e Esgoto.' },
-            { name: 'Energia Elétrica', description: 'Companhias de Eletricidade.' }
+            { name: 'Aluguel e Condomínio', description: 'Custos fixos do local.' },
+            { name: 'Conta de Luz', description: '' },
+            { name: 'Conta de Água', description: '' },
+            { name: 'Manutenção Predial', description: 'Reparos na loja, lâmpadas, pintura.' }
         ]
     },
     {
-        name: 'Despesas Administrativas',
+        name: 'Equipe e Sócios',
         scope: 'EXPENSE' as FinancialScope,
+        is_operational: true,
         subcategories: [
-            { name: 'Software e Sistemas', description: 'Ex: Precifix, CRM.' },
-            { name: 'Marketing e Tráfego Pago', description: 'Ex: Anúncios da gestão de redes sociais.' },
-            { name: 'Material de Escritório/Limpeza', description: 'Ex: Papelaria, café, produtos de limpeza do chão.' },
-            { name: 'Telecomunicações', description: 'Ex: Internet e Celular.' },
-            { name: 'Contabilidade e Legal', description: 'Ex: Honorários e taxas.' },
-            { name: 'Taxas Bancárias/Maquininha', description: 'Ex: Antecipação e taxas de cartão.' }
+            { name: 'Salário Mensal (Fixo)', description: 'Salários fixos de funcionários.' },
+            { name: 'Transporte e Alimentação', description: 'Vale transporte, vale refeição/alimentação.' },
+            { name: 'Salário do Dono (Pró-labore)', description: 'Sua retirada fixa mensal.' },
+            { name: 'Encargos Trabalhistas', description: 'FGTS, INSS, férias, 13º.' }
         ]
     },
     {
-        name: 'Despesas com Pessoal',
+        name: 'Escritório e Marketing',
         scope: 'EXPENSE' as FinancialScope,
+        is_operational: true,
         subcategories: [
-            { name: 'Salários Fixos', description: 'Ex: CLT ou fixo combinado.' },
-            { name: 'Comissões/Produção', description: 'Ex: O valor variável pago por carro feito.' },
-            { name: 'Benefícios', description: 'Ex: Vale transporte, alimentação.' },
-            { name: 'Pró-labore', description: 'Retirada dos sócios.' }
+            { name: 'Sistemas e Internet', description: 'Software de gestão, provedor de internet.' },
+            { name: 'Anúncios e Propaganda', description: 'Ads, Panfletos, Gestão de tráfego.' },
+            { name: 'Material de Escritório', description: 'Papel, caneta, tinta impressora.' },
+            { name: 'Taxas Bancárias', description: 'Manutenção de conta, DOC/TED.' }
         ]
     },
     {
-        name: 'Financeiro/Fiscal',
+        name: 'Impostos e Investimentos',
         scope: 'EXPENSE' as FinancialScope,
+        is_operational: true,
         subcategories: [
-            { name: 'Impostos sobre Nota Fiscal', description: 'Ex: Simples Nacional, ISS.' },
-            { name: 'Investimentos/Obras', description: 'Ex: Reformas no estúdio' }
+            { name: 'Impostos Mensais', description: 'DAS, Simples Nacional.' },
+            { name: 'Compra de Equipamentos', description: 'Politrizes, Aspiradores (Investimento).' },
+            { name: 'Empréstimos', description: 'Pagamento de parcelas de empréstimo.' }
+        ]
+    },
+    {
+        name: 'Comissões e Premiações',
+        scope: 'EXPENSE' as FinancialScope,
+        is_operational: false,
+        subcategories: [
+            { name: 'Comissões de Produção', description: 'Pago ao executor do serviço.' },
+            { name: 'Comissões de Venda', description: 'Pago a quem vendeu.' },
+            { name: 'Bônus e Metas', description: 'Premiações por desempenho.' }
         ]
     }
 ];
@@ -118,7 +133,8 @@ export const financialCategoriesService = {
                         name: group.name,
                         scope: group.scope,
                         description: 'Grupo Padrão',
-                        parent_id: null
+                        parent_id: null,
+                        is_operational: group.is_operational
                     })
                     .select()
                     .single();
@@ -134,7 +150,8 @@ export const financialCategoriesService = {
                     name: sub.name,
                     description: sub.description,
                     parent_id: parent.id,
-                    scope: null // Subcategories inherit scope logically, but column can be null
+                    scope: null, // Subcategories inherit scope logically, but column can be null
+                    is_operational: group.is_operational // Children inherit operational status
                 }));
 
                 const { error: childrenError } = await supabase

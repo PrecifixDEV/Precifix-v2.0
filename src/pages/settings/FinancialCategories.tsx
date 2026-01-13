@@ -33,9 +33,12 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
+    FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Pencil, Trash2, AlertCircle, ChevronRight, ChevronDown, FolderPlus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader2, Plus, Pencil, Trash2, AlertCircle, ChevronRight, ChevronDown, FolderPlus, Construction, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 
@@ -45,6 +48,7 @@ const categorySchema = z.object({
     description: z.string().optional(),
     scope: z.enum(['INCOME', 'EXPENSE']).optional(), // Required for root
     parent_id: z.string().nullable().optional(),   // Required for child
+    is_operational: z.boolean().default(true).optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -106,7 +110,8 @@ export default function FinancialCategories() {
             name: "",
             description: "",
             scope: 'EXPENSE',
-            parent_id: null
+            parent_id: null,
+            is_operational: true
         },
     });
 
@@ -120,6 +125,7 @@ export default function FinancialCategories() {
                     description: editingCategory.description || "",
                     scope: editingCategory.scope,
                     parent_id: editingCategory.parent_id || null,
+                    is_operational: editingCategory.is_operational !== undefined ? editingCategory.is_operational : true
                 });
             } else if (parentForNewSub) {
                 // Creating new Subcategory
@@ -127,7 +133,8 @@ export default function FinancialCategories() {
                     name: "",
                     description: "",
                     scope: undefined, // Subcategories don't strictly need scope in form if logic handles it, or inherit
-                    parent_id: parentForNewSub.id
+                    parent_id: parentForNewSub.id,
+                    is_operational: parentForNewSub.is_operational // Default to parent's setting
                 });
             } else {
                 // Creating new Root Category
@@ -135,7 +142,8 @@ export default function FinancialCategories() {
                     name: "",
                     description: "",
                     scope: activeTab, // Default to current tab
-                    parent_id: null
+                    parent_id: null,
+                    is_operational: true
                 });
             }
         }
@@ -207,193 +215,248 @@ export default function FinancialCategories() {
     const currentList = activeTab === 'INCOME' ? categoryTree.INCOME : categoryTree.EXPENSE;
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Categorias Financeiras</h1>
-                    <p className="text-muted-foreground">
-                        Organize suas receitas e despesas em categorias e subcategorias.
-                    </p>
+        <TooltipProvider>
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Categorias Financeiras</h1>
+                        <p className="text-muted-foreground">
+                            Organize suas receitas e despesas em categorias e subcategorias.
+                        </p>
+                    </div>
+                    <Button onClick={handleCreateRoot}>
+                        <Plus className="mr-2 h-4 w-4" /> Nova Categoria Principal
+                    </Button>
                 </div>
-                <Button onClick={handleCreateRoot}>
-                    <Plus className="mr-2 h-4 w-4" /> Nova Categoria Principal
-                </Button>
-            </div>
 
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinancialScope)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="INCOME">Receitas (Entradas)</TabsTrigger>
-                    <TabsTrigger value="EXPENSE">Despesas (Saídas)</TabsTrigger>
-                </TabsList>
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FinancialScope)} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="INCOME">Receitas (Entradas)</TabsTrigger>
+                        <TabsTrigger value="EXPENSE">Despesas (Saídas)</TabsTrigger>
+                    </TabsList>
 
-                <TabsContent value={activeTab} className="mt-0 space-y-4">
-                    {currentList.length === 0 ? (
-                        <div className="text-center py-10 text-muted-foreground bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
-                            Nenhuma categoria cadastrada neste grupo.
-                        </div>
-                    ) : (
-                        currentList.map((root) => (
-                            <Card key={root.id} className="overflow-hidden">
-                                <div className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-900/50">
-                                    <div className="flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleExpand(root.id)}>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-6 w-6 shrink-0"
-                                        // onClick handled by parent div
-                                        >
-                                            {expandedCategories[root.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                                        </Button>
-                                        <div>
-                                            <h3 className="font-semibold text-lg flex items-center gap-2">
-                                                {root.name}
-                                                <span className="text-xs font-normal text-muted-foreground bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-                                                    {root.children?.length || 0}
-                                                </span>
-                                            </h3>
-                                            {root.description && <p className="text-sm text-muted-foreground">{root.description}</p>}
+                    <TabsContent value={activeTab} className="mt-0 space-y-4">
+                        {currentList.length === 0 ? (
+                            <div className="text-center py-10 text-muted-foreground bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
+                                Nenhuma categoria cadastrada neste grupo.
+                            </div>
+                        ) : (
+                            currentList.map((root) => (
+                                <Card key={root.id} className="overflow-hidden">
+                                    <div className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-900/50">
+                                        <div className="flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleExpand(root.id)}>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 shrink-0"
+                                            // onClick handled by parent div
+                                            >
+                                                {expandedCategories[root.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                            </Button>
+                                            <div>
+                                                <h3 className="font-semibold text-lg flex items-center gap-2">
+                                                    {root.name}
+                                                    {root.is_operational && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Construction className="h-4 w-4 text-orange-500 cursor-help" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Compõe Custo Hora</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    )}
+                                                    <span className="text-xs font-normal text-muted-foreground bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                                                        {root.children?.length || 0}
+                                                    </span>
+                                                </h3>
+                                                {root.description && <p className="text-sm text-muted-foreground">{root.description}</p>}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Button variant="ghost" size="sm" onClick={() => handleCreateSub(root)} className="hidden sm:flex" title="Adicionar Subcategoria">
+                                                <FolderPlus className="mr-2 h-4 w-4 text-emerald-600" />
+                                                Subcategoria
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => handleCreateSub(root)} className="sm:hidden" title="Adicionar Subcategoria">
+                                                <FolderPlus className="h-4 w-4 text-emerald-600" />
+                                            </Button>
+                                            <Separator orientation="vertical" className="h-6 mx-1" />
+                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(root)}>
+                                                <Pencil className="h-4 w-4 text-muted-foreground" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(root.id, root.name)}>
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                            </Button>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="sm" onClick={() => handleCreateSub(root)} className="hidden sm:flex" title="Adicionar Subcategoria">
-                                            <FolderPlus className="mr-2 h-4 w-4 text-emerald-600" />
-                                            Subcategoria
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleCreateSub(root)} className="sm:hidden" title="Adicionar Subcategoria">
-                                            <FolderPlus className="h-4 w-4 text-emerald-600" />
-                                        </Button>
-                                        <Separator orientation="vertical" className="h-6 mx-1" />
-                                        <Button variant="ghost" size="icon" onClick={() => handleEdit(root)}>
-                                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(root.id, root.name)}>
-                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                        </Button>
-                                    </div>
-                                </div>
 
-                                {expandedCategories[root.id] && (
-                                    <div className="border-t bg-white dark:bg-card">
-                                        {root.children && root.children.length > 0 ? (
-                                            <div className="divide-y">
-                                                {root.children.map((child) => (
-                                                    <div key={child.id} className="flex items-center justify-between p-3 pl-12 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                        <div>
-                                                            <p className="font-medium">{child.name}</p>
-                                                            {child.description && <p className="text-xs text-muted-foreground">{child.description}</p>}
+                                    {expandedCategories[root.id] && (
+                                        <div className="border-t bg-white dark:bg-card">
+                                            {root.children && root.children.length > 0 ? (
+                                                <div className="divide-y">
+                                                    {root.children.map((child) => (
+                                                        <div key={child.id} className="flex items-center justify-between p-3 pl-12 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                            <div>
+                                                                <p className="font-medium flex items-center gap-2">
+                                                                    {child.name}
+                                                                    {child.is_operational && (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <Construction className="h-3 w-3 text-orange-500 cursor-help" />
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                <p>Compõe Custo Hora</p>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                </p>
+                                                                {child.description && <p className="text-xs text-muted-foreground">{child.description}</p>}
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(child)}>
+                                                                    <Pencil className="h-3 w-3 text-muted-foreground" />
+                                                                </Button>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(child.id, child.name)}>
+                                                                    <Trash2 className="h-3 w-3 text-red-500" />
+                                                                </Button>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(child)}>
-                                                                <Pencil className="h-3 w-3 text-muted-foreground" />
-                                                            </Button>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(child.id, child.name)}>
-                                                                <Trash2 className="h-3 w-3 text-red-500" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="p-4 pl-12 text-sm text-muted-foreground italic">
-                                                Nenhuma subcategoria.
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </Card>
-                        ))
-                    )}
-                </TabsContent>
-            </Tabs>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="p-4 pl-12 text-sm text-muted-foreground italic">
+                                                    Nenhuma subcategoria.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </Card>
+                            ))
+                        )}
+                    </TabsContent>
+                </Tabs>
 
-            <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            {editingCategory ? "Editar Categoria" : (parentForNewSub ? `Nova Subcategoria em ${parentForNewSub.name}` : "Nova Categoria Principal")}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Preencha os dados abaixo.
-                        </DialogDescription>
-                    </DialogHeader>
+                <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>
+                                {editingCategory ? "Editar Categoria" : (parentForNewSub ? `Nova Subcategoria em ${parentForNewSub.name}` : "Nova Categoria Principal")}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Preencha os dados abaixo.
+                            </DialogDescription>
+                        </DialogHeader>
 
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nome</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ex: Serviços, Aluguel..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Descrição (Opcional)</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Breve descrição" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Scope is only relevant if creating a root category (no parent) and not editing */}
-                            {!parentForNewSub && !editingCategory?.parent_id && (
                                 <FormField
                                     control={form.control}
-                                    name="scope"
+                                    name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Tipo</FormLabel>
+                                            <FormLabel>Nome</FormLabel>
                                             <FormControl>
-                                                <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                                                    <Button
-                                                        type="button"
-                                                        variant={field.value === 'INCOME' ? 'default' : 'ghost'}
-                                                        onClick={() => field.onChange('INCOME')}
-                                                        className="flex-1"
-                                                    >
-                                                        Receita
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        variant={field.value === 'EXPENSE' ? 'default' : 'ghost'}
-                                                        onClick={() => field.onChange('EXPENSE')}
-                                                        className="flex-1"
-                                                    >
-                                                        Despesa
-                                                    </Button>
-                                                </div>
+                                                <Input placeholder="Ex: Serviços, Aluguel..." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                            )}
 
-                            <DialogFooter>
-                                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                                    {createMutation.isPending || updateMutation.isPending ? (
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : null}
-                                    Salvar
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-        </div>
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Descrição (Opcional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Breve descrição" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="is_operational"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                            <div className="space-y-0.5">
+                                                <FormLabel className="flex items-center gap-2">
+                                                    Compõe Custo Hora? (Operacional)
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="max-w-[200px]">
+                                                            <p>Ative se este custo deve ser somado no cálculo do Custo Hora da empresa.</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </FormLabel>
+                                                <FormDescription>
+                                                    Ex: Aluguel, Produtos, Salários. (Desative para Comissões)
+                                                </FormDescription>
+                                            </div>
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* Scope is only relevant if creating a root category (no parent) and not editing */}
+                                {!parentForNewSub && !editingCategory?.parent_id && (
+                                    <FormField
+                                        control={form.control}
+                                        name="scope"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Tipo</FormLabel>
+                                                <FormControl>
+                                                    <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                                        <Button
+                                                            type="button"
+                                                            variant={field.value === 'INCOME' ? 'default' : 'ghost'}
+                                                            onClick={() => field.onChange('INCOME')}
+                                                            className="flex-1"
+                                                        >
+                                                            Receita
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant={field.value === 'EXPENSE' ? 'default' : 'ghost'}
+                                                            onClick={() => field.onChange('EXPENSE')}
+                                                            className="flex-1"
+                                                        >
+                                                            Despesa
+                                                        </Button>
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+
+                                <DialogFooter>
+                                    <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                                        {createMutation.isPending || updateMutation.isPending ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        ) : null}
+                                        Salvar
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </TooltipProvider>
     );
 }

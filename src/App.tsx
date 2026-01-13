@@ -19,6 +19,7 @@ import { Services } from './pages/cadastros/Services'
 import { Clients } from './pages/cadastros/Clients'
 import { FinancialOverview } from './pages/FinancialOverview'
 import { DilutionCalculator } from './pages/tools/DilutionCalculator'
+import { ProductCostCalculator } from './pages/tools/ProductCostCalculator'
 import FinancialCategories from './pages/settings/FinancialCategories';
 
 
@@ -59,6 +60,7 @@ function App() {
 
             {/* Tools Routes */}
             <Route path="/tools/dilution-calculator" element={<DilutionCalculator />} />
+            <Route path="/tools/product-cost" element={<ProductCostCalculator />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

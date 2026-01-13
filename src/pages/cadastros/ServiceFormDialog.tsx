@@ -19,8 +19,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, Search, Info, RefreshCw, DollarSign, Percent, BarChart3, Clock, Tag, Users } from "lucide-react";
+import { Loader2, Trash2, Droplets, Beaker, CarFront, Check, ChevronsUpDown, RefreshCw, DollarSign, Percent, BarChart3, Clock, Tag, Users, Settings2, Package } from "lucide-react";
 import { cn, minutesToHHMM, hhmmToMinutes } from "@/lib/utils";
 import { useQuery } from '@tanstack/react-query';
 
@@ -87,6 +86,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     const [selectedProducts, setSelectedProducts] = useState<ProductWithQuantity[]>([]);
     const [openCombobox, setOpenCombobox] = useState(false);
     const [durationInput, setDurationInput] = useState("");
+    const [showProductsSection, setShowProductsSection] = useState(false);
 
     const form = useForm<ServiceFormValues>({
         resolver: zodResolver(serviceSchema) as any,
@@ -224,6 +224,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                 });
                 setDurationInput("01:00");
                 setSelectedProducts([]);
+                setShowProductsSection(false);
             }
         }
     }, [open, serviceToEdit, form]);
@@ -254,6 +255,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                     use_dilution: !!sp.dilution_ratio, // If it has a ratio saved, assume it uses dilution
                 }));
                 setSelectedProducts(mapped);
+                if (mapped.length > 0) setShowProductsSection(true);
             }
         } catch (error) {
             console.error("Error loading service products:", error);
@@ -377,9 +379,8 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden flex flex-col">
                         <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
-                            <TabsList className="grid w-full grid-cols-3">
+                            <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="details">Detalhes</TabsTrigger>
-                                <TabsTrigger value="costs">Produtos Utilizados</TabsTrigger>
                                 <TabsTrigger value="pricing">Precificação</TabsTrigger>
                             </TabsList>
 
@@ -447,6 +448,193 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                             )}
                                         />
                                     </div>
+                                </div>
+
+                                {/* Product Selection Section */}
+                                <div className="space-y-4 pt-4 border-t mt-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id="add-products"
+                                            checked={showProductsSection}
+                                            onCheckedChange={(checked) => {
+                                                setShowProductsSection(checked);
+                                                if (checked) setOpenCombobox(true);
+                                            }}
+                                        />
+                                        <Label htmlFor="add-products">Adicionar Produtos ao Serviço?</Label>
+                                    </div>
+
+                                    {showProductsSection && (
+                                        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2">
+                                            <div className="flex flex-col gap-2">
+                                                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            aria-expanded={openCombobox}
+                                                            className="w-full justify-between"
+                                                        >
+                                                            Selecione um produto para incluir...
+                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[400px] p-0">
+                                                        <Command>
+                                                            <CommandInput placeholder="Buscar produto..." />
+                                                            <CommandList>
+                                                                <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {products.map((product) => {
+                                                                        const isSelected = selectedProducts.some(sp => sp.id === product.id);
+                                                                        return (
+                                                                            <CommandItem
+                                                                                key={product.id}
+                                                                                value={product.name}
+                                                                                onSelect={() => {
+                                                                                    if (!isSelected) {
+                                                                                        toggleProduct(product);
+                                                                                    }
+                                                                                    setOpenCombobox(false);
+                                                                                }}
+                                                                                className={isSelected ? "opacity-50 cursor-not-allowed" : ""}
+                                                                            >
+                                                                                <Check
+                                                                                    className={cn(
+                                                                                        "mr-2 h-4 w-4",
+                                                                                        isSelected ? "opacity-100" : "opacity-0"
+                                                                                    )}
+                                                                                />
+                                                                                {product.name}
+                                                                            </CommandItem>
+                                                                        );
+                                                                    })}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                {selectedProducts.map(sp => (
+                                                    <div key={sp.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/40 hover:bg-muted/60 transition-colors">
+                                                        <div className="flex items-center gap-3 overflow-hidden">
+                                                            <div className="h-8 w-8 rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                                                {sp.image_url ? (
+                                                                    <img src={sp.image_url} alt={sp.name} className="h-full w-full object-cover rounded" />
+                                                                ) : (
+                                                                    <Package className="h-4 w-4 text-slate-500" />
+                                                                )}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="font-medium text-sm truncate">{sp.name}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-1">
+                                                            <Sheet>
+                                                                <SheetTrigger asChild>
+                                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="Configurar Consumo">
+                                                                        <Settings2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </SheetTrigger>
+                                                                <SheetContent>
+                                                                    <SheetHeader>
+                                                                        <SheetTitle>Configurar Consumo: {sp.name}</SheetTitle>
+                                                                        <SheetDescription>
+                                                                            Ajuste quanto de produto é gasto neste serviço para calcular o custo.
+                                                                        </SheetDescription>
+                                                                    </SheetHeader>
+                                                                    <div className="py-6 space-y-6">
+                                                                        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                                                                            <Label className="cursor-pointer" htmlFor={`dilution-switch-${sp.id}`}>Usa Diluição?</Label>
+                                                                            <Switch
+                                                                                id={`dilution-switch-${sp.id}`}
+                                                                                checked={sp.use_dilution}
+                                                                                onCheckedChange={(checked) => updateProduct(sp.id, { use_dilution: checked })}
+                                                                            />
+                                                                        </div>
+
+                                                                        {sp.use_dilution ? (
+                                                                            <div className="space-y-4 animate-in fade-in slide-in-from-left-2">
+                                                                                <div className="space-y-2">
+                                                                                    <Label>Proporção (1:X)</Label>
+                                                                                    <div className="relative">
+                                                                                        <Droplets className="absolute left-2 top-2.5 h-4 w-4 text-blue-500" />
+                                                                                        <Input
+                                                                                            className="pl-8"
+                                                                                            value={sp.dilution_ratio || ""}
+                                                                                            onChange={(e) => updateProduct(sp.id, { dilution_ratio: e.target.value })}
+                                                                                            placeholder="Ex: 1:10"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <p className="text-xs text-muted-foreground">Ex: 1 parte de produto para 10 de água.</p>
+                                                                                </div>
+                                                                                <div className="space-y-2">
+                                                                                    <Label>Capacidade do Recipiente (ml)</Label>
+                                                                                    <div className="relative">
+                                                                                        <Beaker className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
+                                                                                        <Input
+                                                                                            className="pl-8"
+                                                                                            type="number"
+                                                                                            value={sp.container_size_ml || ""}
+                                                                                            onChange={(e) => updateProduct(sp.id, { container_size_ml: Number(e.target.value) })}
+                                                                                            placeholder="Ex: 500"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <p className="text-xs text-muted-foreground">Tamanho do borrifador usado.</p>
+                                                                                </div>
+                                                                                <div className="space-y-2">
+                                                                                    <Label>Solução Usada (ml)</Label>
+                                                                                    <div className="relative">
+                                                                                        <CarFront className="absolute left-2 top-2.5 h-4 w-4 text-green-500" />
+                                                                                        <Input
+                                                                                            className="pl-8"
+                                                                                            type="number"
+                                                                                            value={sp.quantity || ""}
+                                                                                            onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
+                                                                                            placeholder="Ex: 250"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <p className="text-xs text-muted-foreground">Quantidade total da mistura aplicada no carro.</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="space-y-2 animate-in fade-in slide-in-from-right-2">
+                                                                                <Label>Quantidade Usada (ml ou un)</Label>
+                                                                                <div className="relative">
+                                                                                    <CarFront className="absolute left-2 top-2.5 h-4 w-4 text-green-500" />
+                                                                                    <Input
+                                                                                        className="pl-8"
+                                                                                        type="number"
+                                                                                        value={sp.quantity || ""}
+                                                                                        onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
+                                                                                        placeholder="Ex: 50"
+                                                                                    />
+                                                                                </div>
+                                                                                <p className="text-xs text-muted-foreground">Quantidade direta do produto aplicada.</p>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </SheetContent>
+                                                            </Sheet>
+
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => toggleProduct(sp)}
+                                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                                title="Remover Produto"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </TabsContent>
 
@@ -605,223 +793,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                 </div>
                             </TabsContent>
 
-                            <TabsContent value="costs" className="flex-1 flex flex-col gap-4 overflow-hidden p-1">
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-medium leading-none">Produtos Consumidos</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Selecione os produtos do estoque que são gastos ao realizar este serviço.
-                                        Isso ajuda a calcular o custo real.
-                                    </p>
-                                </div>
 
-                                <div className="flex flex-col gap-4 flex-1 overflow-hidden">
-                                    <div className="flex flex-col gap-2">
-                                        <Label>Adicionar Produto</Label>
-                                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    aria-expanded={openCombobox}
-                                                    className="w-full justify-between"
-                                                >
-                                                    Selecione um produto...
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-[400px] p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Buscar produto..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
-                                                        <CommandGroup>
-                                                            {products.map((product) => {
-                                                                const isSelected = selectedProducts.some(sp => sp.id === product.id);
-                                                                return (
-                                                                    <CommandItem
-                                                                        key={product.id}
-                                                                        value={product.name}
-                                                                        onSelect={() => {
-                                                                            if (!isSelected) {
-                                                                                toggleProduct(product);
-                                                                            }
-                                                                            setOpenCombobox(false);
-                                                                        }}
-                                                                        className={isSelected ? "opacity-50 cursor-not-allowed" : ""}
-                                                                    >
-                                                                        <Check
-                                                                            className={cn(
-                                                                                "mr-2 h-4 w-4",
-                                                                                isSelected ? "opacity-100" : "opacity-0"
-                                                                            )}
-                                                                        />
-                                                                        {product.name}
-                                                                    </CommandItem>
-                                                                );
-                                                            })}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-
-                                    <div className="border rounded-md p-2 flex flex-col flex-1 overflow-hidden">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-xs font-semibold">Selecionados ({selectedProducts.length})</span>
-                                            <Sheet>
-                                                <SheetTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
-                                                        <Info className="h-4 w-4" />
-                                                    </Button>
-                                                </SheetTrigger>
-                                                <SheetContent>
-                                                    <SheetHeader>
-                                                        <SheetTitle>Custos e Diluição</SheetTitle>
-                                                        <SheetDescription>
-                                                            Como calcular os custos corretamente.
-                                                        </SheetDescription>
-                                                    </SheetHeader>
-                                                    <div className="mt-6 space-y-6">
-                                                        <div className="flex gap-4">
-                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-100/10 text-blue-500">
-                                                                <Droplets className="h-5 w-5" />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <h4 className="text-sm font-medium leading-none">Diluição (1:X)</h4>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    Ex: 1:100 = 10ml produto + 990ml água (Total 1L).
-                                                                    <br />
-                                                                    Cálculo: Custo por ML Diluído = (Preço / Tamanho Embalagem) / Ratio.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-4">
-                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-purple-400/50 bg-purple-100/10 text-purple-500">
-                                                                <Beaker className="h-5 w-5" />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <h4 className="text-sm font-medium leading-none">Recipiente de Diluição</h4>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    Apenas referência para o aplicador saber qual borrifador usar (ex: 500ml). Não afeta o cálculo se a "Qtd Usada" estiver correta.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-4">
-                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-green-400/50 bg-green-100/10 text-green-500">
-                                                                <CarFront className="h-5 w-5" />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <h4 className="text-sm font-medium leading-none">Quantidade Usada (ml)</h4>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    Volume TOTAL da solução (água + produto) gasto no veículo.
-                                                                    <br />
-                                                                    Ex: Preparei 500ml, gastei metdade = 250ml.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </SheetContent>
-                                            </Sheet>
-                                        </div>
-                                        <ScrollArea className="flex-1">
-                                            <div className="space-y-4">
-                                                {selectedProducts.map(sp => (
-                                                    <div key={sp.id} className="bg-muted/30 p-2 rounded-md border text-sm space-y-2">
-                                                        <div className="flex items-center justify-between gap-2">
-                                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                <span className="font-medium truncate text-sm" title={sp.name}>{sp.name}</span>
-
-                                                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                    <Label htmlFor={`dilution-${sp.id}`} className={cn("text-[10px] uppercase font-bold tracking-wider cursor-pointer", !sp.use_dilution ? "text-primary" : "text-muted-foreground")}>Pronto Uso</Label>
-                                                                    <Switch
-                                                                        id={`dilution-${sp.id}`}
-                                                                        checked={sp.use_dilution}
-                                                                        onCheckedChange={(checked) => updateProduct(sp.id, { use_dilution: checked })}
-                                                                        className="scale-75 data-[state=checked]:bg-blue-500"
-                                                                    />
-                                                                    <Label htmlFor={`dilution-${sp.id}`} className={cn("text-[10px] uppercase font-bold tracking-wider cursor-pointer", sp.use_dilution ? "text-blue-500" : "text-muted-foreground")}>Diluir</Label>
-                                                                </div>
-                                                            </div>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => toggleProduct(sp)}
-                                                                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-6 w-6"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-
-                                                        {sp.use_dilution ? (
-                                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                                                <div className="relative flex items-center border border-blue-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-blue-500 transition-colors h-8">
-                                                                    <div className="pl-2 pr-1 text-blue-500 shrink-0">
-                                                                        <Droplets className="w-3.5 h-3.5" />
-                                                                    </div>
-                                                                    <Input
-                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Proporção (ex: 1:10)"
-                                                                        value={sp.dilution_ratio || ""}
-                                                                        onChange={(e) => updateProduct(sp.id, { dilution_ratio: e.target.value })}
-                                                                    />
-                                                                </div>
-                                                                <div className="relative flex items-center border border-purple-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-purple-500 transition-colors h-8">
-                                                                    <div className="pl-2 pr-1 text-purple-500 shrink-0">
-                                                                        <Beaker className="w-3.5 h-3.5" />
-                                                                    </div>
-                                                                    <Input
-                                                                        type="number"
-                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Recipiente de Diluição (ml)"
-                                                                        value={sp.container_size_ml || ""}
-                                                                        onChange={(e) => updateProduct(sp.id, { container_size_ml: Number(e.target.value) })}
-                                                                    />
-                                                                </div>
-                                                                <div className="relative flex items-center border border-green-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-green-500 transition-colors h-8">
-                                                                    <div className="pl-2 pr-1 text-green-500 shrink-0">
-                                                                        <CarFront className="w-3.5 h-3.5" />
-                                                                    </div>
-                                                                    <Input
-                                                                        type="number"
-                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Solução Usada (ml)"
-                                                                        value={sp.quantity || ""}
-                                                                        onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="grid grid-cols-1 gap-2">
-                                                                <div className="relative flex items-center border border-green-400/50 rounded-md bg-background focus-within:ring-1 focus-within:ring-green-500 transition-colors h-8 w-full sm:w-1/2">
-                                                                    <div className="pl-2 pr-1 text-green-500 shrink-0">
-                                                                        <CarFront className="w-3.5 h-3.5" />
-                                                                    </div>
-                                                                    <Input
-                                                                        type="number"
-                                                                        className="h-full border-0 focus-visible:ring-0 p-0 text-[10px] placeholder:text-[10px] placeholder:text-muted-foreground/70"
-                                                                        placeholder="Qtd Usada (ml/un)"
-                                                                        value={sp.quantity || ""}
-                                                                        onChange={(e) => updateProduct(sp.id, { quantity: Number(e.target.value) })}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                                {selectedProducts.length === 0 && (
-                                                    <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10">
-                                                        <Search className="w-8 h-8 mb-2 opacity-50" />
-                                                        <p>Nenhum custo adicionado.</p>
-                                                        <p className="text-xs">Utilize a busca acima para adicionar produtos.</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </ScrollArea>
-                                    </div>
-                                </div>
-                            </TabsContent>
                         </Tabs>
 
                         <div className="flex justify-end gap-2 pt-2 border-t">

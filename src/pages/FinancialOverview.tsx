@@ -55,8 +55,6 @@ export const FinancialOverview = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-
-
             // Fetch profile for investment data
             const { data: profile } = await supabase
                 .from('profiles')
@@ -94,34 +92,21 @@ export const FinancialOverview = () => {
                 setIncludeWorkingCapital(incWC || false);
             }
 
-            // Simple sum for now (Recurring + Fixed + Variable average if implemented later)
-            // Assuming all active costs count towards the monthly total. 
-            // If expense_date usage is complex, we might refine this later. 
-            // For now: sum of all records (assuming they represent monthly snapshot or we just sum all registered costs as "Fixed Monthly").
-            // Actually, `operational_costs` might contain transaction history. 
-            // If it's a history table, we shouldn't sum ALL. 
-            // Let's check `ManageCosts.tsx` logic. It usually has "Recurring" costs.
-            // If the table mixes one-off expenses, we need to be careful.
-            // Let's assume for this "Base Calculation" we want "Recurring Fixed Costs".
-            // If we blindly sum everything, one-off expenses from 2023 will break it.
-            // Filter by `is_recurring = true` OR recent expenses?
-            // The user said: "Pegue todos os custos do gerenciar custos".
-            // "Gerenciar Custos" seems to be the place where we list expenses.
-            // Let's filter by `is_recurring` to be safe for a "Base Rate", OR fetch expenses for the CURRENT MONTH.
-            // Requirement: "Pegue todos os custos ... e divida".
-            // Interpretation: The Monthly Expenses. 
-            // Let's try to sum "Recurring Costs" + "Average Variable Costs".
-            // For MVP: Sum of ALL costs in the current month?
-            // Let's fetch costs with `is_recurring: true` AND costs within current month.
+            // 1. Fetch Categories to check is_operational
+            // @ts-ignore
+            const { data: categoriesData } = await supabase
+                .from('financial_categories')
+                .select('name, is_operational');
 
-            // Re-reading: "Pegue todos os custos do gerenciar custos".
-            // I will take distinct recurring costs + one-time costs of this month.
-            // Ideally, we sum everything that hits the cashflow this month.
+            // Create a Set of NON-operational categories (blacklist) for efficient checking
+            // We assume default is OPERATIONAL (true), so we only exclude explicitly marked false
+            const nonOperationalCategories = new Set(
+                (categoriesData || [])
+                    .filter((cat: any) => cat.is_operational === false)
+                    .map((cat: any) => cat.name)
+            );
 
-            // Let's simplify: Sum all UNIQUE recurring costs + Non-recurring costs of THIS MONTH.
-            // But `costService` generates rows for recurring costs too.
-            // So we just search for costs where `expense_date` is within current month.
-
+            // 2. Fetch Monthly Costs
             const startOfMonth = new Date();
             startOfMonth.setDate(1);
             const startStr = startOfMonth.toISOString().split('T')[0];
@@ -130,19 +115,44 @@ export const FinancialOverview = () => {
             endOfMonth.setMonth(endOfMonth.getMonth() + 1);
             const endStr = endOfMonth.toISOString().split('T')[0];
 
+            // Note: We need 'category' field to filter
+            // Attempting to select category. If it fails due to schema, we might need a fallback.
+            // But based on usage in ManageCosts, it should exist or be mapped.
+            // @ts-ignore
             const { data: monthlyCosts, error: monthlyError } = await supabase
                 .from('operational_costs')
-                .select('value')
+                .select('value, category')
                 .gte('expense_date', startStr)
                 .lt('expense_date', endStr);
 
             if (monthlyError) throw monthlyError;
 
-            const totalMonthly = monthlyCosts?.reduce((acc, curr) => acc + curr.value, 0) || 0;
-            setTotalCosts(totalMonthly);
-            setCostCount(monthlyCosts?.length || 0);
+            // 3. Sum only Operational Costs
+            let totalMonthly = 0;
+            let count = 0;
 
-            // 2. Fetch Hours
+            if (monthlyCosts) {
+                // @ts-ignore
+                monthlyCosts.forEach(cost => {
+                    // Check if this cost's category is in the non-operational list
+                    // If cost.category is null, we assume it's operational (general expense)
+                    // @ts-ignore
+                    const catName = cost.category;
+
+                    if (catName && nonOperationalCategories.has(catName)) {
+                        // Skip non-operational (Commisions, Bonuses, etc)
+                        return;
+                    }
+
+                    totalMonthly += cost.value;
+                    count++;
+                });
+            }
+
+            setTotalCosts(totalMonthly);
+            setCostCount(count);
+
+            // 4. Fetch Hours
             const { data: hours, error: hoursError } = await supabase
                 .from('operational_hours')
                 .select('*')
@@ -152,7 +162,6 @@ export const FinancialOverview = () => {
             if (hoursError) throw hoursError;
 
             if (hours) {
-
                 calculateHours(hours as OperationalHours, totalMonthly);
             }
 
