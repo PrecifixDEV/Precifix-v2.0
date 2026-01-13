@@ -11,13 +11,12 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FinancialAccount } from "@/types/costs";
 import { cn } from "@/lib/utils";
-import { CategoryTreeSelect, type CategoryNode } from "@/components/ui/category-tree-select";
+import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
 import { financialCategoriesService, type FinancialCategory } from "@/services/financialCategoriesService";
 import { paymentMethodsService } from "@/services/paymentMethodsService";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 interface AddValueDialogProps {
     open: boolean;

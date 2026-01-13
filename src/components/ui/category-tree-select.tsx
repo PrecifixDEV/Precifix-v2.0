@@ -69,28 +69,9 @@ export function CategoryTreeSelect({
     }
 
     // Filter logic
-    const filteredData = React.useMemo(() => {
-        if (!hasSearch) return data
+    // Filter logic
+    // The filter logic was previously here but was unused as renderSearchResults handles it.
 
-        const lowerTerm = searchTerm.toLowerCase()
-        const result: CategoryNode[] = []
-
-        data.forEach(parent => {
-            if (parent.subcategories) {
-                const matchingSubs = parent.subcategories.filter(sub =>
-                    sub.label.toLowerCase().includes(lowerTerm)
-                )
-
-                if (matchingSubs.length > 0) {
-                    // Clone parent with filtered subs for flat display or tree display?
-                    // User requirements: "Input, accordion suspends. List filters and shows all matching subcategories with path"
-                    // So we return a flat list of matches logic
-                }
-            }
-        })
-
-        return []
-    }, [data, searchTerm, hasSearch])
 
     // Specific render for flat search results
     const renderSearchResults = () => {
@@ -176,7 +157,7 @@ export function CategoryTreeSelect({
                                         // Actually Command component has internal filtering.
                                         // If we control state, we might fight with it.
                                         // Better: Only show renderTree if !hasSearch.
-                                        onSelect={(currentValue) => {
+                                        onSelect={() => {
                                             onSelect(child.label) // Return label/name as expected by current backend
                                             setOpen(false)
                                         }}

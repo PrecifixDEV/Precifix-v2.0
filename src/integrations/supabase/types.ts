@@ -367,6 +367,27 @@ export type Database = {
                 }
                 Relationships: []
             }
+            payment_methods: {
+                Row: {
+                    id: string
+                    name: string
+                    is_active: boolean
+                    created_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    is_active?: boolean
+                    created_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    is_active?: boolean
+                    created_at?: string | null
+                }
+                Relationships: []
+            }
             products: {
                 Row: {
                     code: string | null
