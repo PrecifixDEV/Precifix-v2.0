@@ -93,8 +93,8 @@ export const FinancialOverview = () => {
             }
 
             // 1. Fetch Categories to check is_operational
-            // @ts-ignore
-            const { data: categoriesData } = await supabase
+            // financial_categories table exists but not in generated types yet
+            const { data: categoriesData } = await (supabase as any)
                 .from('financial_categories')
                 .select('name, is_operational');
 

@@ -72,12 +72,12 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                 .select('*')
                 .eq('user_id', user.id);
             if (error) throw error;
-            // Explicitly cast the 'type' field from Supabase string to Union type
+            // Cast the 'type' field from Supabase string to Union type
             return (data || []).map(item => ({
                 ...item,
                 type: item.type as 'fixed' | 'variable',
                 recurrence_frequency: item.recurrence_frequency as OperationalCost['recurrence_frequency']
-            }));
+            })) as OperationalCost[];
         },
         enabled: !!user,
     });
