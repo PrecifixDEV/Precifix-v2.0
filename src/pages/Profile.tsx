@@ -353,14 +353,14 @@ export const Profile = () => {
                                             placeholder="Nome"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-background text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                         <input
                                             type="text"
                                             placeholder="Sobrenome"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-background text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
@@ -440,7 +440,7 @@ export const Profile = () => {
                                             onBlur={handleZipCodeBlur}
                                             maxLength={9}
                                             placeholder="00000-000"
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-background text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2 col-span-2">
@@ -449,7 +449,7 @@ export const Profile = () => {
                                             type="text"
                                             value={address}
                                             onChange={(e) => setAddress(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-background text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
@@ -461,7 +461,7 @@ export const Profile = () => {
                                             type="text"
                                             value={addressNumber}
                                             onChange={(e) => setAddressNumber(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-background text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2 col-span-2">
@@ -471,7 +471,7 @@ export const Profile = () => {
                                             value={addressComplement}
                                             onChange={(e) => setAddressComplement(e.target.value)}
                                             placeholder="Ex: Apto 101"
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-background text-slate-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>

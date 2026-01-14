@@ -451,7 +451,7 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                         </Button>
                         <Button
                             type="submit"
-                            className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                            className="bg-yellow-500 hover:bg-yellow-600 text-foreground"
                             onClick={handleConfirmPayment}
                             disabled={payMutation.isPending}
                         >

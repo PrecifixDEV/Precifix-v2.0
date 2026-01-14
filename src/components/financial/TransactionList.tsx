@@ -34,6 +34,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { financialService } from "@/services/financialService";
+import { ActiveFilters } from "@/components/ui/active-filters";
 
 interface TransactionListProps {
     transactions: (FinancialTransaction & { commercial_accounts: { name: string } | null })[];
@@ -465,48 +466,25 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                 </div>
             </CardHeader>
 
-            {/* Active Filters Display (Simplified) */}
+            {/* Active Filters */}
             {hasActiveFilters && (
-                <div className="px-6 pb-4 text-xs text-muted-foreground flex flex-wrap gap-2 items-center">
-                    <div className="flex items-center gap-1">
-                        <span className="font-medium text-blue-600 dark:text-blue-400">Filtros Ativos:</span>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4 text-slate-400 hover:text-red-500 hover:bg-transparent"
-                            onClick={handleClearFilters}
-                            title="Limpar filtros"
-                        >
-                            <X className="h-3 w-3" />
-                        </Button>
-                    </div>
-                    {dateRange?.from && (
-                        <Badge variant="secondary" className="font-normal">
-                            Periodo: {
-                                (() => {
-                                    const from = dateRange.from;
-                                    const to = dateRange.to || dateRange.from;
-                                    return `${format(from, "dd/MM", { locale: ptBR })} - ${format(to, "dd/MM", { locale: ptBR })}`
-                                })()
-                            }
-                        </Badge>
-                    )}
-                    {activeSearch && (
-                        <Badge variant="secondary" className="font-normal">
-                            {getSearchFieldLabel(activeSearch.field)}: {activeSearch.term}
-                        </Badge>
-                    )}
-                    {showDeletedOnly && (
-                        <Badge variant="destructive" className="font-normal bg-red-100 text-red-700 border-red-200">
-                            Lixeira (Excluídos)
-                        </Badge>
-                    )}
-                    {typeFilter !== 'all' && (
-                        <Badge variant="secondary" className="font-normal">
-                            {typeFilter === 'credit' ? 'Entradas' : 'Saídas'}
-                        </Badge>
-                    )}
-                </div>
+                <ActiveFilters
+                    filters={[
+                        ...(dateRange?.from ? [{
+                            label: 'Período',
+                            value: `${format(dateRange.from, "dd/MM", { locale: ptBR })} - ${format(dateRange.to || dateRange.from, "dd/MM", { locale: ptBR })}`
+                        }] : []),
+                        ...(activeSearch ? [{
+                            label: getSearchFieldLabel(activeSearch.field),
+                            value: activeSearch.term
+                        }] : []),
+                        ...(showDeletedOnly ? [{ label: 'Lixeira (Excluídos)' }] : []),
+                        ...(typeFilter !== 'all' ? [{
+                            label: typeFilter === 'credit' ? 'Entradas' : 'Saídas'
+                        }] : [])
+                    ]}
+                    onClearAll={handleClearFilters}
+                />
             )}
 
             <CardContent className="p-0">

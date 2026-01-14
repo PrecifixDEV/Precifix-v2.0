@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,6 +11,13 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import {
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerFooter,
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -25,6 +32,7 @@ import { productService, type Product } from '@/services/productService';
 import { compressAndConvertToWebP } from '@/utils/imageUtils';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { useMobile } from '@/hooks/useMobile';
 
 const productSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
@@ -64,10 +72,12 @@ interface ProductFormDialogProps {
 }
 
 export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess }: ProductFormDialogProps) {
+    const isMobile = useMobile();
     const [isLoading, setIsLoading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [dilutionType, setDilutionType] = useState<'ready' | 'dilution'>('ready');
+    const dilutionFieldRef = useRef<HTMLDivElement>(null);
 
     const { register, handleSubmit, formState: { errors, isValid }, reset, setValue, watch, setError } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema) as any,
@@ -129,6 +139,18 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             setImageFile(null);
         }
     }, [open, productToEdit, reset, setValue]);
+
+    // Auto-scroll to dilution field when it appears (mobile only)
+    useEffect(() => {
+        if (isMobile && dilutionType === 'dilution' && dilutionFieldRef.current) {
+            setTimeout(() => {
+                dilutionFieldRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            }, 100); // Small delay to ensure animation completes
+        }
+    }, [dilutionType, isMobile]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -228,282 +250,324 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
         }
     };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto w-[90vw] sm:w-full" aria-describedby={undefined}>
-                <DialogHeader>
-                    <DialogTitle className="text-slate-900 dark:text-white">
-                        {productToEdit?.id ? 'Editar Produto' : productToEdit ? 'Clonando Produto Existente' : 'Novo Produto'}
-                    </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-                    {/* Image Upload */}
-                    <div className="flex flex-col items-center justify-center p-4">
-                        {imagePreview ? (
-                            <div className="relative w-40 h-40 group">
-                                <img
-                                    src={imagePreview}
-                                    alt="Preview"
-                                    className="w-full h-full object-cover rounded-md border border-slate-200 dark:border-slate-700"
-                                />
-
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    <label
-                                        htmlFor="image-upload"
-                                        className="bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded cursor-pointer pointer-events-auto transition-colors"
-                                    >
-                                        Alterar
-                                    </label>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={handleRemoveImage}
-                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm transition-colors z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                    title="Remover imagem"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-
-                                <input
-                                    id="image-upload"
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleImageChange}
-                                />
-                            </div>
-                        ) : (
-                            <div className="w-full h-32 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors relative cursor-pointer">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    onChange={handleImageChange}
-                                />
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 pointer-events-none">
-                                    <Upload className="w-8 h-8 mb-2" />
-                                    <span className="text-sm">Clique para enviar imagem</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name" className="!text-foreground">Nome do Produto *</Label>
-                            <TooltipProvider>
-                                <Tooltip open={!!errors.name}>
-                                    <TooltipTrigger asChild>
-                                        <Input
-                                            id="name"
-                                            {...register("name")}
-                                            className="bg-white dark:bg-slate-800"
-                                            placeholder="Ex: Cera de Carnaúba"
-                                        />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                        <p>{errors.name?.message}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
-                        {/* Hidden Code Input Field - kept in state but not shown */}
-                        <input type="hidden" {...register("code")} />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Destinação do Produto</Label>
-                        <div className="flex gap-4 pt-2">
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="usageType"
-                                    checked={!watch("is_for_sale")}
-                                    onChange={() => setValue("is_for_sale", false)}
-                                    className="accent-yellow-500 w-4 h-4"
-                                />
-                                <span className="text-sm font-medium">Uso Próprio</span>
-                            </label>
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="usageType"
-                                    checked={watch("is_for_sale")}
-                                    onChange={() => setValue("is_for_sale", true)}
-                                    className="accent-yellow-500 w-4 h-4"
-                                />
-                                <span className="text-sm font-medium">Revenda</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Descrição</Label>
-                        <Textarea
-                            id="description"
-                            {...register("description")}
-                            className="bg-white dark:bg-slate-800 min-h-[60px] resize-y"
-                            maxLength={500}
-                            rows={2}
-                            placeholder="Máximo 500 caracteres"
+    // Shared form content
+    const formContent = (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Image Upload */}
+            <div className="flex flex-col items-center justify-center p-4">
+                {imagePreview ? (
+                    <div className="relative w-40 h-40 group">
+                        <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover rounded-md border border-slate-200 dark:border-slate-700"
                         />
-                        <div className="text-xs text-right text-muted-foreground">
-                            {watch("description")?.length || 0}/500
+
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <label
+                                htmlFor="image-upload"
+                                className="bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded cursor-pointer pointer-events-auto transition-colors"
+                            >
+                                Alterar
+                            </label>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm transition-colors z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            title="Remover imagem"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+
+                        <input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageChange}
+                        />
+                    </div>
+                ) : (
+                    <div className="w-full h-32 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors relative cursor-pointer">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={handleImageChange}
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 pointer-events-none">
+                            <Upload className="w-8 h-8 mb-2" />
+                            <span className="text-sm">Clique para enviar imagem</span>
                         </div>
                     </div>
+                )}
+            </div>
 
-                    <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
-                        <div className="space-y-2">
-                            <Label htmlFor="price" className="!text-foreground">Preço de Custo (R$) *</Label>
-                            <TooltipProvider>
-                                <Tooltip open={!!errors.price}>
-                                    <TooltipTrigger asChild>
-                                        <Input
-                                            id="price"
-                                            type="number"
-                                            step="0.01"
-                                            {...register("price")}
-                                            className="bg-white dark:bg-slate-800"
-                                            placeholder="R$ 0,00"
-                                        />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                        <p>{errors.price?.message}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
+            <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name" className="!text-foreground">Nome do Produto *</Label>
+                    <TooltipProvider>
+                        <Tooltip open={!!errors.name}>
+                            <TooltipTrigger asChild>
+                                <Input
+                                    id="name"
+                                    {...register("name")}
+                                    className="bg-white dark:bg-slate-800"
+                                    placeholder="Ex: Cera de Carnaúba"
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                <p>{errors.name?.message}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+                <input type="hidden" {...register("code")} />
+            </div>
 
-                        {watch("is_for_sale") && (
-                            <div className="space-y-2">
-                                <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
-                                <Input id="sale_price" type="number" step="0.01" {...register("sale_price")} className="bg-white dark:bg-slate-800" />
-                            </div>
-                        )}
+            <div className="space-y-2">
+                <Label>Destinação do Produto</Label>
+                <div className="flex gap-4 pt-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="usageType"
+                            checked={!watch("is_for_sale")}
+                            onChange={() => setValue("is_for_sale", false)}
+                            className="accent-yellow-500 w-4 h-4"
+                        />
+                        <span className="text-sm font-medium">Uso Próprio</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="usageType"
+                            checked={watch("is_for_sale")}
+                            onChange={() => setValue("is_for_sale", true)}
+                            className="accent-yellow-500 w-4 h-4"
+                        />
+                        <span className="text-sm font-medium">Revenda</span>
+                    </label>
+                </div>
+            </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="stock_quantity" className="!text-foreground">Estoque *</Label>
-                            <TooltipProvider>
-                                <Tooltip open={!!errors.stock_quantity}>
-                                    <TooltipTrigger asChild>
-                                        <Input
-                                            id="stock_quantity"
-                                            type="number"
-                                            {...register("stock_quantity")}
-                                            className="bg-white dark:bg-slate-800"
-                                            placeholder="Ex: 10"
-                                        />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                        <p>{errors.stock_quantity?.message}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
+            <div className="space-y-2">
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                    id="description"
+                    {...register("description")}
+                    className="bg-white dark:bg-slate-800 min-h-[60px] resize-y"
+                    maxLength={500}
+                    rows={2}
+                    placeholder="Máximo 500 caracteres"
+                />
+                <div className="text-xs text-right text-muted-foreground">
+                    {watch("description")?.length || 0}/500
+                </div>
+            </div>
+
+            <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
+                <div className="space-y-2">
+                    <Label htmlFor="price" className="!text-foreground">Preço de Custo (R$) *</Label>
+                    <TooltipProvider>
+                        <Tooltip open={!!errors.price}>
+                            <TooltipTrigger asChild>
+                                <Input
+                                    id="price"
+                                    type="number"
+                                    step="0.01"
+                                    {...register("price")}
+                                    className="bg-white dark:bg-slate-800"
+                                    placeholder="R$ 0,00"
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                <p>{errors.price?.message}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+
+                {watch("is_for_sale") && (
+                    <div className="space-y-2">
+                        <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
+                        <Input id="sale_price" type="number" step="0.01" {...register("sale_price")} className="bg-white dark:bg-slate-800" />
                     </div>
+                )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="container_size_ml" className="!text-foreground">Tamanho da Embalagem (ml) *</Label>
-                            <TooltipProvider>
-                                <Tooltip open={!!errors.container_size_ml}>
-                                    <TooltipTrigger asChild>
-                                        <Input
-                                            id="container_size_ml"
-                                            type="number"
-                                            placeholder="Ex: 5000"
-                                            {...register("container_size_ml")}
-                                            className="bg-white dark:bg-slate-800"
-                                        />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                        <p>{errors.container_size_ml?.message}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                            <span className="text-xs text-slate-500">Volume total em ml (ex: 5L = 5000)</span>
-                        </div>
+                <div className="space-y-2">
+                    <Label htmlFor="stock_quantity" className="!text-foreground">Estoque *</Label>
+                    <TooltipProvider>
+                        <Tooltip open={!!errors.stock_quantity}>
+                            <TooltipTrigger asChild>
+                                <Input
+                                    id="stock_quantity"
+                                    type="number"
+                                    {...register("stock_quantity")}
+                                    className="bg-white dark:bg-slate-800"
+                                    placeholder="Ex: 10"
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                <p>{errors.stock_quantity?.message}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            </div>
 
-                        <div className="space-y-2">
-                            <Label>Tipo de Produto</Label>
-                            <div className="flex gap-4 pt-2">
-                                <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="dilutionType"
-                                        value="ready"
-                                        checked={dilutionType === 'ready'}
-                                        onChange={() => {
-                                            setDilutionType('ready');
-                                            setValue('is_dilutable', false);
-                                            setValue('dilution_ratio', '');
-                                            // Don't reset container size as it's now always required
-                                        }}
-                                        className="accent-yellow-500 w-4 h-4"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="container_size_ml" className="!text-foreground">Tamanho da Embalagem (ml) *</Label>
+                    <TooltipProvider>
+                        <Tooltip open={!!errors.container_size_ml}>
+                            <TooltipTrigger asChild>
+                                <Input
+                                    id="container_size_ml"
+                                    type="number"
+                                    placeholder="Ex: 5000"
+                                    {...register("container_size_ml")}
+                                    className="bg-white dark:bg-slate-800"
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                <p>{errors.container_size_ml?.message}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <span className="text-xs text-slate-500">Volume total em ml (ex: 5L = 5000)</span>
+                </div>
+
+                <div className="space-y-2">
+                    <Label>Tipo de Produto</Label>
+                    <div className="flex gap-4 pt-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="dilutionType"
+                                value="ready"
+                                checked={dilutionType === 'ready'}
+                                onChange={() => {
+                                    setDilutionType('ready');
+                                    setValue('is_dilutable', false);
+                                    setValue('dilution_ratio', '');
+                                }}
+                                className="accent-yellow-500 w-4 h-4"
+                            />
+                            <span className="text-sm font-medium whitespace-nowrap">Pronto Uso</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="dilutionType"
+                                value="dilution"
+                                checked={dilutionType === 'dilution'}
+                                onChange={() => {
+                                    setDilutionType('dilution');
+                                    setValue('is_dilutable', true);
+                                }}
+                                className="accent-yellow-500 w-4 h-4"
+                            />
+                            <span className="text-sm font-medium">Diluível</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {dilutionType === 'dilution' && (
+                <div ref={dilutionFieldRef} className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="space-y-2">
+                        <Label htmlFor="dilution_ratio" className="!text-foreground">Proporção da Diluição *</Label>
+                        <TooltipProvider>
+                            <Tooltip open={!!errors.dilution_ratio}>
+                                <TooltipTrigger asChild>
+                                    <Input
+                                        id="dilution_ratio"
+                                        placeholder="Ex: 1:10"
+                                        {...register("dilution_ratio")}
+                                        className="bg-white dark:bg-slate-800"
                                     />
-                                    <span className="text-sm font-medium whitespace-nowrap">Pronto Uso</span>
-                                </label>
-                                <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="dilutionType"
-                                        value="dilution"
-                                        checked={dilutionType === 'dilution'}
-                                        onChange={() => {
-                                            setDilutionType('dilution');
-                                            setValue('is_dilutable', true);
-                                        }}
-                                        className="accent-yellow-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm font-medium">Diluível</span>
-                                </label>
-                            </div>
-                        </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
+                                    <p>{errors.dilution_ratio?.message}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <span className="text-xs text-slate-500">Ex: 1:10, 1:20, 1:100</span>
+                    </div>
+                </div>
+            )}
+        </form>
+    );
+
+    // Mobile: Drawer
+    if (isMobile) {
+        return (
+            <Drawer open={open} onOpenChange={onOpenChange}>
+                <DrawerContent className="max-h-[95vh]">
+                    <DrawerHeader>
+                        <DrawerTitle>
+                            {productToEdit?.id ? 'Editar Produto' : productToEdit ? 'Clonando Produto Existente' : 'Novo Produto'}
+                        </DrawerTitle>
+                    </DrawerHeader>
+
+                    <div className="flex-1 overflow-y-auto px-4">
+                        {formContent}
                     </div>
 
-                    {dilutionType === 'dilution' && (
-                        <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                            <div className="space-y-2">
-                                <Label htmlFor="dilution_ratio" className="!text-foreground">Proporção da Diluição *</Label>
-                                <TooltipProvider>
-                                    <Tooltip open={!!errors.dilution_ratio}>
-                                        <TooltipTrigger asChild>
-                                            <Input
-                                                id="dilution_ratio"
-                                                placeholder="Ex: 1:10"
-                                                {...register("dilution_ratio")}
-                                                className="bg-white dark:bg-slate-800"
-                                            />
-                                        </TooltipTrigger>
-                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                            <p>{errors.dilution_ratio?.message}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                                <span className="text-xs text-slate-500">Ex: 1:10, 1:20, 1:100</span>
-                            </div>
-                        </div>
-                    )}
-
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Cancelar
-                        </Button>
+                    <DrawerFooter className="pt-2 border-t">
                         <Button
-                            type="submit"
+                            onClick={handleSubmit(onSubmit)}
                             disabled={isLoading || !isValid}
                             className={cn(
-                                "border-none",
+                                "w-full border-none",
                                 !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 text-slate-900"
                             )}
                         >
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
                         </Button>
-                    </DialogFooter>
-                </form>
+                        <Button variant="outline" onClick={() => onOpenChange(false)}>
+                            Cancelar
+                        </Button>
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
+        );
+    }
+
+    // Desktop: Dialog
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col p-0" aria-describedby={undefined}>
+                <DialogHeader className="p-6 pb-2">
+                    <DialogTitle className="text-slate-900 dark:text-white">
+                        {productToEdit?.id ? 'Editar Produto' : productToEdit ? 'Clonando Produto Existente' : 'Novo Produto'}
+                    </DialogTitle>
+                </DialogHeader>
+
+                <div className="flex-1 overflow-y-auto px-6">
+                    {formContent}
+                </div>
+
+                <DialogFooter className="flex-row justify-end gap-2 p-6 pt-4 border-t bg-slate-50 dark:bg-slate-900/50">
+                    <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none bg-background">
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={isLoading || !isValid}
+                        className={cn(
+                            "flex-1 sm:flex-none border-none",
+                            !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 text-slate-900"
+                        )}
+                    >
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

@@ -482,7 +482,7 @@ export const FinancialOverview = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="md:col-span-2 bg-white dark:bg-slate-900 border-2 border-purple-100 dark:border-purple-900/50 shadow-lg relative overflow-hidden transition-all hover:border-purple-200 dark:hover:border-purple-800">
+                    <Card className="md:col-span-2 bg-card border-2 border-purple-100 dark:border-purple-900/50 shadow-lg relative overflow-hidden transition-all hover:border-purple-200 dark:hover:border-purple-800">
                         {/* Background Deco */}
                         <div className="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-5 pointer-events-none text-purple-600 dark:text-purple-400">
                             <TrendingUp className="w-64 h-64" />
@@ -544,7 +544,7 @@ export const FinancialOverview = () => {
                                             type="number"
                                             value={investment.initialValue || ''}
                                             onChange={(e) => updateInvestment('initialValue', Number(e.target.value))}
-                                            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
                                             placeholder="0,00"
                                         />
                                     </div>
@@ -558,7 +558,7 @@ export const FinancialOverview = () => {
                                             type="number"
                                             value={investment.returnMonths || ''}
                                             onChange={(e) => updateInvestment('returnMonths', Number(e.target.value))}
-                                            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
                                             placeholder="36"
                                         />
                                     </div>
@@ -579,7 +579,7 @@ export const FinancialOverview = () => {
                             <p>
                                 Ao diluir esse valor nas suas horas de trabalho, você garante que cada serviço prestado contribui um pouquinho para pagar o investimento que você fez.
                             </p>
-                            <div className="p-3 bg-white dark:bg-slate-900 rounded border text-xs">
+                            <div className="p-3 bg-card rounded border text-xs">
                                 <strong>Recomendação:</strong> 36 meses (3 anos) é um prazo comum para retorno de investimento em negócios de serviços.
                             </div>
                         </CardContent>
@@ -597,7 +597,7 @@ export const FinancialOverview = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="md:col-span-2 bg-white dark:bg-slate-900 border-2 border-emerald-100 dark:border-emerald-900/50 shadow-lg relative overflow-hidden transition-all hover:border-emerald-200 dark:hover:border-emerald-800">
+                    <Card className="md:col-span-2 bg-card border-2 border-emerald-100 dark:border-emerald-900/50 shadow-lg relative overflow-hidden transition-all hover:border-emerald-200 dark:hover:border-emerald-800">
                         <div className="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-5 pointer-events-none text-emerald-600 dark:text-emerald-400">
                             <PiggyBank className="w-64 h-64" />
                         </div>
@@ -654,7 +654,7 @@ export const FinancialOverview = () => {
                                             type="number"
                                             value={workingCapital.goal || ''}
                                             onChange={(e) => updateWorkingCapital('goal', Number(e.target.value))}
-                                            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
                                             placeholder="0,00"
                                         />
                                     </div>
@@ -668,7 +668,7 @@ export const FinancialOverview = () => {
                                             type="number"
                                             value={workingCapital.months || ''}
                                             onChange={(e) => updateWorkingCapital('months', Number(e.target.value))}
-                                            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
                                             placeholder="12"
                                         />
                                     </div>
@@ -689,7 +689,7 @@ export const FinancialOverview = () => {
                             <p>
                                 Planeje acumular de <strong>6 meses a 1 ano</strong> dos seus custos fixos como reserva de segurança.
                             </p>
-                            <div className="p-3 bg-white dark:bg-slate-900 rounded border text-xs">
+                            <div className="p-3 bg-card rounded border text-xs">
                                 <strong>Dica:</strong> Se seu custo fixo é R$ {formatMoney(totalCosts)}, comece mirando R$ {formatMoney(totalCosts * 3)} (3 meses).
                             </div>
                         </CardContent>
@@ -703,11 +703,11 @@ export const FinancialOverview = () => {
                         <DollarSign className="h-5 w-5 text-red-500" />
                         1. Detalhe dos Custos
                     </h2>
-                    <Link to="/custos" className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded text-xs font-medium transition-colors">
+                    <Link to="/custos" className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-foreground px-3 py-1 rounded text-xs font-medium transition-colors">
                         Gerenciar <ArrowRight className="h-3 w-3" />
                     </Link>
                 </div>
-                <Card className="bg-white dark:bg-slate-900 border-2 border-red-100 dark:border-red-900/50 shadow-lg transition-all hover:border-red-200 dark:hover:border-red-800">
+                <Card className="bg-card border-2 border-red-100 dark:border-red-900/50 shadow-lg transition-all hover:border-red-200 dark:hover:border-red-800">
                     <CardContent className="pt-6">
                         <p className="text-sm text-muted-foreground mb-4">
                             Soma de todas as despesas lançadas com data de vencimento neste mês.
@@ -734,11 +734,11 @@ export const FinancialOverview = () => {
                         <Clock className="h-5 w-5 text-blue-500" />
                         2. Detalhe do Tempo (Matemática)
                     </h2>
-                    <Link to="/minha-empresa" className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded text-xs font-medium transition-colors">
+                    <Link to="/minha-empresa" className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-foreground px-3 py-1 rounded text-xs font-medium transition-colors">
                         Ajustar Horários <ArrowRight className="h-3 w-3" />
                     </Link>
                 </div>
-                <Card className="bg-white dark:bg-slate-900 border-2 border-blue-100 dark:border-blue-900/50 shadow-lg transition-all hover:border-blue-200 dark:hover:border-blue-800">
+                <Card className="bg-card border-2 border-blue-100 dark:border-blue-900/50 shadow-lg transition-all hover:border-blue-200 dark:hover:border-blue-800">
                     <CardContent className="pt-6 space-y-4">
                         <div className="flex items-center gap-2 text-sm">
                             <span className="font-semibold text-slate-700 dark:text-slate-300">Dias Trabalhados:</span>

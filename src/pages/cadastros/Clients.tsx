@@ -50,6 +50,7 @@ import { supabase } from "@/lib/supabase";
 import { ClientFormDialog } from "./ClientFormDialog";
 import { clientsService } from "@/services/clientsService";
 import type { ClientWithVehicles } from "@/services/clientsService";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 export const Clients = () => {
     const [clients, setClients] = useState<ClientWithVehicles[]>([]);
@@ -64,6 +65,10 @@ export const Clients = () => {
     const [clientToDelete, setClientToDelete] = useState<ClientWithVehicles | null>(null);
     const [clientToView, setClientToView] = useState<ClientWithVehicles | null>(null);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 25;
 
     const [companyInfo, setCompanyInfo] = useState<{ name: string; logo: string | null; primaryColor: string }>({
         name: '',
@@ -111,6 +116,18 @@ export const Clients = () => {
         });
         setFilteredClients(filtered);
     }, [searchTerm, clients, filterType]);
+
+    // Paginated clients
+    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+    const paginatedClients = filteredClients.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterType]);
 
     // Selection Helpers
     const toggleSelectAll = () => {
@@ -314,7 +331,7 @@ export const Clients = () => {
                         <>
                             {/* Mobile View - List */}
                             <div className="md:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-800">
-                                {filteredClients.map((client) => {
+                                {paginatedClients.map((client) => {
                                     const vehicleCounts = { carro: 0, moto: 0, caminhao: 0 };
                                     client.vehicles?.forEach(v => {
                                         const type = v.type as keyof typeof vehicleCounts || 'carro';
@@ -412,9 +429,13 @@ export const Clients = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredClients.map((client) => (
-                                            <TableRow key={client.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                                <TableCell className="text-center">
+                                        {paginatedClients.map((client) => (
+                                            <TableRow
+                                                key={client.id}
+                                                className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+                                                onClick={() => handleEdit(client)}
+                                            >
+                                                <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                     <Checkbox
                                                         checked={selectedClients.includes(client.id)}
                                                         onCheckedChange={() => toggleSelect(client.id)}
@@ -444,7 +465,7 @@ export const Clients = () => {
                                                         })()}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="text-right">
+                                                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                                     <div className="flex justify-end gap-1">
                                                         <Button variant="ghost" size="icon" onClick={() => handleView(client)} className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100">
                                                             <Info className="h-4 w-4" />
@@ -474,6 +495,14 @@ export const Clients = () => {
                             </div>
                         </>
                     )}
+
+                    <TablePagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredClients.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                    />
                 </CardContent>
             </Card>
 

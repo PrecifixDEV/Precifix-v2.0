@@ -52,6 +52,7 @@ import { ServiceAnalysisSheet } from "./ServiceAnalysisSheet";
 import { servicesService } from "@/services/servicesService";
 import type { Service, ServiceWithProductCount } from "@/services/servicesService";
 import { SERVICE_ICONS } from "@/components/services/ServiceIconSelector";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 export const Services = () => {
     const [services, setServices] = useState<ServiceWithProductCount[]>([]);
@@ -75,6 +76,10 @@ export const Services = () => {
         logo: null,
         primaryColor: '#000000'
     });
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 25;
 
     useEffect(() => {
         loadServices();
@@ -119,6 +124,17 @@ export const Services = () => {
         });
         setFilteredServices(filtered);
     }, [searchTerm, services, filterType]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterType]);
+
+    // Paginated services
+    const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedServices = filteredServices.slice(startIndex, endIndex);
 
     // Selection Helpers
     const toggleSelectAll = () => {
@@ -436,11 +452,11 @@ export const Services = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredServices.map((service) => {
+                                        {paginatedServices.map((service) => {
                                             const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                             return (
-                                                <TableRow key={service.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                                    <TableCell className="text-center">
+                                                <TableRow key={service.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer" onClick={() => handleEdit(service)}>
+                                                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                         <Checkbox
                                                             checked={selectedServices.includes(service.id)}
                                                             onCheckedChange={() => toggleSelect(service.id)}
@@ -478,7 +494,7 @@ export const Services = () => {
                                                     </TableCell>
                                                     <TableCell className="text-center">{service.duration_minutes} min</TableCell>
                                                     <TableCell className="text-right">R$ {(service.base_price || 0).toFixed(2)}</TableCell>
-                                                    <TableCell className="text-right">
+                                                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -516,6 +532,15 @@ export const Services = () => {
                                     </TableBody>
                                 </Table>
                             </div>
+
+                            {/* Pagination */}
+                            <TablePagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                                totalItems={filteredServices.length}
+                                itemsPerPage={ITEMS_PER_PAGE}
+                            />
                         </>
                     )}
 

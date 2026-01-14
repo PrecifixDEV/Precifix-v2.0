@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { ResponsiveAddButton } from '@/components/ui/responsive-add-button';
 
 import {
     BarChart,
@@ -192,17 +193,25 @@ export const ManageCosts = () => {
 
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 pb-20">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
-                        Gerenciar Despesas
-                    </h1>
-                    <p className="text-muted-foreground mt-1">Análise detalhada de custos e despesas operacionais.</p>
+            <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+                            Gerenciar Despesas
+                        </h1>
+                        <p className="text-muted-foreground mt-1">Análise detalhada de custos e despesas operacionais.</p>
+                    </div>
+
+                    <ResponsiveAddButton
+                        onClick={() => setIsDialogOpen(true)}
+                        label="Nova Despesa"
+                        className="shadow-lg shadow-primary/20 shrink-0"
+                    />
                 </div>
 
+                {/* Period Selector */}
                 <div className="flex items-center gap-2">
-                    {/* Period Selector */}
                     <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
                         <SelectTrigger className="w-[140px] bg-background">
                             <SelectValue />
@@ -224,11 +233,6 @@ export const ManageCosts = () => {
                             ))}
                         </SelectContent>
                     </Select>
-
-                    <Button onClick={() => setIsDialogOpen(true)} className="gap-2 shadow-lg shadow-primary/20">
-                        <Plus className="h-4 w-4" />
-                        Nova Despesa
-                    </Button>
                 </div>
             </div>
 

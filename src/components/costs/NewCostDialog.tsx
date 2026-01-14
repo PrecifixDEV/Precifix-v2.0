@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { useMobile } from "@/hooks/useMobile";
 import { Button } from "@/components/ui/button";
 import { CategoryTreeSelect, type CategoryNode } from "@/components/ui/category-tree-select";
 import {
@@ -20,6 +21,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Drawer,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+} from "@/components/ui/drawer";
 import {
     Form,
     FormControl,
@@ -51,26 +60,23 @@ const costSchema = z.object({
     description: z.string().min(1, "Descrição é obrigatória"),
     observation: z.string().max(500, "Máximo de 500 caracteres").optional(),
     value: z.string().min(1, "Valor é obrigatório"),
-    // type: z.enum(["fixed", "variable"]), // Hidden/Hardcoded
     expense_date: z.date(),
     category: z.string().min(1, "Categoria é obrigatória"),
     is_recurring: z.boolean().default(false),
     recurrence_frequency: z.enum(["daily", "weekly", "monthly", "yearly"]).optional(),
     recurrence_end_date: z.date().optional(),
-    // Logic for "Paid"
     is_paid: z.boolean().default(false),
     payment_date: z.date().optional(),
     payment_method: z.string().optional(),
     account_id: z.string().optional(),
 }).refine((data) => {
-    // If paid is checked, we need payment details regardless of recurrence
     if (data.is_paid) {
         return !!data.payment_method && !!data.account_id && !!data.payment_date;
     }
     return true;
 }, {
     message: "Preencha os dados do pagamento",
-    path: ["account_id"], // Highlight one field
+    path: ["account_id"],
 });
 
 type CostFormValues = z.infer<typeof costSchema>;
@@ -81,6 +87,7 @@ interface NewCostDialogProps {
 }
 
 export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
+    const isMobile = useMobile();
     const queryClient = useQueryClient();
 
     // --- Data Fetching ---
@@ -119,14 +126,12 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
         }).sort((a, b) => a.label.localeCompare(b.label));
     }, [configuredCategories]);
 
-
     const form = useForm<CostFormValues>({
         resolver: zodResolver(costSchema) as any,
         defaultValues: {
             description: "",
             observation: "",
             value: "",
-            // type: "variable",
             expense_date: new Date(),
             category: "",
             is_recurring: false,
@@ -149,7 +154,6 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                 description: "",
                 observation: "",
                 value: "",
-                // type: "variable",
                 expense_date: new Date(),
                 category: "",
                 is_recurring: false,
@@ -164,17 +168,16 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
 
     const { mutate: saveCost, isPending } = useMutation({
         mutationFn: async (values: CostFormValues) => {
-            const formattedValue = parseFloat(values.value.replace(/\./g, '').replace(',', '.')); // Handle pt-BR currency
+            const formattedValue = parseFloat(values.value.replace(/\./g, '').replace(',', '.'));
             const numValue = isNaN(formattedValue) ? 0 : formattedValue;
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Usuário não autenticado");
 
-            // 1. Create Cost
             const savedCosts = await costService.saveCost({
                 description: values.description,
                 observation: values.observation,
                 value: numValue,
-                type: 'variable', // Hardcoded as requested
+                type: 'variable',
                 expense_date: format(values.expense_date, "yyyy-MM-dd"),
                 category: values.category,
                 is_recurring: values.is_recurring,
@@ -182,12 +185,9 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                 recurrence_end_date: values.is_recurring && values.recurrence_end_date ? format(values.recurrence_end_date, "yyyy-MM-dd") : undefined,
             } as any);
 
-            // 2. If Paid -> Create Transaction AND Payment Record for the FIRST item
-            // Used to be (!values.is_recurring && values.is_paid ...), now we allow recurring too
             if (values.is_paid && savedCosts && Array.isArray(savedCosts) && savedCosts.length > 0) {
-                const cost = savedCosts[0]; // The first installment (or the only one)
+                const cost = savedCosts[0];
 
-                // A. Financial Transaction (Money leaving the account)
                 await financialService.createTransaction({
                     description: `Pgto: ${values.description}`,
                     category: values.category,
@@ -200,7 +200,6 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                     related_entity_id: cost.id,
                 });
 
-                // B. Operational Cost Payment Record
                 const { error: paymentError } = await supabase.from('operational_cost_payments').insert({
                     user_id: user?.id,
                     operational_cost_id: cost.id,
@@ -235,8 +234,342 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
         saveCost(data);
     };
 
+    // Shared form content
+    const formContent = (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
+                <div className="flex gap-3">
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="flex-1">
+                                <FormLabel>Descrição</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Ex: Mercado, Aluguel" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="expense_date"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col w-[150px]">
+                                <FormLabel>Vencimento</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full pl-3 text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {field.value ? (
+                                                    format(field.value, "dd/MM/yyyy")
+                                                ) : (
+                                                    <span>Data</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="end">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            locale={ptBR}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="value"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Valor (R$)</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="0,00"
+                                        {...field}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, "");
+                                            const floatValue = Number(value) / 100;
+                                            const formatted = floatValue.toLocaleString("pt-BR", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            });
+                                            field.onChange(formatted);
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Categoria</FormLabel>
+                                <CategoryTreeSelect
+                                    data={categoryTree}
+                                    value={field.value}
+                                    onSelect={field.onChange}
+                                    placeholder="Selecione..."
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <FormField
+                    control={form.control}
+                    name="observation"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Observações</FormLabel>
+                            <FormControl>
+                                <Textarea
+                                    placeholder="Opcional"
+                                    className="resize-y min-h-[60px]"
+                                    maxLength={500}
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <Separator className="my-2" />
+
+                <FormField
+                    control={form.control}
+                    name="is_recurring"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-slate-50 dark:bg-slate-900/50">
+                            <FormLabel className="text-base">Despesa Recorrente?</FormLabel>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={(val) => {
+                                        field.onChange(val);
+                                    }}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+
+                {isRecurring && (
+                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border rounded-md border-t-0 rounded-t-none -mt-3 bg-slate-50 dark:bg-slate-900/50 mb-2">
+                        <FormField
+                            control={form.control}
+                            name="recurrence_frequency"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Frequência</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecione" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="weekly">Semanal</SelectItem>
+                                            <SelectItem value="monthly">Mensal</SelectItem>
+                                            <SelectItem value="yearly">Anual</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="recurrence_end_date"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Repetir até (Opcional)</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full pl-3 text-left font-normal bg-background",
+                                                        !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value ? format(field.value, "dd/MM/yyyy") : <span>Indefinido</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) => date < new Date()}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                )}
+
+                <div className="space-y-3">
+                    <FormField
+                        control={form.control}
+                        name="is_paid"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800">
+                                <FormLabel className="text-base text-emerald-700 dark:text-emerald-400">
+                                    {isRecurring ? "Primeira fatura paga?" : "Já está pago?"}
+                                </FormLabel>
+                                <FormControl>
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
+
+                    {isPaid && (
+                        <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border border-emerald-100 dark:border-emerald-800 rounded-md bg-emerald-50/50 dark:bg-emerald-900/5 -mt-2">
+                            <FormField
+                                control={form.control}
+                                name="payment_date"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Data Pagamento</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-background", !field.value && "text-muted-foreground")}>
+                                                        {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione</span>}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="payment_method"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Meio Pgto</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger className="bg-background">
+                                                    <SelectValue placeholder="Selecione" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {paymentMethods?.map(pm => (
+                                                    <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="account_id"
+                                render={({ field }) => (
+                                    <FormItem className="col-span-2">
+                                        <FormLabel>Conta de Origem</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger className="bg-background">
+                                                    <SelectValue placeholder="Selecione a conta" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {accounts?.map(acc => (
+                                                    <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    )}
+                </div>
+            </form>
+        </Form>
+    );
+
+    // Mobile: Drawer
+    if (isMobile) {
+        return (
+            <Drawer open={open} onOpenChange={onOpenChange} dismissible={true}>
+                <DrawerContent className="max-h-[95vh]">
+                    <DrawerHeader>
+                        <DrawerTitle>Nova Despesa</DrawerTitle>
+                        <DrawerDescription>
+                            Lançamento de contas a pagar ou despesas avulsas.
+                        </DrawerDescription>
+                    </DrawerHeader>
+
+                    <div className="flex-1 overflow-y-auto px-4">
+                        {formContent}
+                    </div>
+
+                    <DrawerFooter className="pt-2 border-t">
+                        <Button
+                            onClick={form.handleSubmit(onSubmit)}
+                            disabled={isPending}
+                            className="w-full"
+                        >
+                            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Salvar Despesa
+                        </Button>
+                        <Button variant="outline" onClick={() => onOpenChange(false)}>
+                            Cancelar
+                        </Button>
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
+        );
+    }
+
+    // Desktop: Dialog
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Nova Despesa</DialogTitle>
@@ -246,308 +579,11 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                 </DialogHeader>
 
                 <div className="flex-1 overflow-y-auto px-1">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
-
-                            <div className="flex gap-3">
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem className="flex-1">
-                                            <FormLabel>Descrição</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Ex: Mercado, Aluguel" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="expense_date"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col w-[150px]">
-                                            <FormLabel>Vencimento</FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            variant={"outline"}
-                                                            className={cn(
-                                                                "w-full pl-3 text-left font-normal",
-                                                                !field.value && "text-muted-foreground"
-                                                            )}
-                                                        >
-                                                            {field.value ? (
-                                                                format(field.value, "dd/MM/yyyy")
-                                                            ) : (
-                                                                <span>Data</span>
-                                                            )}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="end">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={field.value}
-                                                        onSelect={field.onChange}
-                                                        locale={ptBR}
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="value"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Valor (R$)</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="0,00"
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        const value = e.target.value.replace(/\D/g, "");
-                                                        const floatValue = Number(value) / 100;
-                                                        const formatted = floatValue.toLocaleString("pt-BR", {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2,
-                                                        });
-                                                        field.onChange(formatted);
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="category"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Categoria</FormLabel>
-                                            <CategoryTreeSelect
-                                                data={categoryTree}
-                                                value={field.value}
-                                                onSelect={field.onChange}
-                                                placeholder="Selecione..."
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <FormField
-                                control={form.control}
-                                name="observation"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Observações</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Opcional"
-                                                className="resize-y min-h-[60px]"
-                                                maxLength={500}
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <Separator className="my-2" />
-
-                            <FormField
-                                control={form.control}
-                                name="is_recurring"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-slate-50 dark:bg-slate-900/50">
-                                        <FormLabel className="text-base">Despesa Recorrente?</FormLabel>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={(val) => {
-                                                    field.onChange(val);
-                                                }}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Recurring Options */}
-                            {isRecurring && (
-                                <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border rounded-md border-t-0 rounded-t-none -mt-3 bg-slate-50 dark:bg-slate-900/50 mb-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="recurrence_frequency"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Frequência</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Selecione" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="weekly">Semanal</SelectItem>
-                                                        <SelectItem value="monthly">Mensal</SelectItem>
-                                                        <SelectItem value="yearly">Anual</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="recurrence_end_date"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormLabel>Repetir até (Opcional)</FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <FormControl>
-                                                            <Button
-                                                                variant={"outline"}
-                                                                className={cn(
-                                                                    "w-full pl-3 text-left font-normal bg-white dark:bg-slate-950",
-                                                                    !field.value && "text-muted-foreground"
-                                                                )}
-                                                            >
-                                                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Indefinido</span>}
-                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                            </Button>
-                                                        </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-auto p-0" align="start">
-                                                        <Calendar
-                                                            mode="single"
-                                                            selected={field.value}
-                                                            onSelect={field.onChange}
-                                                            disabled={(date) => date < new Date()}
-                                                            initialFocus
-                                                        />
-                                                    </PopoverContent>
-                                                </Popover>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            )}
-
-                            <div className="space-y-3">
-                                <FormField
-                                    control={form.control}
-                                    name="is_paid"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800">
-                                            <FormLabel className="text-base text-emerald-700 dark:text-emerald-400">
-                                                {isRecurring ? "Primeira fatura paga?" : "Já está pago?"}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Switch
-                                                    checked={field.value}
-                                                    onCheckedChange={field.onChange}
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {isPaid && (
-                                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border border-emerald-100 dark:border-emerald-800 rounded-md bg-emerald-50/50 dark:bg-emerald-900/5 -mt-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="payment_date"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>Data Pagamento</FormLabel>
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <FormControl>
-                                                                <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-white dark:bg-slate-950", !field.value && "text-muted-foreground")}>
-                                                                    {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione</span>}
-                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                                </Button>
-                                                            </FormControl>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-auto p-0" align="start">
-                                                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="payment_method"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Meio Pgto</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="bg-white dark:bg-slate-950">
-                                                                <SelectValue placeholder="Selecione" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {paymentMethods?.map(pm => (
-                                                                <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="account_id"
-                                            render={({ field }) => (
-                                                <FormItem className="col-span-2">
-                                                    <FormLabel>Conta de Origem</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="bg-white dark:bg-slate-950">
-                                                                <SelectValue placeholder="Selecione a conta" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {accounts?.map(acc => (
-                                                                <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                        </form>
-                    </Form>
+                    {formContent}
                 </div>
 
                 <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t mt-auto p-4 bg-slate-50 dark:bg-slate-900/50">
-                    <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none bg-white dark:bg-slate-950">Cancelar</Button>
+                    <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none bg-background">Cancelar</Button>
                     <Button
                         className="flex-1 sm:flex-none"
                         onClick={form.handleSubmit(onSubmit)}

@@ -37,6 +37,8 @@ import { ProductSaleDialog } from './ProductSaleDialog';
 import { productService, type Product } from '@/services/productService';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { TablePagination } from '@/components/ui/table-pagination';
+import { ActiveFilters } from '@/components/ui/active-filters';
 
 export const Products = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -54,6 +56,10 @@ export const Products = () => {
         logo: null,
         primaryColor: '#000000'
     });
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 25;
 
 
     useEffect(() => {
@@ -216,31 +222,20 @@ export const Products = () => {
         }
     };
 
-    const confirmBulkDelete = async () => {
+    const handleBulkDelete = async () => {
         try {
-            await productService.deleteProducts(selectedProducts);
-            setProducts(products.filter(p => !selectedProducts.includes(p.id)));
+            const promises = selectedProducts.map(id => productService.deleteProduct(id));
+            await Promise.all(promises);
+            toast.success(`${selectedProducts.length} produto(s) excluído(s) com sucesso!`);
             setSelectedProducts([]);
-            setIsDeleteAlertOpen(false);
-            toast.success("Produtos excluídos com sucesso");
+            fetchProducts();
         } catch (error) {
-            console.error("Erro ao excluir produtos:", error);
-            toast.error("Erro ao excluir produtos");
+            console.error('Erro ao excluir produtos:', error);
+            toast.error('Erro ao excluir produtos');
+        } finally {
+            setIsDeleteAlertOpen(false);
         }
     };
-
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (product.code && product.code.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        if (!matchesSearch) return false;
-
-        if (filterType === 'for_sale') return product.is_for_sale;
-        if (filterType === 'zero_stock') return product.stock_quantity <= 0;
-        if (filterType === 'incomplete') return !product.code || !product.image_url;
-
-        return true;
-    });
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -248,6 +243,31 @@ export const Products = () => {
             currency: 'BRL',
         }).format(value);
     };
+
+    // Filter products
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (product.code && product.code.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        if (!matchesSearch) return false;
+
+        if (filterType === 'for_sale') return product.is_for_sale;
+        if (filterType === 'zero_stock') return product.stock_quantity === 0;
+        if (filterType === 'incomplete') return !product.image_url || !product.description;
+
+        return true;
+    });
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterType]);
+
+    // Paginated products
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
     return (
         <div className="space-y-6">
@@ -345,6 +365,20 @@ export const Products = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0 md:p-6">
+                    {/* Active Filters */}
+                    {filterType !== 'all' && (
+                        <ActiveFilters
+                            filters={[
+                                {
+                                    label: filterType === 'for_sale' ? 'Produtos para Venda' :
+                                        filterType === 'zero_stock' ? 'Produtos com Estoque Zerado' :
+                                            filterType === 'incomplete' ? 'Produtos Cadastro Incompleto' : ''
+                                }
+                            ]}
+                            onClearAll={() => setFilterType('all')}
+                        />
+                    )}
+
                     {/* Desktop Table View */}
                     <div className="hidden md:block rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
                         <Table>
@@ -380,12 +414,9 @@ export const Products = () => {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredProducts.map((product) => (
-                                        <TableRow
-                                            key={product.id}
-                                            className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                        >
-                                            <TableCell className="text-center">
+                                    paginatedProducts.map((product) => (
+                                        <TableRow key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer" onClick={() => handleEdit(product)}>
+                                            <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                 <Checkbox
                                                     checked={selectedProducts.includes(product.id)}
                                                     onCheckedChange={() => toggleSelect(product.id)}
@@ -455,7 +486,7 @@ export const Products = () => {
                                                     )}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -503,6 +534,15 @@ export const Products = () => {
                             </TableBody>
                         </Table>
                     </div>
+
+                    {/* Pagination */}
+                    <TablePagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        totalItems={filteredProducts.length}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                    />
 
                     {/* Mobile List View */}
                     <div className="md:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-800">
@@ -647,11 +687,8 @@ export const Products = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={confirmBulkDelete}
-                            className="bg-red-600 hover:bg-red-700 text-white border-none"
-                        >
-                            Excluir Todos
+                        <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90">
+                            Excluir
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
