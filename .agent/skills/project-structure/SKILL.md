@@ -16,6 +16,16 @@ Mantenha a organização rigorosa para facilitar a manutenção.
 - `src/utils/`: Funções puras (ex: `imageUtils.ts`, `format.ts`).
 - `src/lib/`: Configurações de libs (Supabase client, utils do shadcn).
 
+## Diretório .agent (Configuração e Planejamento)
+- `.agent/skills/`: Skills para orientar o desenvolvimento (leia sempre que relevante)
+- `.agent/planning/`: **CRÍTICO** - Sistema de continuidade entre sessões
+  - `task.md`: Checklist de tarefas atual
+  - `walkthrough.md`: Resumo da última sessão
+  - `session-log.md`: Histórico cronológico de todas as sessões
+  - `README.md`: Documentação do sistema de planejamento
+
+**⚠️ IMPORTANTE**: Sempre leia `.agent/planning/task.md` e `.agent/planning/walkthrough.md` ao iniciar uma sessão!
+
 ## Convenções
 - **Nomes de Arquivo:** PascalCase para Componentes (`UserProfile.tsx`), camelCase para hooks/utils (`useAuth.ts`).
 - **Layout:** Novas rotas autenticadas devem ficar dentro do `MainLayout` (que gerencia Sidebar/Header).
