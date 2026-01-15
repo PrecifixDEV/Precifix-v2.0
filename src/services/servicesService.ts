@@ -83,6 +83,7 @@ export const servicesService = {
                 service_id: newService.id,
                 product_id: p.product_id,
                 quantity: 1, // Default quantity for reference-only products
+                user_id: user.id,
                 // No dilution - products are reference-only
             }));
 
@@ -116,10 +117,15 @@ export const servicesService = {
 
         // Insert new products
         if (products.length > 0) {
+            // Get authenticated user for user_id in service_products
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("User not authenticated");
+
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: id,
                 product_id: p.product_id,
-                quantity: 1, // Default quantity for reference-only products
+                quantity: 1, // Default quantity
+                user_id: user.id,
                 // No dilution - products are reference-only
             }));
 
