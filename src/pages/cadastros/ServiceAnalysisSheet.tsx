@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 interface ServiceAnalysisSheetProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    service: any | null; // using any for now to avoid strict type issues with the joined data, but ideally ServiceWithProductCount
+    service: any | null;
 }
 
 export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAnalysisSheetProps) => {
@@ -39,32 +39,8 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
         }
     };
 
-    const calculateProductCost = (item: ServiceProduct) => {
-        const product = item.products;
-        if (!product || !product.price || !product.container_size_ml) return 0;
-
-        const pricePerMlConcentrate = product.price / product.container_size_ml;
-
-        // Logic for Dilutable Products:
-        // quantity = Solution Used (ml)
-        // dilution_ratio = "1:X" (e.g., 1:100)
-        // Concentrated Product Used = Solution Used / X
-        if (item.dilution_ratio && item.dilution_ratio.includes(':')) {
-            const parts = item.dilution_ratio.split(':');
-            const dilutionFactor = parseFloat(parts[1]);
-
-            if (!isNaN(dilutionFactor) && dilutionFactor > 0) {
-                const concentrateUsed = item.quantity / dilutionFactor;
-                return concentrateUsed * pricePerMlConcentrate;
-            }
-        }
-
-        // Logic for Ready-to-use / Non-dilutable:
-        // quantity = Consumed amount (ml/units) directly
-        return pricePerMlConcentrate * item.quantity;
-    };
-
-    const totalProductCost = products.reduce((acc, item) => acc + calculateProductCost(item), 0);
+    // Products are reference-only - no cost calculation needed
+    // Costs managed via operational expenses
     const servicePrice = service?.base_price || 0;
 
     // Cost Calculations
@@ -72,19 +48,7 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
     const commissionCost = (servicePrice * (service?.commission_percent || 0)) / 100;
     const otherCosts = service?.other_costs || 0;
 
-    // Initial Request: "Total cost explicitly including calculated hourly cost"
-    // Note: Product costs are usually operational and included in hourly rate, but user wants them listed? 
-    // "Detail commission costs and any other associated costs."
-    // User requested "simple list of ... products", implying maybe they don't want the complex cost calc for products shown individually, 
-    // BUT they asked for "Total Cost".
-    // Usually Total Cost = Labor + Commission + Other + Products (if products are NOT part of hourly rate calculation).
-    // The previous code had a disclaimer: "If you launch purchase as expense, it's already in Hourly Cost".
-    // Assuming for this "Unit Analysis", we sum everything to show "Cost of providing this specific service".
-
-    // Updated Requirement: Product costs are NOT part of the service cost calculation for margin purposes.
-    // They are operational overhead managed elsewhere. Storing them here is for "Recommended Usage" only.
-
-    // Total Cost = Labor + Commission + Other (Excludes Products)
+    // Total Cost = Labor + Commission + Other (Products excluded - managed via operational expenses)
     const totalCost = laborCost + commissionCost + otherCosts;
     const netProfit = servicePrice - totalCost;
     const marginPercent = servicePrice > 0 ? (netProfit / servicePrice) * 100 : 0;
@@ -165,17 +129,6 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
                                     <span>{formatMoney(totalCost)}</span>
                                 </div>
                             </div>
-
-                            {/* Product Cost Info Block */}
-                            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 rounded-md border border-yellow-100 dark:border-yellow-900/20 text-xs">
-                                <div className="flex justify-between items-center text-yellow-700 dark:text-yellow-400 font-medium mb-1">
-                                    <span>Estimativa de Produtos:</span>
-                                    <span>{formatMoney(totalProductCost)}</span>
-                                </div>
-                                <p className="text-yellow-600/80 dark:text-yellow-500/80 leading-snug">
-                                    * Este valor não é descontado do lucro aqui, pois os produtos devem ser lançados como despesas operacionais da empresa.
-                                </p>
-                            </div>
                         </div>
 
                         {/* Sales Performance */}
@@ -209,10 +162,10 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
 
                         <div className="h-px bg-border" />
 
-                        {/* Products List (Simple) */}
+                        {/* Products List (Simple - Reference Only) */}
                         <div>
                             <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-                                <Package className="h-4 w-4" /> Produtos Utilizados
+                                <Package className="h-4 w-4" /> Produtos Utilizados (Referência)
                             </h3>
                             {products.length > 0 ? (
                                 <ul className="space-y-2">
@@ -226,6 +179,9 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
                             ) : (
                                 <p className="text-sm text-muted-foreground italic">Nenhum produto vinculado.</p>
                             )}
+                            <p className="text-xs text-muted-foreground mt-2">
+                                * Produtos são apenas referência. Custos gerenciados via despesas operacionais.
+                            </p>
                         </div>
                     </div>
                 )}

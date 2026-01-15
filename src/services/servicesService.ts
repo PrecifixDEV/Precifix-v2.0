@@ -17,9 +17,8 @@ export type NewServiceProduct = Database["public"]["Tables"]["service_products"]
 
 export interface ServiceProductInput {
     product_id: string;
-    quantity: number;
-    dilution_ratio?: string | null;
-    container_size_ml?: number | null;
+    // Products in services are now reference-only (no quantity/dilution)
+    // Cost calculations handled via operational expenses
 }
 
 export const servicesService = {
@@ -31,38 +30,13 @@ export const servicesService = {
 
         if (error) throw error;
 
-        // Fetch sales data to aggregate
-        const { data: salesItems, error: salesError } = await supabase
-            .from("service_order_items")
-            .select("service_id, quantity, price");
-
-        if (salesError) {
-            console.error("Error fetching sales items:", salesError);
-            // Return services without sales data if error (or handle differently)
-            return services as unknown as ServiceWithProductCount[];
-        }
-
-        // Aggregate sales data
-        const salesMap = new Map<string, { count: number; value: number }>();
-
-        salesItems?.forEach(item => {
-            if (item.service_id) {
-                const current = salesMap.get(item.service_id) || { count: 0, value: 0 };
-                salesMap.set(item.service_id, {
-                    count: current.count + (item.quantity || 0),
-                    value: current.value + ((item.quantity || 0) * (item.price || 0))
-                });
-            }
-        });
-
-        const servicesWithSales = services.map(service => {
-            const stats = salesMap.get(service.id) || { count: 0, value: 0 };
-            return {
-                ...service,
-                total_sales_count: stats.count,
-                total_sales_value: stats.value
-            };
-        });
+        // TODO: Re-enable sales data when service_order_items table is created
+        // For now, return services with zero sales stats
+        const servicesWithSales = services.map(service => ({
+            ...service,
+            total_sales_count: 0,
+            total_sales_value: 0
+        }));
 
         return servicesWithSales as unknown as ServiceWithProductCount[];
     },
@@ -92,9 +66,13 @@ export const servicesService = {
     },
 
     async createService(service: NewService, products: ServiceProductInput[] = []) {
+        // Get authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("User not authenticated");
+
         const { data: newService, error: serviceError } = await supabase
             .from("services")
-            .insert(service)
+            .insert({ ...service, user_id: user.id })
             .select()
             .single();
 
@@ -104,9 +82,7 @@ export const servicesService = {
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: newService.id,
                 product_id: p.product_id,
-                quantity: p.quantity,
-                dilution_ratio: p.dilution_ratio,
-                container_size_ml: p.container_size_ml
+                // No quantity/dilution - products are reference-only
             }));
 
             const { error: productsError } = await supabase
@@ -142,9 +118,7 @@ export const servicesService = {
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: id,
                 product_id: p.product_id,
-                quantity: p.quantity,
-                dilution_ratio: p.dilution_ratio,
-                container_size_ml: p.container_size_ml
+                // No quantity/dilution - products are reference-only
             }));
 
             const { error: productsError } = await supabase

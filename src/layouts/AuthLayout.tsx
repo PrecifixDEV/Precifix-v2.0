@@ -1,9 +1,37 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/precifix-logo.png'
 import background from '../assets/login-background.jpg'
 
 export const AuthLayout: React.FC = () => {
+    const navigate = useNavigate()
+    const [isChecking, setIsChecking] = useState(true)
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
+                if (session) {
+                    // User is already authenticated, redirect to dashboard
+                    navigate('/', { replace: true })
+                } else {
+                    setIsChecking(false)
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error)
+                setIsChecking(false)
+            }
+        }
+
+        checkAuth()
+    }, [navigate])
+
+    // Return null while checking to prevent flash
+    if (isChecking) {
+        return null
+    }
+
     return (
         <div className="min-h-screen w-full flex items-center justify-center relative bg-slate-900">
             {/* Background with Overlay */}

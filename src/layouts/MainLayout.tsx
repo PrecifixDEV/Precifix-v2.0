@@ -24,7 +24,6 @@ import {
     FolderPlus,
     Wrench,
     Calculator,
-    Loader2,
 
 } from 'lucide-react'
 import { SubscriptionTag } from '../components/SubscriptionTag'
@@ -83,16 +82,17 @@ export const MainLayout = () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession()
                 if (!session) {
-                    navigate('/login')
+                    // Redirect immediately without showing loading
+                    navigate('/login', { replace: true })
+                    return
                 } else {
                     setUser(session.user)
                     await fetchProfile(session.user.id)
+                    setIsLoading(false)
                 }
             } catch (error) {
                 console.error("Session check failed", error)
-                navigate('/login')
-            } finally {
-                setIsLoading(false)
+                navigate('/login', { replace: true })
             }
         }
 
@@ -101,7 +101,7 @@ export const MainLayout = () => {
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_OUT' || !session) {
-                navigate('/login')
+                navigate('/login', { replace: true })
                 setUser(null)
             } else if (event === 'SIGNED_IN' || session) {
                 setUser(session.user)
@@ -168,11 +168,8 @@ export const MainLayout = () => {
     }
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-        )
+        // Return null to prevent any flash before redirect
+        return null
     }
 
     return (
