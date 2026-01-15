@@ -263,14 +263,18 @@ export function ClientFormDialog({
 
         try {
             setIsLoading(true);
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Usuário não autenticado");
+
             const payload = {
                 client_id: activeClient.id,
                 brand: fipeData.Marca,
                 model: fipeData.Modelo,
-                year: fipeData.AnoModelo,
+                year: String(fipeData.AnoModelo),
                 plate: newVehiclePlate || null,
                 color: newVehicleColor || null,
                 type: fipeData.TipoVeiculo === 1 ? 'carro' : fipeData.TipoVeiculo === 2 ? 'moto' : 'caminhao',
+                user_id: user.id
             };
             console.log("Saving vehicle payload:", payload);
 

@@ -17,9 +17,6 @@ export type NewServiceProduct = Database["public"]["Tables"]["service_products"]
 
 export interface ServiceProductInput {
     product_id: string;
-    quantity: number;
-    dilution_ratio?: string | null;
-    container_size_ml?: number | null;
 }
 
 export const servicesService = {
@@ -34,7 +31,7 @@ export const servicesService = {
         // Fetch sales data to aggregate
         const { data: salesItems, error: salesError } = await supabase
             .from("service_order_items")
-            .select("service_id, quantity, price");
+            .select("service_id, quantity, unit_price");
 
         if (salesError) {
             console.error("Error fetching sales items:", salesError);
@@ -50,7 +47,7 @@ export const servicesService = {
                 const current = salesMap.get(item.service_id) || { count: 0, value: 0 };
                 salesMap.set(item.service_id, {
                     count: current.count + (item.quantity || 0),
-                    value: current.value + ((item.quantity || 0) * (item.price || 0))
+                    value: current.value + ((item.quantity || 0) * (item.unit_price || 0))
                 });
             }
         });
@@ -103,10 +100,7 @@ export const servicesService = {
         if (products.length > 0) {
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: newService.id,
-                product_id: p.product_id,
-                quantity: p.quantity,
-                dilution_ratio: p.dilution_ratio,
-                container_size_ml: p.container_size_ml
+                product_id: p.product_id
             }));
 
             const { error: productsError } = await supabase
@@ -141,10 +135,7 @@ export const servicesService = {
         if (products.length > 0) {
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: id,
-                product_id: p.product_id,
-                quantity: p.quantity,
-                dilution_ratio: p.dilution_ratio,
-                container_size_ml: p.container_size_ml
+                product_id: p.product_id
             }));
 
             const { error: productsError } = await supabase

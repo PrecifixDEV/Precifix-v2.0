@@ -167,10 +167,10 @@ export const ProductCostCalculator = () => {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {selectedProduct && selectedProduct.price > 0 && selectedProduct.container_size_ml && (
+                            {selectedProduct && (selectedProduct.price || 0) > 0 && selectedProduct.container_size_ml && (
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Preço Base: {formatMoney(selectedProduct.price)} / {selectedProduct.container_size_ml}ml
-                                    ({formatMoneyHighPrecision(selectedProduct.price / selectedProduct.container_size_ml)}/ml)
+                                    Preço Base: {formatMoney(selectedProduct.price || 0)} / {selectedProduct.container_size_ml}ml
+                                    ({formatMoneyHighPrecision((selectedProduct.price || 0) / selectedProduct.container_size_ml)}/ml)
                                 </p>
                             )}
                         </div>

@@ -103,8 +103,8 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 setValue('name', productToEdit.name);
                 setValue('code', productToEdit.code || '');
                 setValue('description', productToEdit.description || '');
-                setValue('price', productToEdit.price);
-                setValue('stock_quantity', productToEdit.stock_quantity);
+                setValue('price', productToEdit.price || 0);
+                setValue('stock_quantity', productToEdit.stock_quantity || 0);
                 setValue('size', productToEdit.size || '');
                 setValue('is_dilutable', productToEdit.is_dilutable || false);
                 setValue('dilution_ratio', productToEdit.dilution_ratio || '');

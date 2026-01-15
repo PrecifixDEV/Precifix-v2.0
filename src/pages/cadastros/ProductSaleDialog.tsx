@@ -44,7 +44,7 @@ export function ProductSaleDialog({ open, onOpenChange, product, onSuccess }: Pr
 
     useEffect(() => {
         if (open && product) {
-            setValue('price', product.price);
+            setValue('price', product.price || 0);
             setValue('sale_price', product.sale_price || 0);
         }
     }, [open, product, setValue]);

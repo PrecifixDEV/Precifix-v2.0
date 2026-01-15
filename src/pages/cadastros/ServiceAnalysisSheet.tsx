@@ -39,32 +39,13 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
         }
     };
 
-    const calculateProductCost = (item: ServiceProduct) => {
-        const product = item.products;
-        if (!product || !product.price || !product.container_size_ml) return 0;
-
-        const pricePerMlConcentrate = product.price / product.container_size_ml;
-
-        // Logic for Dilutable Products:
-        // quantity = Solution Used (ml)
-        // dilution_ratio = "1:X" (e.g., 1:100)
-        // Concentrated Product Used = Solution Used / X
-        if (item.dilution_ratio && item.dilution_ratio.includes(':')) {
-            const parts = item.dilution_ratio.split(':');
-            const dilutionFactor = parseFloat(parts[1]);
-
-            if (!isNaN(dilutionFactor) && dilutionFactor > 0) {
-                const concentrateUsed = item.quantity / dilutionFactor;
-                return concentrateUsed * pricePerMlConcentrate;
-            }
-        }
-
-        // Logic for Ready-to-use / Non-dilutable:
-        // quantity = Consumed amount (ml/units) directly
-        return pricePerMlConcentrate * item.quantity;
+    const calculateProductCost = () => {
+        // Product cost calculation removed as quantity and dilution_ratio fields
+        // are no longer part of the service_products table
+        return 0;
     };
 
-    const totalProductCost = products.reduce((acc, item) => acc + calculateProductCost(item), 0);
+    const totalProductCost = products.reduce((acc) => acc + calculateProductCost(), 0);
     const servicePrice = service?.base_price || 0;
 
     // Cost Calculations

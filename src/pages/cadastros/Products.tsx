@@ -199,9 +199,9 @@ export const Products = () => {
                 const dilutionInfo = p.is_dilutable ? (p.dilution_ratio || '-') : 'Pronto Uso';
                 const containerInfo = p.container_size_ml ? `${p.container_size_ml}ml` : '-';
 
-                let priceDisplay = formatCurrency(p.price);
+                let priceDisplay = formatCurrency(p.price || 0);
                 if (p.is_for_sale) {
-                    priceDisplay = `${formatCurrency(p.price)} / ${formatCurrency(p.sale_price || 0)}`;
+                    priceDisplay = `${formatCurrency(p.price || 0)} / ${formatCurrency(p.sale_price || 0)}`;
                 }
 
                 const typeDisplay = p.is_for_sale ? 'Revenda' : 'Uso Próprio';
@@ -463,7 +463,7 @@ export const Products = () => {
                                                     {product.is_for_sale ? (
                                                         <div className="flex flex-col items-end">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-slate-500 text-xs">{formatCurrency(product.price)}</span>
+                                                                <span className="text-slate-500 text-xs">{formatCurrency(product.price || 0)}</span>
                                                                 <span className="text-slate-400">/</span>
                                                                 <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(product.sale_price || 0)}</span>
 
@@ -482,7 +482,7 @@ export const Products = () => {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-slate-600 dark:text-slate-400">{formatCurrency(product.price)}</span>
+                                                        <span className="text-slate-600 dark:text-slate-400">{formatCurrency(product.price || 0)}</span>
                                                     )}
                                                 </div>
                                             </TableCell>
@@ -598,15 +598,15 @@ export const Products = () => {
                                                     {product.is_for_sale ? (
                                                         <div className="flex items-center gap-1">
                                                             <span className="text-slate-500">Custo:</span>
-                                                            <span className="text-slate-500">{formatCurrency(product.price)}</span>
+                                                            <span className="text-slate-500">{formatCurrency(product.price || 0)}</span>
                                                             <span className="text-slate-400">/</span>
                                                             <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(product.sale_price || 0)}</span>
                                                         </div>
                                                     ) : (
-                                                        <div>Preço Custo: {formatCurrency(product.price)}</div>
+                                                        <div>Preço Custo: {formatCurrency(product.price || 0)}</div>
                                                     )}
 
-                                                    <div className={product.stock_quantity <= 0 ? 'text-red-500 font-medium' : ''}>
+                                                    <div className={(product.stock_quantity || 0) <= 0 ? 'text-red-500 font-medium' : ''}>
                                                         Estoque: {product.stock_quantity}
                                                     </div>
                                                     <div>Emb.: {product.container_size_ml ? `${product.container_size_ml}ml` : '-'}</div>
