@@ -82,7 +82,8 @@ export const servicesService = {
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: newService.id,
                 product_id: p.product_id,
-                // No quantity/dilution - products are reference-only
+                quantity: 1, // Default quantity for reference-only products
+                // No dilution - products are reference-only
             }));
 
             const { error: productsError } = await supabase
@@ -118,7 +119,8 @@ export const servicesService = {
             const serviceProducts: NewServiceProduct[] = products.map((p) => ({
                 service_id: id,
                 product_id: p.product_id,
-                // No quantity/dilution - products are reference-only
+                quantity: 1, // Default quantity for reference-only products
+                // No dilution - products are reference-only
             }));
 
             const { error: productsError } = await supabase

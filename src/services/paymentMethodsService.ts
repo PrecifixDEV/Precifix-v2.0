@@ -8,7 +8,8 @@ export interface PaymentMethod {
 
 export const paymentMethodsService = {
     getAll: async () => {
-        const { data, error } = await supabase
+        // Use type assertion since payment_methods table exists but not in generated types
+        const { data, error } = await (supabase as any)
             .from('payment_methods')
             .select('*')
             .eq('is_active', true)

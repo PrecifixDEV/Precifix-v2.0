@@ -94,19 +94,20 @@ export const financialService = {
         // Fetch current
         const { data: account } = await supabase
             .from('commercial_accounts')
-            .select('current_balance')
+            .select('*')
             .eq('id', accountId)
             .single();
 
         if (!account) return;
 
+        const currentBalance = (account as any).current_balance || 0;
         const newBalance = type === 'credit'
-            ? Number(account.current_balance) + Number(amount)
-            : Number(account.current_balance) - Number(amount);
+            ? Number(currentBalance) + Number(amount)
+            : Number(currentBalance) - Number(amount);
 
         await supabase
             .from('commercial_accounts')
-            .update({ current_balance: newBalance })
+            .update({ current_balance: newBalance } as any)
             .eq('id', accountId);
     },
 
@@ -115,35 +116,36 @@ export const financialService = {
         if (!user) throw new Error("User not authenticated");
 
         const txDescription = description || "Transferência entre Contas";
+        const txDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
         // 1. Debit Source
         const debitTx = await this.createTransaction({
             description: txDescription,
             amount: amount,
             type: 'debit',
-            category: 'Transferência',
+            category_id: null,
             payment_method: 'Transferência',
-            transaction_date: new Date().toISOString(),
+            date: txDate,
             account_id: fromId,
             related_entity_type: 'transfer_pair'
-        });
+        } as any);
 
         // 2. Credit Destination
         const creditTx = await this.createTransaction({
             description: txDescription,
             amount: amount,
             type: 'credit',
-            category: 'Transferência',
+            category_id: null,
             payment_method: 'Transferência',
-            transaction_date: new Date().toISOString(),
+            date: txDate,
             account_id: toId,
             related_entity_type: 'transfer_pair'
-        });
+        } as any);
 
         if (debitTx && creditTx) {
             // Link them
-            await supabase.from('financial_transactions').update({ related_entity_id: creditTx.id }).eq('id', debitTx.id);
-            await supabase.from('financial_transactions').update({ related_entity_id: debitTx.id }).eq('id', creditTx.id);
+            await supabase.from('financial_transactions').update({ related_entity_id: creditTx.id } as any).eq('id', debitTx.id);
+            await supabase.from('financial_transactions').update({ related_entity_id: debitTx.id } as any).eq('id', creditTx.id);
         }
     },
 
@@ -180,8 +182,9 @@ export const financialService = {
         if (updateError) throw updateError;
 
         // 4. Delete related transaction if it's a transfer pair
-        if (transaction.related_entity_type === 'transfer_pair' && transaction.related_entity_id) {
-            await this.deleteTransaction(transaction.related_entity_id);
+        const txAny = transaction as any;
+        if (txAny.related_entity_type === 'transfer_pair' && txAny.related_entity_id) {
+            await this.deleteTransaction(txAny.related_entity_id);
         }
     },
 
@@ -224,8 +227,9 @@ export const financialService = {
         if (updateError) throw updateError;
 
         // 4. Restore related transaction if it's a transfer pair
-        if (transaction.related_entity_type === 'transfer_pair' && transaction.related_entity_id) {
-            await this.restoreTransaction(transaction.related_entity_id);
+        const txAny = transaction as any;
+        if (txAny.related_entity_type === 'transfer_pair' && txAny.related_entity_id) {
+            await this.restoreTransaction(txAny.related_entity_id);
         }
     }
 };

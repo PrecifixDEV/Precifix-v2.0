@@ -53,25 +53,30 @@ export interface FinancialAccount {
     user_id: string;
     name: string;
     type: 'bank' | 'cash' | 'wallet';
-    bank_code?: string;
+    bank_code?: string | null;
+    bank_name?: string | null;
+    agency?: string | null;
+    account_number?: string | null;
     initial_balance: number;
     current_balance: number;
-    color?: string;
     created_at?: string;
+    updated_at?: string;
 }
 
 export interface FinancialTransaction {
     id: string;
     user_id: string;
-    account_id: string | null;
+    account_id: string;
     amount: number;
     type: 'credit' | 'debit';
     description: string;
-    category?: string;
-    payment_method?: string;
-    transaction_date: string;
-    related_entity_type?: string;
-    related_entity_id?: string;
+    category_id?: string | null;
+    payment_method?: string | null;
+    date: string; // This is the field name in DB
+    transaction_date?: string; // Alias for compatibility
+    related_entity_type?: string | null;
+    related_entity_id?: string | null;
     is_deleted?: boolean;
     created_at?: string;
+    updated_at?: string;
 }

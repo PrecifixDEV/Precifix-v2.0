@@ -51,13 +51,6 @@ export const productService = {
     },
 
     async updateProduct(id: string, product: ProductUpdate) {
-        // Fetch old product data to get the old image URL
-        const { data: oldProduct } = await supabase
-            .from('products')
-            .select('image_url')
-            .eq('id', id)
-            .single();
-
         const { data, error } = await supabase
             .from('products')
             .update(product)
@@ -67,23 +60,15 @@ export const productService = {
 
         if (error) throw error;
 
-        // If update successful and image URL changed, delete old image
-        // Only if image_url is explicitly provided in the update object (not undefined)
-        if (oldProduct?.image_url && product.image_url !== undefined && oldProduct.image_url !== product.image_url) {
-            await deleteStorageImage(oldProduct.image_url);
-        }
+        // TODO: Re-enable image deletion when image_url field is added to products table
+        // if (oldProduct?.image_url && product.image_url !== undefined && oldProduct.image_url !== product.image_url) {
+        //     await deleteStorageImage(oldProduct.image_url);
+        // }
 
         return data;
     },
 
     async deleteProduct(id: string) {
-        // Fetch product first to get image URL
-        const { data: product } = await supabase
-            .from('products')
-            .select('image_url')
-            .eq('id', id)
-            .single();
-
         const { error } = await supabase
             .from('products')
             .delete()
@@ -94,19 +79,13 @@ export const productService = {
             throw error;
         }
 
-        // If delete successful and had image, delete from storage
-        if (product?.image_url) {
-            await deleteStorageImage(product.image_url);
-        }
+        // TODO: Re-enable image deletion when image_url field is added to products table
+        // if (product?.image_url) {
+        //     await deleteStorageImage(product.image_url);
+        // }
     },
 
     async deleteProducts(ids: string[]) {
-        // Fetch products first to get image URLs
-        const { data: products } = await supabase
-            .from('products')
-            .select('image_url')
-            .in('id', ids);
-
         const { error } = await supabase
             .from('products')
             .delete()
@@ -117,16 +96,15 @@ export const productService = {
             throw error;
         }
 
-        // Delete all associated images
-        if (products && products.length > 0) {
-            const imageUrls = products
-                .map(p => p.image_url)
-                .filter(url => url !== null) as string[];
-
-            for (const url of imageUrls) {
-                await deleteStorageImage(url);
-            }
-        }
+        // TODO: Re-enable image deletion when image_url field is added to products table
+        // if (products && products.length > 0) {
+        //     const imageUrls = products
+        //         .map(p => p.image_url)
+        //         .filter(url => url !== null) as string[];
+        //     for (const url of imageUrls) {
+        //         await deleteStorageImage(url);
+        //     }
+        // }
     },
 
     async checkProductAvailability(name: string, code: string | null | undefined, excludeId?: string): Promise<{ nameExists: boolean; codeExists: boolean }> {
