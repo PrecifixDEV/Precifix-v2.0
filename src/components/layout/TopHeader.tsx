@@ -1,5 +1,5 @@
-import { Bell } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Bell, ChevronLeft } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/precifix-logo.png";
 
 // Mapeamento de rotas para títulos
@@ -18,29 +18,51 @@ const PAGE_TITLES: Record<string, string> = {
     "/profile": "Meu Perfil",
     "/minha-empresa": "Minha Empresa",
     "/settings/categories": "Configurações",
-    "/tools/dilution-calculator": "Calculadora de Diluição",
-    "/ferramentas/calculadora-diluicao": "Calculadora de Diluição",
+    "/tools/dilution-calculator": "Ferramentas",
+    "/tools/product-cost": "Ferramentas",
+    "/ferramentas/calculadora-diluicao": "Ferramentas",
+    "/menu": "Menu",
 };
+
+const ROOT_PATHS = ['/', '/menu', '/sales', '/profile'];
 
 export function TopHeader() {
     const location = useLocation();
+    const navigate = useNavigate();
     const pageTitle = PAGE_TITLES[location.pathname] || "Precifix";
     const isHome = location.pathname === "/";
+    const showBackButton = !ROOT_PATHS.includes(location.pathname);
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4">
-            {/* Logo ou Título */}
-            {isHome ? (
-                <img src={logo} alt="Precifix Logo" className="h-8 w-auto" />
-            ) : (
-                <h1 className="text-lg font-bold text-white">{pageTitle}</h1>
-            )}
+            {/* Left Section: Back Button (only if not root path) */}
+            <div className="flex items-center w-10 z-20">
+                {showBackButton && (
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-white p-1 hover:bg-slate-800 rounded-full transition-colors"
+                    >
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                )}
+            </div>
 
-            {/* Notificações */}
-            <button className="relative p-2 text-white hover:bg-slate-800 rounded-full transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-slate-950"></span>
-            </button>
+            {/* Center Section: Title OR Logo */}
+            <div className="absolute left-0 right-0 flex justify-center pointer-events-none">
+                {isHome ? (
+                    <img src={logo} alt="Precifix Logo" className="h-10 w-auto object-contain" />
+                ) : (
+                    <h1 className="text-2xl font-bold text-white whitespace-nowrap">{pageTitle}</h1>
+                )}
+            </div>
+
+            {/* Right Section: Notifications */}
+            <div className="flex items-center justify-end w-10 z-20">
+                <button className="relative p-2 text-white hover:bg-slate-800 rounded-full transition-colors">
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-slate-950"></span>
+                </button>
+            </div>
         </header>
     );
 }

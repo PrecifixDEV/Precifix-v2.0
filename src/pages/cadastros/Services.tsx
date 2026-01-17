@@ -3,12 +3,11 @@ import { Trash2, Search, CarFront, Info, Pencil, MoreHorizontal, TrendingUp } fr
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
+
 import { Input } from "@/components/ui/input";
 import {
     Card,
     CardContent,
-    CardHeader,
 } from "@/components/ui/card";
 import {
     Table,
@@ -61,7 +60,6 @@ export const Services = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState<"all">("all");
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
@@ -270,76 +268,84 @@ export const Services = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Serviços</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Gerencie os serviços oferecidos</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Serviços</h1>
+                    <p className="text-slate-500 dark:text-slate-400 hidden md:block">Gerencie os serviços oferecidos</p>
                 </div>
-                <ResponsiveAddButton
-                    onClick={handleCreate}
-                    label="Novo Serviço"
-                    className="shrink-0"
-                />
+                <Button onClick={handleCreate} className="w-full md:w-auto">
+                    Adicionar Novo Serviço
+                </Button>
+            </div>
+
+            {/* Search and Filters - Moved outside Card */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 w-full md:w-auto md:flex-1 md:max-w-sm">
+                    {/* Mobile Select All */}
+                    <div className="md:hidden flex items-center justify-center mr-1">
+                        <Checkbox
+                            checked={filteredServices.length > 0 && selectedServices.length === filteredServices.length}
+                            onCheckedChange={toggleSelectAll}
+                        />
+                    </div>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-slate-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}`}>
+                                <Filter className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                            <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setFilterType('all')} className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}>
+                                Todos
+                            </DropdownMenuItem>
+                            {/* Future filters */}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
+                        <Input
+                            placeholder="Buscar serviços..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-9 bg-white dark:bg-slate-900 w-full"
+                        />
+                    </div>
+
+                    {/* Mobile Bulk Actions */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {selectedServices.length > 0 && (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                                    <Printer className="h-4 w-4" />
+                                </Button>
+                                <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Desktop Bulk Actions */}
+                <div className="hidden md:flex items-center gap-2">
+                    {selectedServices.length > 0 && (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                                <Printer className="h-4 w-4" />
+                            </Button>
+                            <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <CardHeader className="pb-4">
-
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 flex-1 max-w-sm">
-                            <div className="md:hidden flex items-center justify-center mr-1">
-                                <Checkbox
-                                    checked={filteredServices.length > 0 && selectedServices.length === filteredServices.length}
-                                    onCheckedChange={toggleSelectAll}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="icon" title="Filtrar" className={filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}>
-                                        <Filter className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-56">
-                                    <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => setFilterType('all')} className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}>
-                                        Todos
-                                    </DropdownMenuItem>
-                                    {/* Future filters */}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-
-                            <div className={`relative flex-1 transition-all duration-300 ${isSearchFocused ? 'w-full' : 'w-auto'}`}>
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
-                                <Input
-                                    placeholder="Buscar serviços..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9"
-                                    onFocus={() => setIsSearchFocused(true)}
-                                    onBlur={() => setIsSearchFocused(false)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={`flex items-center gap-2 ${isSearchFocused ? 'hidden md:flex' : 'flex'}`}>
-                            {selectedServices.length > 0 && (
-                                <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-5">
-                                    <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados">
-                                        <Printer className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
-
-
-
-                            {/* Desktop Button Removed - Moved to Header */}
-                        </div>
-                    </div>
-                </CardHeader>
                 <CardContent className="p-0 md:p-6">
                     {filteredServices.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
@@ -352,76 +358,77 @@ export const Services = () => {
                                 {filteredServices.map((service) => {
                                     const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                     return (
-                                        <div key={service.id} className="px-6 py-4 flex items-start gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                                            <Checkbox
-                                                checked={selectedServices.includes(service.id)}
-                                                onCheckedChange={() => toggleSelect(service.id)}
-                                                className="mt-1"
-                                            />
+                                        <div key={service.id} className="px-6 py-4 flex flex-col hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <Checkbox
+                                                        checked={selectedServices.includes(service.id)}
+                                                        onCheckedChange={() => toggleSelect(service.id)}
+                                                    />
 
-                                            <div className="relative w-10 h-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                                <IconComponent className="h-5 w-5" />
-                                            </div>
+                                                    <div className="relative w-10 h-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                        <IconComponent className="h-5 w-5" />
+                                                    </div>
 
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between">
-                                                    <div onClick={() => handleEdit(service)} className="cursor-pointer">
+                                                    <div className="flex flex-col gap-0.5 min-w-0">
                                                         <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2">
                                                             {service.name}
                                                         </h3>
-                                                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                                                        <p className="text-xs text-muted-foreground line-clamp-1">
                                                             {service.description || "Sem descrição"}
                                                         </p>
-
-                                                        <div className="mt-2 flex flex-col gap-0.5 text-xs text-muted-foreground">
-                                                            <div className="font-medium text-slate-900 dark:text-slate-200">
-                                                                Preço: R$ {(service.base_price || 0).toFixed(2)}
-                                                            </div>
-                                                            <div>Duração: {service.duration_minutes} min</div>
-                                                            <div
-                                                                className="flex items-center gap-1 mt-1 font-medium text-blue-600 dark:text-blue-400"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleShowProducts(service);
-                                                                }}
-                                                            >
-                                                                {service.service_products?.length || 0} {service.service_products?.length === 1 ? 'Produto' : 'Produtos'}
-                                                                <Info className="h-3 w-3" />
-                                                            </div>
-                                                        </div>
                                                     </div>
+                                                </div>
 
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-2 text-slate-400">
-                                                                <span className="sr-only">Abrir menu</span>
-                                                                <MoreHorizontal className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                                            <DropdownMenuItem onClick={() => handleEdit(service)}>
-                                                                <Pencil className="mr-2 h-4 w-4" />
-                                                                Editar
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => setSelectedServiceForAnalysis(service)}>
-                                                                <TrendingUp className="mr-2 h-4 w-4" />
-                                                                Análise
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleShowProducts(service)}>
-                                                                <Info className="mr-2 h-4 w-4" />
-                                                                Ver Produtos
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem
-                                                                onClick={() => setServiceToDelete(service)}
-                                                                className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
-                                                            >
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                Excluir
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-slate-400">
+                                                            <span className="sr-only">Abrir menu</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                        <DropdownMenuItem onClick={() => handleEdit(service)}>
+                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                            Editar
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => setSelectedServiceForAnalysis(service)}>
+                                                            <TrendingUp className="mr-2 h-4 w-4" />
+                                                            Análise
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleShowProducts(service)}>
+                                                            <Info className="mr-2 h-4 w-4" />
+                                                            Ver Produtos
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            onClick={() => setServiceToDelete(service)}
+                                                            className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Excluir
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+
+                                            <div className="pl-0 text-xs text-muted-foreground">
+                                                <div onClick={() => handleEdit(service)} className="cursor-pointer space-y-1">
+                                                    <div className="font-medium text-slate-900 dark:text-slate-200">
+                                                        Preço: R$ {(service.base_price || 0).toFixed(2)}
+                                                    </div>
+                                                    <div>Duração: {service.duration_minutes} min</div>
+                                                    <div
+                                                        className="flex items-center gap-1 mt-1 font-medium text-blue-600 dark:text-blue-400"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleShowProducts(service);
+                                                        }}
+                                                    >
+                                                        {service.service_products?.length || 0} {service.service_products?.length === 1 ? 'Produto' : 'Produtos'}
+                                                        <Info className="h-3 w-3" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

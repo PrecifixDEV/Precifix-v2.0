@@ -1,4 +1,5 @@
 import { ShoppingCart, Calendar, FileText } from "lucide-react";
+import { createPortal } from "react-dom";
 
 interface SpeedDialMenuProps {
     isOpen: boolean;
@@ -29,11 +30,11 @@ export function SpeedDialMenu({ isOpen, onClose }: SpeedDialMenuProps) {
         },
     ];
 
-    return (
+    return createPortal(
         <>
-            {/* Overlay */}
+            {/* Overlay Invisivel (apenas para fechar ao clicar fora) */}
             <div
-                className="fixed inset-0 bg-black/50 z-40 animate-in fade-in duration-200"
+                className="fixed inset-0 z-40"
                 onClick={onClose}
             />
 
@@ -44,8 +45,8 @@ export function SpeedDialMenu({ isOpen, onClose }: SpeedDialMenuProps) {
                         key={action.label}
                         href={action.href}
                         className={`
-                            flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl
-                            ${action.color} text-white
+                            flex items-center gap-4 px-6 py-4 rounded-2xl
+                            bg-yellow-500 text-slate-950 border border-yellow-400
                             transform transition-all duration-200
                             hover:scale-105 active:scale-95
                             animate-in slide-in-from-bottom-2
@@ -62,6 +63,7 @@ export function SpeedDialMenu({ isOpen, onClose }: SpeedDialMenuProps) {
                     </a>
                 ))}
             </div>
-        </>
+        </>,
+        document.body
     );
 }

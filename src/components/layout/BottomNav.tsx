@@ -1,12 +1,17 @@
 import { Home, LayoutGrid, ClipboardList, User, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SpeedDialMenu } from "./SpeedDialMenu";
 
 export function BottomNav() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
+
+    // Fechar menu ao navegar
+    useEffect(() => {
+        setIsSpeedDialOpen(false);
+    }, [location.pathname]);
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -17,8 +22,11 @@ export function BottomNav() {
                 onClose={() => setIsSpeedDialOpen(false)}
             />
 
-            <div className="fixed bottom-0 left-0 right-0 z-50">
-                <div className="relative w-full h-[80px] flex items-end justify-center">
+            <div className="w-full relative z-50">
+                <div
+                    className="relative w-full h-[80px] flex items-end justify-center"
+                    onClick={() => isSpeedDialOpen && setIsSpeedDialOpen(false)}
+                >
                     {/* Background SVG com a Curva */}
                     <svg
                         viewBox="0 0 375 80"
@@ -36,9 +44,12 @@ export function BottomNav() {
                     </svg>
 
                     {/* Botão Central Flutuante (Speed Dial) */}
-                    <div className="absolute -top-[15px] left-1/2 -translate-x-1/2">
+                    <div className="absolute -top-[15px] left-1/2 -translate-x-1/2 z-50">
                         <button
-                            onClick={() => setIsSpeedDialOpen(!isSpeedDialOpen)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsSpeedDialOpen(!isSpeedDialOpen);
+                            }}
                             className={`
                                 flex h-16 w-16 items-center justify-center rounded-full 
                                 bg-yellow-500 text-slate-950 shadow-xl ring-4 ring-slate-950 
@@ -56,8 +67,8 @@ export function BottomNav() {
                         <button
                             onClick={() => navigate("/")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/")
-                                    ? "text-yellow-500"
-                                    : "text-slate-400 hover:text-yellow-500"
+                                ? "text-yellow-500"
+                                : "text-slate-400 hover:text-yellow-500"
                                 }`}
                         >
                             <Home className="h-6 w-6" />
@@ -68,8 +79,8 @@ export function BottomNav() {
                         <button
                             onClick={() => navigate("/menu")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/menu")
-                                    ? "text-yellow-500"
-                                    : "text-slate-400 hover:text-yellow-500"
+                                ? "text-yellow-500"
+                                : "text-slate-400 hover:text-yellow-500"
                                 }`}
                         >
                             <LayoutGrid className="h-6 w-6" />
@@ -83,8 +94,8 @@ export function BottomNav() {
                         <button
                             onClick={() => navigate("/sales")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/sales")
-                                    ? "text-yellow-500"
-                                    : "text-slate-400 hover:text-yellow-500"
+                                ? "text-yellow-500"
+                                : "text-slate-400 hover:text-yellow-500"
                                 }`}
                         >
                             <ClipboardList className="h-6 w-6" />
@@ -95,8 +106,8 @@ export function BottomNav() {
                         <button
                             onClick={() => navigate("/profile")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/profile")
-                                    ? "text-yellow-500"
-                                    : "text-slate-400 hover:text-yellow-500"
+                                ? "text-yellow-500"
+                                : "text-slate-400 hover:text-yellow-500"
                                 }`}
                         >
                             <User className="h-6 w-6" />

@@ -23,6 +23,8 @@ import { ProductCostCalculator } from './pages/tools/ProductCostCalculator'
 import FinancialCategories from './pages/settings/FinancialCategories';
 
 
+import { MobileMenu } from './pages/MobileMenu'
+
 function App() {
   return (
     <ThemeProvider>
@@ -41,6 +43,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/minha-empresa" element={<MyCompany />} />
+            <Route path="/menu" element={<MobileMenu />} />
             <Route path="/custos" element={<ManageCosts />} />
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/accounts/:id" element={<AccountDetailsPage />} />

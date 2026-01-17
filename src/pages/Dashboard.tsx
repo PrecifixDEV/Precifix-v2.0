@@ -161,7 +161,7 @@ export const Dashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-slate-900 dark:text-white text-2xl font-bold">Painel Principal</h1>
+                    <h1 className="text-slate-900 dark:text-white text-2xl font-bold hidden md:block">Painel Principal</h1>
                     <p className="text-slate-400 capitalize">
                         {currentMonth} {currentYear}
                     </p>

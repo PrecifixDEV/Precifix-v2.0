@@ -369,7 +369,7 @@ export const FinancialOverview = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 pb-20">
             <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white items-center gap-2 hidden md:flex">
                     <Calculator className="h-8 w-8 text-primary" />
                     Custo Hora da Empresa
                 </h1>

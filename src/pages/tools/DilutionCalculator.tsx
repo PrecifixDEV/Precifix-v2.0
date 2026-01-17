@@ -185,15 +185,7 @@ export const DilutionCalculator = () => {
                     </Card>
                 )}
             </div>
-            {/* Navigation to Cost Calculator */}
-            <div className="flex justify-center pb-8">
-                <Link to="/tools/product-cost">
-                    <Button variant="outline" className="gap-2 border-primary/20 text-primary hover:text-primary hover:bg-primary/10">
-                        <DollarSign className="h-4 w-4" />
-                        Gostaria de calcular os Custos de Diluição dos seus produtos?
-                    </Button>
-                </Link>
-            </div>
+
         </div>
     );
 };

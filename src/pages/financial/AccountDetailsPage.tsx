@@ -91,7 +91,7 @@ export default function AccountDetailsPage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{account.name}</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 hidden md:block">{account.name}</h1>
                     <p className="text-slate-500 dark:text-slate-400">Detalhes e movimentações da conta</p>
                 </div>
             </div>

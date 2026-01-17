@@ -3,12 +3,12 @@ import { Trash2, Search, User, Pencil, Printer, Filter, Car, Bike, Truck, Info, 
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
+
 import { Input } from "@/components/ui/input";
 import {
     Card,
     CardContent,
-    CardHeader,
+
 } from "@/components/ui/card";
 import {
     Table,
@@ -58,7 +58,6 @@ export const Clients = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState<"all">("all");
     const [selectedClients, setSelectedClients] = useState<string[]>([]);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [clientToEdit, setClientToEdit] = useState<ClientWithVehicles | null>(null);
@@ -256,72 +255,81 @@ export const Clients = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Clientes</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Gerencie seus clientes</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Clientes</h1>
+                    <p className="text-slate-500 dark:text-slate-400 hidden md:block">Gerencie seus clientes</p>
                 </div>
-                <ResponsiveAddButton
-                    onClick={handleCreate}
-                    label="Novo Cliente"
-                    className="shrink-0"
-                />
+                <Button onClick={handleCreate} className="w-full md:w-auto">
+                    Adicionar Novo Cliente
+                </Button>
+            </div>
+
+            {/* Search and Filters - Moved outside Card */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 flex-1 w-full md:max-w-sm">
+                    {/* Mobile Select All */}
+                    <div className="md:hidden flex items-center justify-center mr-1">
+                        <Checkbox
+                            checked={selectedClients.length === filteredClients.length && filteredClients.length > 0}
+                            onCheckedChange={toggleSelectAll}
+                        />
+                    </div>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-slate-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}`}>
+                                <Filter className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                            <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setFilterType('all')} className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}>
+                                Todos
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
+                        <Input
+                            placeholder="Buscar clientes..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-9 bg-white dark:bg-slate-900"
+                        />
+                    </div>
+
+                    <div className="md:hidden flex items-center gap-2">
+                        {selectedClients.length > 0 && (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                                    <Printer className="h-4 w-4" />
+                                </Button>
+                                <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="hidden md:flex items-center gap-2">
+                    {selectedClients.length > 0 && (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                                <Printer className="h-4 w-4" />
+                            </Button>
+                            <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 flex-1 max-w-sm">
-                            <div className="md:hidden flex items-center justify-center mr-1">
-                                <Checkbox
-                                    checked={selectedClients.length === filteredClients.length && filteredClients.length > 0}
-                                    onCheckedChange={toggleSelectAll}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="icon" title="Filtrar" className={filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}>
-                                        <Filter className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-56">
-                                    <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => setFilterType('all')} className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}>
-                                        Todos
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-
-                            <div className={`relative flex-1 transition-all duration-300 ${isSearchFocused ? 'w-full' : 'w-auto'}`}>
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
-                                <Input
-                                    placeholder="Buscar clientes..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9"
-                                    onFocus={() => setIsSearchFocused(true)}
-                                    onBlur={() => setIsSearchFocused(false)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={`flex items-center gap-2 ${isSearchFocused ? 'hidden md:flex' : 'flex'}`}>
-                            {selectedClients.length > 0 && (
-                                <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-5">
-                                    <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados">
-                                        <Printer className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
-
-                            {/* Desktop Button Removed - Unified in Header */}
-                        </div>
-                    </div>
-                </CardHeader>
                 <CardContent className="p-0 md:p-6">
                     {filteredClients.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
@@ -340,14 +348,37 @@ export const Clients = () => {
                                     });
 
                                     return (
-                                        <div key={client.id} className="px-6 py-4 flex items-start gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                                            <Checkbox
-                                                checked={selectedClients.includes(client.id)}
-                                                onCheckedChange={() => toggleSelect(client.id)}
-                                                className="mt-1"
-                                            />
-                                            <div className="flex-1 grid grid-cols-1 gap-1 text-sm">
-                                                <div className="font-bold text-base">{client.name}</div>
+                                        <div key={client.id} className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                            <div className="flex items-center justify-between gap-3 mb-2">
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <Checkbox
+                                                        checked={selectedClients.includes(client.id)}
+                                                        onCheckedChange={() => toggleSelect(client.id)}
+                                                    />
+                                                    <div className="font-bold text-base truncate">{client.name}</div>
+                                                </div>
+
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleView(client)}>
+                                                            <Info className="mr-2 h-4 w-4" /> Detalhes
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleEdit(client)}>
+                                                            <Pencil className="mr-2 h-4 w-4" /> Editar
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => setClientToDelete(client)} className="text-destructive focus:text-destructive">
+                                                            <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-1 text-sm pl-0">
                                                 <div>
                                                     <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">CPF/CNPJ:</span>
                                                     <span>{client.document || "-"}</span>
@@ -385,25 +416,6 @@ export const Clients = () => {
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => handleView(client)}>
-                                                        <Info className="mr-2 h-4 w-4" /> Detalhes
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleEdit(client)}>
-                                                        <Pencil className="mr-2 h-4 w-4" /> Editar
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => setClientToDelete(client)} className="text-destructive focus:text-destructive">
-                                                        <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
                                         </div>
                                     );
                                 })}

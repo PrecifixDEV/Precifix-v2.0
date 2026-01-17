@@ -197,7 +197,7 @@ export const ManageCosts = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent hidden md:block">
                             Gerenciar Despesas
                         </h1>
                         <p className="text-muted-foreground mt-1">Análise detalhada de custos e despesas operacionais.</p>

@@ -298,7 +298,7 @@ export const Profile = () => {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Meu Perfil</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Meu Perfil</h1>
                 <p className="text-slate-500 dark:text-slate-400">
                     Gerencie suas informações pessoais.
                 </p>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ResponsiveAddButton } from '@/components/ui/responsive-add-button';
+
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -30,7 +30,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ProductFormDialog } from './ProductFormDialog';
 import { ProductSaleDialog } from './ProductSaleDialog';
 
@@ -271,99 +271,124 @@ export const Products = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Produtos</h1>
-                <ResponsiveAddButton
-                    onClick={handleCreateNew}
-                    label="Novo Produto"
-                    className="shrink-0"
-                />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Produtos</h1>
+                <Button onClick={handleCreateNew} className="w-full md:w-auto">
+                    Adicionar Novo Produto
+                </Button>
+            </div>
+
+            {/* Search and Filters - Moved outside Card */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 w-full md:w-auto md:flex-1 md:max-w-sm">
+                    {/* Mobile Select All */}
+                    <div className="md:hidden flex items-center justify-center mr-1">
+                        <Checkbox
+                            checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
+                            onCheckedChange={toggleSelectAll}
+                        />
+                    </div>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-slate-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}`}>
+                                <Filter className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                            <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('all')}
+                                className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                            >
+                                Todos
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('for_sale')}
+                                className={filterType === 'for_sale' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                            >
+                                Produtos para Venda
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('zero_stock')}
+                                className={filterType === 'zero_stock' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                            >
+                                Produtos com Estoque Zerado
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('incomplete')}
+                                className={filterType === 'incomplete' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
+                            >
+                                Produtos Cadastro Incompleto
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400 z-10" />
+                        <Input
+                            placeholder="Buscar produto..."
+                            className="pl-9 bg-white dark:bg-slate-900 w-full"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Mobile Bulk Actions */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {selectedProducts.length > 0 && (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleBulkPrint}
+                                    title="Imprimir Selecionados"
+                                    className="bg-white dark:bg-slate-900"
+                                >
+                                    <Printer className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setIsDeleteAlertOpen(true)}
+                                    title="Excluir Selecionados"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Desktop Bulk Actions */}
+                <div className="hidden md:flex items-center gap-2">
+                    {selectedProducts.length > 0 && (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handleBulkPrint}
+                                title="Imprimir Selecionados"
+                                className="bg-white dark:bg-slate-900"
+                            >
+                                <Printer className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => setIsDeleteAlertOpen(true)}
+                                title="Excluir Selecionados"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 flex-1 max-w-sm">
-                            <div className="md:hidden flex items-center justify-center mr-1">
-                                <Checkbox
-                                    checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
-                                    onCheckedChange={toggleSelectAll}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="icon" title="Filtrar" className={filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}>
-                                        <Filter className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-56">
-                                    <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onClick={() => setFilterType('all')}
-                                        className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                                    >
-                                        Todos
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => setFilterType('for_sale')}
-                                        className={filterType === 'for_sale' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                                    >
-                                        Produtos para Venda
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => setFilterType('zero_stock')}
-                                        className={filterType === 'zero_stock' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                                    >
-                                        Produtos com Estoque Zerado
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => setFilterType('incomplete')}
-                                        className={filterType === 'incomplete' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                                    >
-                                        Produtos Cadastro Incompleto
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
 
-                            <div className="relative flex-1">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400 z-10" />
-                                <Input
-                                    placeholder="Buscar produto..."
-                                    className="pl-8 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-
-
-                        <div className="flex items-center gap-2">
-                            {selectedProducts.length > 0 && (
-                                <>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={handleBulkPrint}
-                                        title="Imprimir Selecionados"
-                                    >
-                                        <Printer className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="icon"
-                                        onClick={() => setIsDeleteAlertOpen(true)}
-                                        title="Excluir Selecionados"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </>
-                            )}
-                            {/* Desktop custom button removed - unified in header */}
-                        </div>
-                    </div>
-                </CardHeader>
                 <CardContent className="p-0 md:p-6">
                     {/* Active Filters */}
                     {filterType !== 'all' && (
@@ -556,104 +581,106 @@ export const Products = () => {
                             </div>
                         ) : (
                             filteredProducts.map((product) => (
-                                <div key={product.id} className="px-6 py-4 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                                    <Checkbox
-                                        checked={selectedProducts.includes(product.id)}
-                                        onCheckedChange={() => toggleSelect(product.id)}
-                                        className="mt-1"
-                                    />
-
-                                    <div className="relative w-12 h-12 flex-shrink-0">
-                                        {product.image_url ? (
-                                            <img
-                                                src={product.image_url}
-                                                alt={product.name}
-                                                className="w-full h-full object-cover rounded-md border border-slate-200 dark:border-slate-700"
+                                <div key={product.id} className="px-6 py-4 flex flex-col hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                    <div className="flex items-start justify-between gap-3 mb-2">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <Checkbox
+                                                checked={selectedProducts.includes(product.id)}
+                                                onCheckedChange={() => toggleSelect(product.id)}
                                             />
-                                        ) : (
-                                            <div className="w-full h-full rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                                                <Package className="w-6 h-6 opacity-50" />
+
+                                            <div className="relative w-12 h-12 flex-shrink-0">
+                                                {product.image_url ? (
+                                                    <img
+                                                        src={product.image_url}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover rounded-md border border-slate-200 dark:border-slate-700"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                                        <Package className="w-6 h-6 opacity-50" />
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+
+                                            <div className="flex flex-col gap-1 min-w-0">
+                                                <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2">
+                                                    {product.name}
+                                                </h3>
+                                                {product.is_for_sale ? (
+                                                    <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                        Revenda
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                                        Uso Próprio
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-slate-400">
+                                                    <span className="sr-only">Abrir menu</span>
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                                    <Edit2 className="mr-2 h-4 w-4" />
+                                                    Alterar
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleClone(product)}>
+                                                    <Copy className="mr-2 h-4 w-4" />
+                                                    Clonar Produto
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleToggleForSale(product)}>
+                                                    {product.is_for_sale ? (
+                                                        <>
+                                                            <Store className="mr-2 h-4 w-4 opacity-50" />
+                                                            Marcar Uso Próprio
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <DollarSign className="mr-2 h-4 w-4 text-green-600" />
+                                                            Produto para Venda
+                                                        </>
+                                                    )}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    onClick={() => handleDelete(product.id)}
+                                                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Apagar
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
 
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between">
-                                            <div onClick={() => handleEdit(product)} className="cursor-pointer">
-                                                <div className="flex flex-col gap-1">
-                                                    <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2">
-                                                        {product.name}
-                                                    </h3>
-                                                    {product.is_for_sale ? (
-                                                        <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                                            Revenda
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
-                                                            Uso Próprio
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="mt-2 flex flex-col gap-0.5 text-xs text-muted-foreground">
-                                                    {product.is_for_sale ? (
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-slate-500">Custo:</span>
-                                                            <span className="text-slate-500">{formatCurrency(product.price || 0)}</span>
-                                                            <span className="text-slate-400">/</span>
-                                                            <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(product.sale_price || 0)}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div>Preço Custo: {formatCurrency(product.price || 0)}</div>
-                                                    )}
-
-                                                    <div className={(product.stock_quantity || 0) <= 0 ? 'text-red-500 font-medium' : ''}>
-                                                        Estoque: {product.stock_quantity}
+                                    <div className="pl-0">
+                                        <div onClick={() => handleEdit(product)} className="cursor-pointer">
+                                            <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                                                {product.is_for_sale ? (
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-slate-500">Custo:</span>
+                                                        <span className="text-slate-500">{formatCurrency(product.price || 0)}</span>
+                                                        <span className="text-slate-400">/</span>
+                                                        <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(product.sale_price || 0)}</span>
                                                     </div>
-                                                    <div>Emb.: {product.container_size_ml ? `${product.container_size_ml}ml` : '-'}</div>
-                                                    <div>Diluição: {product.is_dilutable ? (product.dilution_ratio || '-') : 'Pronto Uso'}</div>
-                                                </div>
-                                            </div>
+                                                ) : (
+                                                    <div>Preço Custo: {formatCurrency(product.price || 0)}</div>
+                                                )}
 
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-2 text-slate-400">
-                                                        <span className="sr-only">Abrir menu</span>
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handleEdit(product)}>
-                                                        <Edit2 className="mr-2 h-4 w-4" />
-                                                        Alterar
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleClone(product)}>
-                                                        <Copy className="mr-2 h-4 w-4" />
-                                                        Clonar Produto
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleToggleForSale(product)}>
-                                                        {product.is_for_sale ? (
-                                                            <>
-                                                                <Store className="mr-2 h-4 w-4 opacity-50" />
-                                                                Marcar Uso Próprio
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <DollarSign className="mr-2 h-4 w-4 text-green-600" />
-                                                                Produto para Venda
-                                                            </>
-                                                        )}
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        onClick={() => handleDelete(product.id)}
-                                                        className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
-                                                    >
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Apagar
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                                <div className={(product.stock_quantity || 0) <= 0 ? 'text-red-500 font-medium' : ''}>
+                                                    Estoque: {product.stock_quantity}
+                                                </div>
+                                                <div>Emb.: {product.container_size_ml ? `${product.container_size_ml}ml` : '-'}</div>
+                                                <div>Diluição: {product.is_dilutable ? (product.dilution_ratio || '-') : 'Pronto Uso'}</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

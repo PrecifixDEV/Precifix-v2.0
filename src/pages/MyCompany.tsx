@@ -351,7 +351,7 @@ export const MyCompany = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 max-w-4xl pb-20 animate-in fade-in duration-500">
             <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Minha Empresa</h1>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white hidden md:block">Minha Empresa</h1>
                 <p className="text-slate-500 dark:text-slate-400">Gerencie as configurações da sua empresa, marca e horários.</p>
             </div>
 
