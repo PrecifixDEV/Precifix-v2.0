@@ -31,7 +31,7 @@ import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
 import { supabase } from '../lib/supabase'
 import { ThemeToggle } from '../components/ThemeToggle'
-import { AppLayout } from '../components/layout/AppLayout'
+import { AppLayout } from '@/components/layout/AppLayout'
 import { useMobile } from '../hooks/useMobile'
 
 import logo from '../assets/precifix-logo.png'
