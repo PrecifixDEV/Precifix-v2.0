@@ -31,10 +31,14 @@ import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
 import { supabase } from '../lib/supabase'
 import { ThemeToggle } from '../components/ThemeToggle'
+import { AppLayout } from '../components/layout/AppLayout'
+import { useMobile } from '../hooks/useMobile'
 
 import logo from '../assets/precifix-logo.png'
 
 export const MainLayout = () => {
+    // Mobile Layout Detection
+    const isMobile = useMobile();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [user, setUser] = useState<any>(null)
@@ -175,6 +179,17 @@ export const MainLayout = () => {
         )
     }
 
+
+
+    if (isMobile) {
+        return (
+            <AppLayout>
+                <Outlet />
+            </AppLayout>
+        );
+    }
+
+    // Desktop Layout (original)
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-200">
             {/* Mobile Sidebar Overlay */}

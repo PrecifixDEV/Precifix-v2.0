@@ -8,6 +8,9 @@ description: Padrões de UI/UX, responsividade e componentes para o Precifix.
 
 ## Responsividade
 
+> [!IMPORTANT]
+> **Mobile First**: A aplicação vai ser mobile first. Se ficar bom no mobile, provavelmente ficará bom no desktop. Sempre priorize a experiência em telas pequenas (< 768px) antes de expandir para layouts maiores.
+
 ### Entrada de Dados (Formulários)
 
 **Form Dialogs (Criação/Edição)**: Formulários modais para criar ou editar itens (ex: "Novo Produto", "Editar Cliente") devem usar:
