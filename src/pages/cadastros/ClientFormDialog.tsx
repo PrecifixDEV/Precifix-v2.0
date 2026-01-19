@@ -1,67 +1,16 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Car, ArrowRight, Save, Bike, Truck } from "lucide-react";
-import { cn } from "@/lib/utils";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-    Card,
-    CardContent,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/lib/supabase";
-import { clientsService } from "@/services/clientsService";
-import type { Client, NewClient, Vehicle } from "@/services/clientsService";
-import { FipeVehicleSelector } from "@/components/vehicles/FipeVehicleSelector";
-import type { FipeVehicle } from "@/services/fipeService";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { StandardSheet, StandardSheetToggle } from "@/components/ui/StandardSheet";
+import { Loader2, User, Phone, Mail, Car, Trash2, Plus, FileText, MapPin, Calendar, Edit } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { clientsService, type Client, type NewClient, type Vehicle } from "@/services/clientsService";
+import { VehicleFormSheet } from "./VehicleFormSheet";
 
-const formSchema = z.object({
-    name: z.string().min(1, "Nome é obrigatório"),
-    document: z.string().min(11, "CPF/CNPJ inválido").refine(val => {
-        const digits = val.replace(/\D/g, '');
-        return digits.length === 11 || digits.length === 14;
-    }, "Documento inválido"),
-    email: z.string().email("Email inválido").optional().or(z.literal("")),
-    phone: z.string().min(10, "Telefone inválido"),
-    zip_code: z.string().optional(),
-    address: z.string().optional(),
-    number: z.string().optional(),
-    complement: z.string().optional(),
-    neighborhood: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-});
 
 interface ClientFormDialogProps {
     open: boolean;
@@ -70,626 +19,530 @@ interface ClientFormDialogProps {
     onSuccess: () => void;
 }
 
-export function ClientFormDialog({
-    open,
-    onOpenChange,
-    clientToEdit,
-    onSuccess,
-}: ClientFormDialogProps) {
+export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }: ClientFormDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
+
+    // Form States
+    const [name, setName] = useState("");
+    const [whatsapp, setWhatsapp] = useState("");
+
+    // Optional Fields Visibility
+    const [showDocument, setShowDocument] = useState(false);
+    const [showEmail, setShowEmail] = useState(false);
+    const [showAddress, setShowAddress] = useState(false);
+    const [showBirthDate, setShowBirthDate] = useState(false);
+    const [showNotes, setShowNotes] = useState(false);
+
+    // Optional Fields Values
+    const [cpfCnpj, setCpfCnpj] = useState("");
+    const [email, setEmail] = useState("");
+    const [birthDate, setBirthDate] = useState("");
+    const [cep, setCep] = useState("");
+    const [street, setStreet] = useState("");
+    const [number, setNumber] = useState("");
+    const [neighborhood, setNeighborhood] = useState("");
+    const [city, setCity] = useState("");
+    const [state, setState] = useState("");
+    const [notes, setNotes] = useState("");
+
+    const [isLoadingCep, setIsLoadingCep] = useState(false);
+
+    // Vehicle Sheet
+    const [showVehicleSheet, setShowVehicleSheet] = useState(false);
+    const [tempClientId, setTempClientId] = useState<string>("");
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-    const [loadingVehicles, setLoadingVehicles] = useState(false);
 
-    // Internal state for "Edit Mode" after creation
-    const [activeClient, setActiveClient] = useState<Client | null>(null);
-    const [activeTab, setActiveTab] = useState("details");
-
-    // Vehicle Form State
-    const [isAddingVehicle, setIsAddingVehicle] = useState(false);
-    const [newVehiclePlate, setNewVehiclePlate] = useState("");
-    const [newVehicleColor, setNewVehicleColor] = useState("");
-    const [fipeData, setFipeData] = useState<FipeVehicle | null>(null);
-
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        mode: "onChange",
-        defaultValues: {
-            name: "",
-            document: "",
-            email: "",
-            phone: "",
-            zip_code: "",
-            address: "",
-            number: "",
-            complement: "",
-            neighborhood: "",
-            city: "",
-            state: "",
-        },
-    });
-
-    const { isValid, errors } = form.formState;
+    // Store local vehicles (with photos) to be saved later
+    const [pendingVehicles, setPendingVehicles] = useState<{ data: any, photos: File[] }[]>([]);
 
     useEffect(() => {
         if (open) {
-            setIsAddingVehicle(false);
-            setFipeData(null);
-            setNewVehiclePlate("");
-            setNewVehicleColor("");
-            setActiveTab("details");
-
-            // Prioritize clientToEdit, otherwise clear activeClient
             if (clientToEdit) {
-                setActiveClient(clientToEdit);
-                form.reset({
-                    name: clientToEdit.name,
-                    document: clientToEdit.document || "",
-                    email: clientToEdit.email || "",
-                    phone: clientToEdit.phone || "",
-                    zip_code: clientToEdit.zip_code || "",
-                    address: clientToEdit.address || "",
-                    number: clientToEdit.number || "",
-                    complement: clientToEdit.complement || "",
-                    neighborhood: clientToEdit.neighborhood || "",
-                    city: clientToEdit.city || "",
-                    state: clientToEdit.state || "",
-                });
-                loadVehicles(clientToEdit.id);
+                // Populate fields
+                setName(clientToEdit.name);
+                setWhatsapp(clientToEdit.phone || "");
+                setCpfCnpj(clientToEdit.document || "");
+                setEmail(clientToEdit.email || "");
+                setCep(clientToEdit.zip_code || "");
+                setStreet(clientToEdit.address || "");
+                setNumber(clientToEdit.number || "");
+                setNeighborhood(clientToEdit.neighborhood || "");
+                setCity(clientToEdit.city || "");
+                setState(clientToEdit.state || "");
+                // Note: BirthDate and Notes might need DB migration if not present
+
+                // Set Toggles
+                setShowDocument(!!clientToEdit.document);
+                setShowEmail(!!clientToEdit.email);
+                setShowAddress(!!clientToEdit.address);
+
+                setTempClientId(clientToEdit.id);
+                refreshVehicles();
             } else {
-                setActiveClient(null);
-                form.reset({
-                    name: "",
-                    document: "",
-                    email: "",
-                    phone: "",
-                    zip_code: "",
-                    address: "",
-                    number: "",
-                    complement: "",
-                    neighborhood: "",
-                    city: "",
-                    state: "",
-                });
-                setVehicles([]);
+                // Reset form
+                resetForm();
+                // Create a temp ID if needed or wait for save? 
+                // For simplicity, we only allow vehicles after initial save if it's new client, 
+                // OR we can't add vehicles until client is saved.
+                // Let's set tempClientId empty.
+                setTempClientId("");
             }
         }
-    }, [open, clientToEdit, form]);
+    }, [open, clientToEdit]);
 
-    const loadVehicles = async (clientId: string) => {
-        try {
-            setLoadingVehicles(true);
-            const data = await clientsService.getVehicles(clientId);
-            setVehicles(data || []);
-        } catch (error) {
-            console.error("Error loading vehicles:", error);
-            toast.error("Erro ao carregar veículos.");
-        } finally {
-            setLoadingVehicles(false);
+    const resetForm = () => {
+        setName("");
+        setWhatsapp("");
+        setCpfCnpj("");
+        setEmail("");
+        setBirthDate("");
+        setCep("");
+        setStreet("");
+        setNumber("");
+        setNeighborhood("");
+        setCity("");
+        setState("");
+        setNotes("");
+
+        setShowDocument(false);
+        setShowEmail(false);
+        setShowAddress(false);
+        setShowBirthDate(false);
+        setShowNotes(false);
+        setVehicles([]);
+        setPendingVehicles([]); // Clear pending
+    };
+
+    const refreshVehicles = async () => {
+        if (clientToEdit?.id) {
+            const vs = await clientsService.getVehicles(clientToEdit.id);
+            setVehicles(vs);
+        } else if (tempClientId) {
+            const vs = await clientsService.getVehicles(tempClientId);
+            setVehicles(vs);
         }
     };
 
-    const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
-        let v = e.target.value.replace(/\D/g, "");
-        if (v.length > 14) v = v.slice(0, 14);
+    const formatPhone = (v: string) => {
+        v = v.replace(/\D/g, "");
+        if (v.length > 11) v = v.substring(0, 11);
+        if (v.length > 10) return v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+        if (v.length > 6) return v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+        if (v.length > 2) return v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+        return v;
+    };
 
+    const formatCpfCnpj = (v: string) => {
+        v = v.replace(/\D/g, "");
+        if (v.length > 14) v = v.substring(0, 14);
         if (v.length > 11) {
-            v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-        } else {
-            v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            return v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
         }
-        onChange(v);
+        return v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     };
 
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+    const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         let v = e.target.value.replace(/\D/g, "");
-        if (v.length > 11) v = v.slice(0, 11);
+        if (v.length > 8) v = v.substring(0, 8);
+        const formatted = v.replace(/^(\d{5})(\d{3})/, "$1-$2");
+        setCep(formatted);
 
-        let formatted = v;
-        if (v.length > 10) {
-            formatted = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-        } else if (v.length > 6) {
-            formatted = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
-        } else if (v.length > 2) {
-            formatted = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
-        } else {
-            formatted = v;
-        }
-        onChange(formatted);
-    };
-
-    const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-        const cep = e.target.value.replace(/\D/g, "");
-        if (cep.length === 8) {
+        if (v.length === 8) {
+            setIsLoadingCep(true);
             try {
-                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                const data = await response.json();
+                const res = await fetch(`https://viacep.com.br/ws/${v}/json/`);
+                const data = await res.json();
                 if (!data.erro) {
-                    form.setValue("address", data.logradouro);
-                    form.setValue("neighborhood", data.bairro);
-                    form.setValue("city", data.localidade);
-                    form.setValue("state", data.uf);
-                    form.setFocus("number");
+                    setStreet(data.logradouro);
+                    setNeighborhood(data.bairro);
+                    setCity(data.localidade);
+                    setState(data.uf);
                 }
-            } catch (error) {
-                console.error("Erro ao buscar CEP:", error);
+            } catch (err) {
+                console.error("CEP error", err);
+            } finally {
+                setIsLoadingCep(false);
             }
         }
     };
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        setIsLoading(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Usuário não autenticado");
-
-            const clientData: NewClient = {
-                ...values,
-                user_id: user.id,
-            };
-
-            let savedClient: Client;
-
-            if (activeClient) {
-                savedClient = await clientsService.updateClient(activeClient.id, clientData);
-                toast.success("Cliente atualizado!");
-            } else {
-                savedClient = await clientsService.createClient(clientData);
-                toast.success("Cliente criado!");
-            }
-
-            // Update state to reflect saved client
-            setActiveClient(savedClient);
-            onSuccess(); // Refresh parent list
-
-            // Switch to Vehicles tab automatically
-            setActiveTab("vehicles");
-            // If it's a new client, maybe auto-open "Add Vehicle"?
-            // User requested: "ao invés de fechar a janela... abrir a aba veículos"
-
-        } catch (error) {
-            console.error("Erro ao salvar cliente:", error);
-            toast.error("Erro ao salvar cliente.");
-        } finally {
-            setIsLoading(false);
+    const handleSave = async () => {
+        if (!name || !whatsapp) {
+            toast.error("Preencha campos obrigatórios (*)");
+            return;
         }
-    };
-
-    const onFipeSelected = (vehicle: FipeVehicle) => {
-        setFipeData(vehicle);
-    };
-
-    const handleAddVehicle = async () => {
-        if (!activeClient || !fipeData) return;
 
         try {
             setIsLoading(true);
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Usuário não autenticado");
 
-            const payload = {
-                client_id: activeClient.id,
-                brand: fipeData.Marca,
-                model: fipeData.Modelo,
-                year: String(fipeData.AnoModelo),
-                plate: newVehiclePlate || null,
-                color: newVehicleColor || null,
-                type: fipeData.TipoVeiculo === 1 ? 'carro' : fipeData.TipoVeiculo === 2 ? 'moto' : 'caminhao',
-                user_id: user.id
+            const payload: NewClient = {
+                user_id: user.id,
+                name,
+                phone: whatsapp,
+                document: cpfCnpj || null,
+                email: email || null,
+                zip_code: cep || null,
+                address: street || null,
+                number: number || null,
+                neighborhood: neighborhood || null,
+                city: city || null,
+                state: state || null,
+                complement: null // Not in form yet
             };
-            console.log("Saving vehicle payload:", payload);
 
-            await clientsService.addVehicle(payload);
+            let finalClientId = clientToEdit?.id || tempClientId;
 
-            toast.success("Veículo adicionado!");
-            setIsAddingVehicle(false);
-            setFipeData(null);
-            setNewVehiclePlate("");
-            setNewVehicleColor("");
-            loadVehicles(activeClient.id);
+            if (finalClientId) {
+                await clientsService.updateClient(finalClientId, payload);
+                toast.success("Cliente atualizado!");
+            } else {
+                const newClient = await clientsService.createClient(payload);
+                if (newClient) {
+                    finalClientId = newClient.id;
+                    setTempClientId(newClient.id);
+                    toast.success("Cliente cadastrado!");
+                }
+            }
+
+            // Save Pending Vehicles if we have a valid Client ID now
+            if (finalClientId && pendingVehicles.length > 0) {
+                for (const pv of pendingVehicles) {
+                    // Prepare payload
+                    const vPayload = {
+                        ...pv.data,
+                        client_id: finalClientId,
+                        user_id: user.id
+                    };
+                    // Remove the temp id we added for rendering
+                    delete vPayload.id;
+
+                    const savedV = await clientsService.addVehicle(vPayload);
+
+                    // Upload photos
+                    if (savedV && pv.photos.length > 0) {
+                        for (const photo of pv.photos) {
+                            const publicUrl = await clientsService.uploadVehiclePhoto(photo);
+                            if (publicUrl) {
+                                await clientsService.addVehiclePhotoRef(savedV.id, publicUrl);
+                            }
+                        }
+                    }
+                }
+                // Clear pending after save
+                setPendingVehicles([]);
+                // Refresh list from server
+                if (finalClientId) {
+                    const vs = await clientsService.getVehicles(finalClientId);
+                    setVehicles(vs);
+                }
+            }
+
+            // Close if strictly saving (not just intermediate save for vehicles)
+            if (!showVehicleSheet) {
+                onSuccess();
+                handleClose();
+            }
+
         } catch (error) {
-            console.error("Erro ao adicionar veículo detailed:", error);
-            // @ts-ignore
-            if (error.message) toast.error(`Erro: ${error.message}`);
-            // @ts-ignore
-            if (error.details) console.error("Error details:", error.details);
-            // @ts-ignore
-            if (error.hint) console.error("Error hint:", error.hint);
-
-            toast.error("Erro ao adicionar veículo. Verifique o console.");
+            console.error("Erro ao salvar cliente:", error);
+            toast.error("Erro ao salvar cliente");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDeleteVehicle = async (id: string) => {
-        if (!confirm("Tem certeza que deseja remover este veículo?")) return;
-        try {
-            await clientsService.deleteVehicle(id);
-            toast.success("Veículo removido.");
-            if (activeClient) loadVehicles(activeClient.id);
-        } catch (error) {
-            console.error(error);
-            toast.error("Erro ao remover veículo.");
-        }
-    };
-
     const handleClose = () => {
+        setTempClientId("");
         onOpenChange(false);
     };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 max-h-[90vh] overflow-hidden flex flex-col p-0" aria-describedby={undefined}>
-                <DialogHeader className="p-6 pb-2">
-                    <DialogTitle className="text-zinc-900 dark:text-white">
-                        {activeClient ? "Editar Cliente" : "Novo Cliente"}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Passo 1: Dados Pessoais &nbsp; &rarr; &nbsp; Passo 2: Veículos
-                    </DialogDescription>
-                </DialogHeader>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-                    <div className="px-6">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="details">Dados do Cliente</TabsTrigger>
-                            <TabsTrigger
-                                value="vehicles"
-                                disabled={!activeClient}
-                                className={!activeClient ? "opacity-50 cursor-not-allowed" : ""}
-                            >
-                                Veículos
-                                {!activeClient && <span className="ml-2 text-[10px] text-muted-foreground">(Salve primeiro)</span>}
-                            </TabsTrigger>
-                        </TabsList>
+
+    const handleDeleteVehicle = async (id: string, isPending: boolean = false) => {
+        if (!confirm("Remover veículo?")) return;
+
+        if (isPending) {
+            setPendingVehicles(prev => prev.filter(v => v.data.id !== id));
+            toast.success("Veículo removido (Local)");
+        } else {
+            await clientsService.deleteVehicle(id);
+            refreshVehicles();
+            toast.success("Veículo removido");
+        }
+    };
+
+    // Combine for display
+    const allVehicles = [
+        ...vehicles,
+        ...pendingVehicles.map(pv => ({ ...pv.data } as Vehicle))
+    ];
+
+
+    return (
+        <StandardSheet
+            open={open}
+            onOpenChange={handleClose}
+            title={clientToEdit ? "Editar Cliente" : "Novo Cliente"}
+            onSave={handleSave}
+            isLoading={isLoading}
+            saveLabel={clientToEdit ? "Salvar Alterações" : "Cadastrar Cliente"}
+        >
+            <div className="space-y-6">
+                {/* Mandatory Fields Section */}
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Nome Completo <span className="text-red-500">*</span></Label>
+                        <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                            <Input
+                                id="name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="pl-9 bg-white dark:bg-zinc-950 border-input"
+                                placeholder="Ex: João da Silva"
+                            />
+                        </div>
                     </div>
 
-                    <TabsContent value="details" className="flex-1 overflow-y-auto p-6 pt-4">
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="!text-foreground">Nome *</FormLabel>
-                                                <TooltipProvider>
-                                                    <Tooltip open={!!errors.name}>
-                                                        <TooltipTrigger asChild>
-                                                            <FormControl>
-                                                                <Input placeholder="Nome do cliente" {...field} className="bg-white dark:bg-zinc-800" />
-                                                            </FormControl>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                            <p>{errors.name?.message}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </FormItem>
-                                        )}
-                                    />
+                    <div className="space-y-2">
+                        <Label htmlFor="whatsapp">WhatsApp <span className="text-red-500">*</span></Label>
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                            <Input
+                                id="whatsapp"
+                                value={whatsapp}
+                                onChange={(e) => setWhatsapp(formatPhone(e.target.value))}
+                                className="pl-9 bg-white dark:bg-zinc-950 border-input"
+                                placeholder="(00) 00000-0000"
+                                maxLength={15}
+                            />
+                        </div>
+                    </div>
+                </div>
 
-                                    <FormField
-                                        control={form.control}
-                                        name="document"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="!text-foreground">CPF / CNPJ *</FormLabel>
-                                                <TooltipProvider>
-                                                    <Tooltip open={!!errors.document}>
-                                                        <TooltipTrigger asChild>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="000.000.000-00"
-                                                                    {...field}
-                                                                    className="bg-white dark:bg-zinc-800"
-                                                                    onChange={(e) => handleDocumentChange(e, field.onChange)}
-                                                                    maxLength={18}
-                                                                />
-                                                            </FormControl>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                            <p>{errors.document?.message}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </FormItem>
-                                        )}
-                                    />
+                {/* Inline Vehicle List (Always Visible) */}
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                        <Label className="text-base font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                            <Car className="w-4 h-4 text-yellow-500" />
+                            Veículos
+                        </Label>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                // Always allow opening logic - removed the requirement to save first
+                                setShowVehicleSheet(true);
+                            }}
+                            className="bg-zinc-900 border-green-600/30 hover:border-green-500 text-green-500 hover:text-green-400 hover:bg-zinc-800 text-xs h-8"
+                        >
+                            <Plus className="w-3 h-3 mr-1.5" />
+                            Novo Veículo
+                        </Button>
+                    </div>
 
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="email@exemplo.com" {...field} className="bg-white dark:bg-zinc-800" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="phone"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="!text-foreground">Telefone *</FormLabel>
-                                                <TooltipProvider>
-                                                    <Tooltip open={!!errors.phone}>
-                                                        <TooltipTrigger asChild>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="(00) 00000-0000"
-                                                                    {...field}
-                                                                    className="bg-white dark:bg-zinc-800"
-                                                                    onChange={(e) => handlePhoneChange(e, field.onChange)}
-                                                                    maxLength={15}
-                                                                />
-                                                            </FormControl>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                            <p>{errors.phone?.message}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                <div className="border-t pt-4 mt-4">
-                                    <h3 className="font-semibold mb-3">Endereço</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <FormField
-                                            control={form.control}
-                                            name="zip_code"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>CEP</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="00000-000"
-                                                            {...field}
-                                                            onBlur={handleCepBlur}
-                                                            className="bg-white dark:bg-zinc-800"
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="address"
-                                            render={({ field }) => (
-                                                <FormItem className="md:col-span-2">
-                                                    <FormLabel>Endereço</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Rua, Av..." {...field} className="bg-white dark:bg-zinc-800" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="number"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Número</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="123" {...field} className="bg-white dark:bg-zinc-800" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="complement"
-                                            render={({ field }) => (
-                                                <FormItem className="md:col-span-2">
-                                                    <FormLabel>Complemento</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Apto, Sala..." {...field} className="bg-white dark:bg-zinc-800" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="neighborhood"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Bairro</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Bairro" {...field} className="bg-white dark:bg-zinc-800" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="city"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Cidade</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Cidade" {...field} className="bg-white dark:bg-zinc-800" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="state"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Estado</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="UF" maxLength={2} {...field} className="bg-white dark:bg-zinc-800" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                    {allVehicles.length === 0 ? (
+                        <div className="text-center p-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
+                            <Car className="w-8 h-8 text-zinc-300 dark:text-zinc-700 mx-auto mb-2" />
+                            <p className="text-sm text-zinc-500">Nenhum veículo cadastrado</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {allVehicles.map((vehicle) => (
+                                <div key={vehicle.id} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg group">
+                                    <div>
+                                        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{vehicle.model}</p>
+                                        <p className="text-xs text-zinc-500">{vehicle.brand} • {vehicle.plate || 'S/ Placa'}</p>
+                                        {vehicle.id.startsWith('temp-') && <span className="text-[10px] text-yellow-500 font-bold bg-yellow-500/10 px-1.5 py-0.5 rounded ml-1">NOVO</span>}
                                     </div>
-                                </div>
-
-                                <div className="flex justify-end gap-2 pt-4 border-t mt-4">
-                                    <Button type="button" variant="outline" onClick={handleClose}>
-                                        Cancelar
-                                    </Button>
                                     <Button
-                                        type="submit"
-                                        disabled={isLoading || !isValid}
-                                        className={cn(
-                                            "text-zinc-900 duration-200",
-                                            !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 shadow-md hover:shadow-lg"
-                                        )}
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleDeleteVehicle(vehicle.id, vehicle.id.startsWith('temp-'))}
+                                        className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
                                     >
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Salvar e Cadastrar Veículo
-                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                        <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
-                            </form>
-                        </Form>
-                    </TabsContent>
-
-                    <TabsContent value="vehicles" className="flex-1 overflow-y-auto p-6 pt-4 space-y-4 flex flex-col">
-                        <div className="flex-1 space-y-4">
-                            {!isAddingVehicle ? (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-sm font-medium">Veículos Cadastrados</h3>
-                                        <Button size="sm" onClick={() => setIsAddingVehicle(true)} className="bg-yellow-500 hover:bg-yellow-600 text-zinc-900 shadow-sm">
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Adicionar Veículo
-                                        </Button>
-                                    </div>
-
-                                    {loadingVehicles ? (
-                                        <div className="flex justify-center py-8">
-                                            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                                        </div>
-                                    ) : vehicles.length === 0 ? (
-                                        <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10">
-                                            <Car className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                                            <p>Nenhum veículo cadastrado.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="grid gap-3">
-                                            {vehicles.map(vehicle => (
-                                                <Card key={vehicle.id} className="bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                                                    <CardContent className="p-4 flex justify-between items-center">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="p-2 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700">
-                                                                {vehicle.type === 'moto' ? <Bike className="w-5 h-5 text-zinc-600 dark:text-zinc-400" /> :
-                                                                    vehicle.type === 'caminhao' ? <Truck className="w-5 h-5 text-zinc-600 dark:text-zinc-400" /> :
-                                                                        <Car className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />}
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="font-semibold text-sm">{vehicle.model}</h4>
-                                                                <div className="text-xs text-muted-foreground flex flex-wrap gap-2 mt-1">
-                                                                    <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{vehicle.brand}</span>
-                                                                    <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{vehicle.year}</span>
-                                                                    <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border font-mono uppercase">{vehicle.plate || 'S/ Placa'}</span>
-                                                                    {vehicle.color && <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{vehicle.color}</span>}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <Button variant="ghost" size="icon" onClick={() => handleDeleteVehicle(vehicle.id)} className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0">
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </CardContent>
-                                                </Card>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="font-medium text-sm">Adicionar Novo Veículo</h3>
-                                        <Button variant="ghost" size="sm" onClick={() => setIsAddingVehicle(false)}>
-                                            Cancelar
-                                        </Button>
-                                    </div>
-
-                                    <FipeVehicleSelector onVehicleSelected={onFipeSelected} />
-
-                                    {fipeData && (
-                                        <div className="bg-zinc-100 dark:bg-zinc-900/50 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 space-y-4 animate-in fade-in zoom-in-95 duration-300 shadow-sm">
-                                            <div className="flex items-start gap-4">
-                                                <div className="p-3 bg-white dark:bg-zinc-800 rounded-full shadow-sm">
-                                                    <Car className="w-6 h-6 text-zinc-500" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-lg leading-tight">{fipeData.Modelo}</h4>
-                                                    <p className="text-sm text-muted-foreground">{fipeData.Marca} &bull; {fipeData.AnoModelo} &bull; {fipeData.Combustivel}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 pt-2">
-                                                <div className="space-y-2">
-                                                    <Label className="text-xs font-semibold uppercase text-muted-foreground">Placa (Opcional)</Label>
-                                                    <Input
-                                                        placeholder="ABC-1234"
-                                                        value={newVehiclePlate}
-                                                        onChange={(e) => setNewVehiclePlate(e.target.value.toUpperCase())}
-                                                        maxLength={8}
-                                                        className="bg-white dark:bg-zinc-800 font-mono"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-xs font-semibold uppercase text-muted-foreground">Cor (Opcional)</Label>
-                                                    <Input
-                                                        placeholder="Ex: Prata"
-                                                        value={newVehicleColor}
-                                                        onChange={(e) => setNewVehicleColor(e.target.value)}
-                                                        className="bg-white dark:bg-zinc-800"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="pt-2 flex justify-end">
-                                                <Button onClick={handleAddVehicle} disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white w-full md:w-auto shadow-sm">
-                                                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                                                    Salvar Veículo
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            ))}
                         </div>
+                    )}
+                </div>
 
-                        {/* Footer Buttons for Vehicle Tab */}
-                        <div className="flex justify-end gap-2 pt-4 border-t mt-4">
-                            <Button type="button" variant="outline" onClick={handleClose}>
-                                Cancelar
-                            </Button>
-                            <Button type="button" onClick={handleClose} className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
-                                Salvar Cliente
-                            </Button>
+                <div className="border-t border-zinc-200 dark:border-zinc-800 my-4" />
+
+                {/* Optional Fields Toggles */}
+                <div className="space-y-4">
+                    <Label className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Informações Adicionais</Label>
+                    <div className="flex flex-wrap gap-2">
+                        <StandardSheetToggle
+                            label="Documento"
+                            active={showDocument}
+                            onClick={() => setShowDocument(!showDocument)}
+                            icon={<FileText className="h-4 w-4" />}
+                        />
+                        <StandardSheetToggle
+                            label="Email"
+                            active={showEmail}
+                            onClick={() => setShowEmail(!showEmail)}
+                            icon={<Mail className="h-4 w-4" />}
+                        />
+                        <StandardSheetToggle
+                            label="Endereço"
+                            active={showAddress}
+                            onClick={() => setShowAddress(!showAddress)}
+                            icon={<MapPin className="h-4 w-4" />}
+                        />
+                        <StandardSheetToggle
+                            label="Nascimento"
+                            active={showBirthDate}
+                            onClick={() => setShowBirthDate(!showBirthDate)}
+                            icon={<Calendar className="h-4 w-4" />}
+                        />
+                        <StandardSheetToggle
+                            label="Observações"
+                            active={showNotes}
+                            onClick={() => setShowNotes(!showNotes)}
+                            icon={<Edit className="h-4 w-4" />}
+                        />
+                    </div>
+                </div>
+
+                {/* Optional Fields Content */}
+                <div className="space-y-4">
+                    {showDocument && (
+                        <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
+                            <Label>CPF / CNPJ</Label>
+                            <Input
+                                value={cpfCnpj}
+                                onChange={(e) => setCpfCnpj(formatCpfCnpj(e.target.value))}
+                                className="bg-white dark:bg-zinc-950 border-input"
+                                placeholder="000.000.000-00"
+                                maxLength={18}
+                            />
                         </div>
-                    </TabsContent>
-                </Tabs>
-            </DialogContent>
-        </Dialog>
+                    )}
+
+                    {showEmail && (
+                        <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
+                            <Label>Email</Label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                <Input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="pl-9 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    placeholder="cliente@email.com"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {showBirthDate && (
+                        <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
+                            <Label>Data de Nascimento</Label>
+                            <Input
+                                type="date"
+                                value={birthDate}
+                                onChange={(e) => setBirthDate(e.target.value)}
+                                className="justify-start text-left font-normal bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
+                    )}
+
+                    {showAddress && (
+                        <div className="animate-in fade-in slide-in-from-top-2 space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                            <div className="space-y-2">
+                                <Label>CEP</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={cep}
+                                        onChange={handleCepChange}
+                                        className="bg-white dark:bg-zinc-950 border-input"
+                                        placeholder="00000-000"
+                                        maxLength={9}
+                                    />
+                                    {isLoadingCep && <Loader2 className="w-5 h-5 animate-spin text-zinc-500 self-center" />}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-[2fr_1fr] gap-3">
+                                <div className="space-y-2">
+                                    <Label>Rua</Label>
+                                    <Input
+                                        value={street}
+                                        onChange={(e) => setStreet(e.target.value)}
+                                        className="bg-white dark:bg-zinc-950 border-input"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Número</Label>
+                                    <Input
+                                        value={number}
+                                        onChange={(e) => setNumber(e.target.value)}
+                                        className="bg-white dark:bg-zinc-950 border-input"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Bairro</Label>
+                                <Input
+                                    value={neighborhood}
+                                    onChange={(e) => setNeighborhood(e.target.value)}
+                                    className="bg-white dark:bg-zinc-950 border-input"
+                                    maxLength={40}
+                                />
+                            </div>
+                            <div className="grid grid-cols-[2fr_1fr] gap-3">
+                                <div className="space-y-2">
+                                    <Label>Cidade</Label>
+                                    <Input
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                        className="bg-white dark:bg-zinc-950 border-input"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>UF</Label>
+                                    <Input
+                                        value={state}
+                                        onChange={(e) => setState(e.target.value)}
+                                        className="bg-white dark:bg-zinc-950 border-input uppercase"
+                                        maxLength={2}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showNotes && (
+                        <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
+                            <Label>Observações</Label>
+                            <Textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                className="bg-white dark:bg-zinc-950 border-input min-h-[80px]"
+                                placeholder="Informações adicionais..."
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* NESTED SHEET FOR VEHICLE */}
+            <VehicleFormSheet
+                open={showVehicleSheet}
+                onOpenChange={setShowVehicleSheet}
+                clientId={clientToEdit?.id || tempClientId}
+                onSuccess={refreshVehicles}
+                onLocalSave={(vData, vPhotos) => {
+                    setPendingVehicles(prev => [...prev, { data: vData, photos: vPhotos }]);
+                }}
+            />
+        </StandardSheet>
     );
 }
+
+

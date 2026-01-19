@@ -7,6 +7,13 @@ export type ClientWithVehicles = Client & { vehicles: Vehicle[] };
 export type NewClient = Database["public"]["Tables"]["clients"]["Insert"];
 export type UpdateClient = Database["public"]["Tables"]["clients"]["Update"];
 
+export interface VehiclePhoto {
+    id: string;
+    vehicle_id: string;
+    url: string;
+    created_at: string;
+}
+
 export const clientsService = {
     async getClients() {
         const { data, error } = await supabase
@@ -82,6 +89,57 @@ export const clientsService = {
 
     async deleteVehicle(id: string) {
         const { error } = await supabase.from("vehicles").delete().eq("id", id);
+        if (error) throw error;
+    },
+
+    // Vehicle Photos Methods
+    async uploadVehiclePhoto(file: File) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('vehicle-images')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('vehicle-images')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+    },
+
+    async addVehiclePhotoRef(vehicleId: string, url: string) {
+        const { data, error } = await supabase
+            // @ts-ignore
+            .from('vehicle_photos')
+            .insert({ vehicle_id: vehicleId, url })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async getVehiclePhotos(vehicleId: string) {
+        const { data, error } = await supabase
+            // @ts-ignore
+            .from('vehicle_photos')
+            .select('*')
+            .eq('vehicle_id', vehicleId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        return data as VehiclePhoto[];
+    },
+
+    async deleteVehiclePhoto(id: string) {
+        // Note: For now we only delete the DB reference. 
+        // Ideally we should also delete from storage, but we need the path, not just full URL.
+        // @ts-ignore
+        const { error } = await supabase.from('vehicle_photos').delete().eq('id', id);
         if (error) throw error;
     },
 };

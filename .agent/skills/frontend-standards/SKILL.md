@@ -4,20 +4,71 @@ description: Padrões de UI/UX, responsividade e componentes para o Precifix.
 ---
 
 # Padrões de Frontend do Precifix
-# Frontend Standards - Precifix
 
 ## Responsividade
 
 > [!IMPORTANT]
 > **Mobile First**: A aplicação vai ser mobile first. Se ficar bom no mobile, provavelmente ficará bom no desktop. Sempre priorize a experiência em telas pequenas (< 768px) antes de expandir para layouts maiores.
 
-### Entrada de Dados (Formulários)
+## Cores e Tema (Industrial Theme)
 
-**Form Dialogs (Criação/Edição)**: Formulários modais para criar ou editar itens (ex: "Novo Produto", "Editar Cliente") devem usar:
-- **Mobile (< 768px)**: `<Drawer>` com footer empilhado verticalmente
-- **Desktop (≥ 768px)**: `<Dialog>` com footer horizontal
+### Dark Mode
+- **Fundo da Página**: `bg-zinc-900` (#18181b)
+- **Fundo de Navegação (Top/Bottom/Side)**: `bg-black` (#000000)
+- **Elementos de Card/Sheet**: `bg-zinc-900`
+- **Bordas**: `border-zinc-800`
+- **Inputs**: `bg-zinc-950` com border `border-zinc-800`
 
-**Páginas Completas**: Páginas como "Meu Perfil" ou "Configurações" devem permanecer como páginas normais, NÃO usar Drawer/Dialog.
+### Light Mode
+- **Fundo da Página**: `bg-zinc-50`
+- **Elementos**: `bg-white`
+
+## Entrada de Dados (Formulários)
+
+> [!IMPORTANT]
+> **Padrão Único**: Todos os formulários de criação e edição devem usar o componente **Sheet** (`side="right"`).
+> **NÃO USE** `Dialog` ou `Drawer` para formulários complexos. O objetivo é manter a consistência visual e o "feel" de painel lateral robusto.
+
+### Estrutura do Sheet (Formulário)
+
+Siga estritamente esta estrutura para manter a consistência com a página de Produtos:
+
+```tsx
+<Sheet open={open} onOpenChange={onOpenChange}>
+    {/* Classes: Largura fixa 600px, Fundo correto, Sombra, Sem padding padrão (p-0) para controle total */}
+    <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col bg-white dark:bg-zinc-900 shadow-xl z-[100]" side="right">
+        
+        {/* HEADER: Amarelo Industrial com Texto Preto */}
+        <SheetHeader className="h-16 px-6 shadow-md flex justify-center shrink-0 bg-yellow-500">
+            <SheetTitle className="text-zinc-900 text-center font-bold">
+                {isEditing ? 'Editar Item' : 'Novo Item'}
+            </SheetTitle>
+        </SheetHeader>
+
+        {/* BODY: Área com Scroll */}
+        <div className="overflow-y-auto px-6 py-4 flex-1">
+            <form id="my-form" className="space-y-6">
+                {/* Campos do formulário */}
+                <div className="space-y-2">
+                    <Label>Nome</Label>
+                    <Input className="bg-white dark:bg-zinc-800" />
+                </div>
+            </form>
+        </div>
+
+        {/* FOOTER: Fixo na parte inferior */}
+        <div className="p-4 shadow-[0_-2px_8px_rgba(0,0,0,0.1)] bg-white dark:bg-zinc-900 shrink-0">
+            <Button 
+                onClick={handleSubmit} 
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md flex justify-between"
+            >
+                <span>Salvar</span>
+                <CircleCheckBig className="h-6 w-6" />
+            </Button>
+        </div>
+    </SheetContent>
+</Sheet>
+```
 
 ### Auto-Scroll para Campos Condicionais (Mobile)
 
@@ -45,107 +96,51 @@ useEffect(() => {
 )}
 ```
 
-### Filtros Ativos (ActiveFilters)
+## Componentes de UI
 
-Use o componente `ActiveFilters` para exibir filtros aplicados:
+### Filtros Ativos (ActiveFilters) (Pode ser usado em Sheets ou Pages)
 
-```tsx
-import { ActiveFilters } from '@/components/ui/active-filters';
-
-// No componente
-{filterType !== 'all' && (
-    <ActiveFilters
-        filters={[
-            { label: 'Nome do Filtro' },
-            { label: 'Outro Filtro', value: 'Valor' } // opcional
-        ]}
-        onClearAll={() => setFilterType('all')}
-    />
-)}
-```
-
-**Comportamento**:
-- **Desktop**: Botão mostra "X Limpar Filtros"
-- **Mobile**: Botão mostra apenas "X" (economiza espaço)
-- Badges com fundo cinza claro/escuro
-- Borda inferior para separação visual
-
-## Componentes de Tabela
+Veja a documentação de `src/components/ui/active-filters.tsx` para detalhes.
 
 ### Paginação (TablePagination)
 
-Use `TablePagination` para tabelas com > 25 itens:
+Use `TablePagination` para tabelas com > 25 itens.
 
+### Click-to-Edit
+
+Em tabelas, o clique na linha deve abrir o Sheet de edição. Use `e.stopPropagation()` em botões de ação dentro da linha.
+
+### Campos Opcionais (Toggle Pattern)
+
+Para formulários com muitos campos opcionais, use botões de "toggle" para exibir/ocultar esses campos, mantendo o formulário limpo.
+
+- **UI**: Botões pequenos (badge-like) com ícone `+` (ex: `+ Descrição`, `+ Foto`).
+- **Comportamento**: Ao clicar, o botão muda para `-` ou muda de cor (ex: cinza escuro) e o campo aparece logo abaixo ou em uma seção dedicada.
+- **Botões de Seleção**: Para campos como "Tipo de Produto", use grupos de botões grandes e visuais em vez de Radio Buttons nativos.
+
+Exemplo de estrutura visual dos botões de opção:
 ```tsx
-import { TablePagination } from '@/components/ui/table-pagination';
+<div className="flex flex-wrap gap-2 mb-4">
+    <Button 
+        variant={showDescription ? "secondary" : "outline"} 
+        onClick={() => setShowDescription(!showDescription)}
+        size="sm"
+    >
+        {showDescription ? <Minus /> : <Plus />} Descrição
+    </Button>
+    {/* Outros botões */}
+</div>
 
-const [currentPage, setCurrentPage] = useState(1);
-const ITEMS_PER_PAGE = 25;
-
-// Lógica de paginação
-const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
-const paginatedItems = filteredItems.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-);
-
-// Reset ao filtrar
-useEffect(() => {
-    setCurrentPage(1);
-}, [searchTerm, filterType]);
-
-// Componente
-<TablePagination
-    currentPage={currentPage}
-    totalPages={totalPages}
-    onPageChange={setCurrentPage}
-    totalItems={filteredItems.length}
-    itemsPerPage={ITEMS_PER_PAGE}
-/>
+{showDescription && (
+    <div className="animate-in fade-in slide-in-from-top-2">
+       {/* Input do campo */}
+    </div>
+)}
 ```
 
-**Comportamento**:
-- **Desktop**: Controles completos (Primeira | Anterior | Dropdown | Próxima | Última)
-- **Mobile**: Apenas setas `< >`
-- Auto-hide quando total ≤ 25 itens
-
-### Click-to-Edit em Tabelas
-
-Implemente click na linha para editar com `stopPropagation` em elementos interativos:
-
-```tsx
-<TableRow 
-    onClick={() => handleEdit(item)}
-    className="hover:bg-slate-50 cursor-pointer"
->
-    <TableCell onClick={(e) => e.stopPropagation()}>
-        <Checkbox ... />
-    </TableCell>
-    {/* campos normais */}
-    <TableCell onClick={(e) => e.stopPropagation()}>
-        <DropdownMenu ... />
-    </TableCell>
-</TableRow>
-```
-## 2. Theming (Dark/Light Mode)
-- **Consistência Total:** Todas as telas devem funcionar perfeitamente em Light e Dark mode.
-- **Cores:**
-  - Use **apenas** classes do Tailwind com variáveis CSS (ex: `bg-background`, `text-foreground`, `border-border`).
-  - **Proibido:** Usar cores hexadecimais fixas ou classes que não se adaptam (ex: `text-black` ou `bg-white` sem variante dark).
-  - Teste sempre o contraste.
-
-## 3. Stack Tecnológica
-- **Estilização:** Tailwind CSS v4.
+## Stack Tecnológica
+- **Estilização:** Tailwind CSS (use variáveis do tema `index.css`).
 - **Componentes:** Shadcn/UI (baseado em Radix UI).
 - **Ícones:** Lucide React.
 - **Feedback:** Use `sonner` para Toasts.
 
-## Exemplo de Estrutura Responsiva
-```tsx
-const isMobile = useMobile() // ou hook equivalente
-
-if (isMobile) {
-  return <Drawer><DrawerContent>{/* Form */}</DrawerContent></Drawer>
-}
-return <Dialog><DialogContent>{/* Form */}</DialogContent></Dialog>
-```

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from '@/components/ui/card';
 import { ProductFormDialog } from './ProductFormDialog';
-import { ProductSaleDialog } from './ProductSaleDialog';
+
 
 import { productService, type Product } from '@/services/productService';
 import { toast } from 'sonner';
@@ -47,8 +47,7 @@ export const Products = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-    const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
-    const [productForSale, setProductForSale] = useState<Product | null>(null);
+
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [filterType, setFilterType] = useState<'all' | 'for_sale' | 'zero_stock' | 'incomplete'>('all');
     const [companyInfo, setCompanyInfo] = useState<{ name: string; logo: string | null; primaryColor: string }>({
@@ -149,8 +148,9 @@ export const Products = () => {
 
     const handleToggleForSale = async (product: Product) => {
         if (!product.is_for_sale) {
-            setProductForSale(product);
-            setIsSaleDialogOpen(true);
+            // If turning ON sale, just open the edit dialog (user handles details there)
+            setProductToEdit(product);
+            setIsDialogOpen(true);
         } else {
             try {
                 const updatedProduct = { ...product, is_for_sale: false };
@@ -166,8 +166,8 @@ export const Products = () => {
     };
 
     const handleEditSale = (product: Product) => {
-        setProductForSale(product);
-        setIsSaleDialogOpen(true);
+        setProductToEdit(product);
+        setIsDialogOpen(true);
     };
 
     const handleBulkPrint = () => {
@@ -690,13 +690,6 @@ export const Products = () => {
                 </CardContent>
             </Card>
 
-            <ProductSaleDialog
-                open={isSaleDialogOpen}
-                onOpenChange={setIsSaleDialogOpen}
-                product={productForSale}
-                onSuccess={fetchProducts}
-            />
-
             <ProductFormDialog
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
@@ -722,4 +715,5 @@ export const Products = () => {
             </AlertDialog>
         </div >
     );
+
 };

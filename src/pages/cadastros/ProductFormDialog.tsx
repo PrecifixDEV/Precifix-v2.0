@@ -2,18 +2,13 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Upload, Trash2, CircleCheckBig } from 'lucide-react';
+import { Upload, Trash2, SprayCan, Brush, Zap, DollarSign, FileText, Tag, Image } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
+import { StandardSheet, StandardSheetToggle } from "@/components/ui/StandardSheet";
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 import { productService, type Product } from '@/services/productService';
 import { compressAndConvertToWebP } from '@/utils/imageUtils';
@@ -36,7 +31,7 @@ const productSchema = z.object({
     dilution_ratio: z.string().optional(),
     container_size_ml: z.union([z.string(), z.number()])
         .transform((v) => (v === "" ? undefined : Number(v)))
-        .refine((v) => v !== undefined && !isNaN(v) && v > 0, { message: "Tamanho da embalagem é obrigatório" }),
+        .optional(),
     is_for_sale: z.boolean().optional(),
     sale_price: z.coerce.number().optional(),
 }).superRefine((data, ctx) => {
@@ -58,12 +53,20 @@ interface ProductFormDialogProps {
     onSuccess: () => void;
 }
 
+type ProductType = 'liquid' | 'accessory' | 'machine';
+
 export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess }: ProductFormDialogProps) {
     const isMobile = useMobile();
     const [isLoading, setIsLoading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [dilutionType, setDilutionType] = useState<'ready' | 'dilution'>('ready');
+    const [productType, setProductType] = useState<ProductType>('liquid');
+
+    // Toggle States for Optional Fields
+    const [showDescription, setShowDescription] = useState(false);
+    const [showResale, setShowResale] = useState(false);
+    const [showPhoto, setShowPhoto] = useState(false);
+
     const dilutionFieldRef = useRef<HTMLDivElement>(null);
 
     const { register, handleSubmit, formState: { errors }, reset, setValue, watch, setError, trigger } = useForm<ProductFormValues>({
@@ -84,6 +87,16 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
         }
     });
 
+    // Helper to sync local type state with form values
+    const updateProductType = (type: ProductType) => {
+        setProductType(type);
+        if (type !== 'liquid') {
+            setValue('is_dilutable', false);
+            setValue('dilution_ratio', '');
+            setValue('container_size_ml', undefined); // Clear container size for non-liquids
+        }
+    };
+
     useEffect(() => {
         if (open) {
             if (productToEdit) {
@@ -99,13 +112,23 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 setValue('is_for_sale', productToEdit.is_for_sale || false);
                 setValue('sale_price', productToEdit.sale_price || 0);
 
-                if (productToEdit.is_dilutable) {
-                    setDilutionType('dilution');
+                setImagePreview(productToEdit.image_url);
+
+                // Infer Type
+                // If it has container_size_ml or is_dilutable, it's likely Liquid (unless we add strict type column later)
+                // For now, heuristic:
+                if (productToEdit.container_size_ml || productToEdit.is_dilutable) {
+                    setProductType('liquid');
                 } else {
-                    setDilutionType('ready');
+                    // Default to accessory if no clear indicator
+                    setProductType('accessory');
                 }
 
-                setImagePreview(productToEdit.image_url);
+                // Set Options Visibility based on existent data
+                setShowDescription(!!productToEdit.description);
+                setShowResale(!!productToEdit.is_for_sale);
+                setShowPhoto(!!productToEdit.image_url);
+
             } else {
                 reset({
                     name: '',
@@ -120,8 +143,11 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     is_for_sale: false,
                     sale_price: 0,
                 });
-                setDilutionType('ready');
+                setProductType('liquid');
                 setImagePreview(null);
+                setShowDescription(false);
+                setShowResale(false);
+                setShowPhoto(false);
             }
             setImageFile(null);
         }
@@ -129,15 +155,20 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
     // Auto-scroll to dilution field when it appears (mobile only)
     useEffect(() => {
-        if (isMobile && dilutionType === 'dilution' && dilutionFieldRef.current) {
-            setTimeout(() => {
-                dilutionFieldRef.current?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                });
-            }, 100); // Small delay to ensure animation completes
-        }
-    }, [dilutionType, isMobile]);
+        const subscription = watch((value, { name }) => {
+            if (name === 'is_dilutable' && value.is_dilutable) {
+                if (isMobile && dilutionFieldRef.current) {
+                    setTimeout(() => {
+                        dilutionFieldRef.current?.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest'
+                        });
+                    }, 100);
+                }
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, isMobile]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -152,7 +183,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
     };
 
     const handleRemoveImage = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent triggering any parent click
+        e.stopPropagation();
         setImageFile(null);
         setImagePreview(null);
     };
@@ -188,23 +219,15 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             const userResponse = await supabase.auth.getUser();
             const user = userResponse.data.user;
 
-            if (!user) {
-                throw new Error("Usuário não autenticado");
-            }
+            if (!user) throw new Error("Usuário não autenticado");
 
             const excludeId = (productToEdit && productToEdit.id) ? productToEdit.id : undefined;
-            // Skip code check if we are generating it or if it is empty for now (will be generated)
             const checkCode = data.code ? data.code : undefined;
 
             const availability = await productService.checkProductAvailability(data.name, checkCode, excludeId);
 
-            let hasError = false;
             if (availability.nameExists) {
                 setError('name', { type: 'manual', message: 'Já existe um produto com este nome.' });
-                hasError = true;
-            }
-
-            if (hasError) {
                 setIsLoading(false);
                 return;
             }
@@ -228,7 +251,9 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 imageUrl = null;
             }
 
-            const isDilutable = dilutionType === 'dilution';
+            // Logic cleanup based on Product Type
+            const isDilutable = productType === 'liquid' ? data.is_dilutable : false;
+            const containerSize = productType === 'liquid' ? Number(data.container_size_ml) : null;
 
             const productData = {
                 user_id: user.id,
@@ -240,7 +265,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                 size: data.size || null,
                 is_dilutable: isDilutable,
                 dilution_ratio: isDilutable ? (data.dilution_ratio || null) : null,
-                container_size_ml: isDilutable ? (Number(data.container_size_ml) || null) : Number(data.container_size_ml),
+                container_size_ml: containerSize || null,
                 image_url: imageUrl,
                 is_for_sale: data.is_for_sale || false,
                 sale_price: data.sale_price || 0,
@@ -256,244 +281,305 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             onOpenChange(false);
         } catch (error) {
             console.error("Erro ao salvar produto:", error);
-            alert("Erro ao salvar produto. Verifique se você está logado ou tente novamente.");
+            alert("Erro ao salvar produto.");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col bg-white dark:bg-zinc-900 shadow-xl z-[100]" side="right" aria-describedby={undefined}>
-                <SheetHeader className="h-16 px-6 shadow-md flex justify-center shrink-0 bg-yellow-500">
-                    <SheetTitle className="text-zinc-900 text-center font-bold">
-                        {productToEdit?.id ? 'Editar Produto' : productToEdit ? 'Clonando Produto Existente' : 'Novo Produto'}
-                    </SheetTitle>
-                </SheetHeader>
+        <StandardSheet
+            open={open}
+            onOpenChange={onOpenChange}
+            title={productToEdit?.id ? 'Editar Produto' : 'Novo Produto'}
+            onSave={handleSaveClick}
+            isLoading={isLoading}
+            saveLabel={productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
+        >
+            <div className="space-y-6">
+                <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-                <div className="overflow-y-auto px-6 py-4">
-                    <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        {/* Image Upload */}
-                        <div className="flex flex-col items-center justify-center">
-                            {imagePreview ? (
-                                <div className="relative w-40 h-40 group">
-                                    <img
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover rounded-md border border-zinc-200 dark:border-zinc-700"
-                                    />
-
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        <label
-                                            htmlFor="image-upload"
-                                            className="bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded cursor-pointer pointer-events-auto transition-colors"
-                                        >
-                                            Alterar
-                                        </label>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        onClick={handleRemoveImage}
-                                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm transition-colors z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                        title="Remover imagem"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-
-                                    <input
-                                        id="image-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleImageChange}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="w-full h-32 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors relative cursor-pointer">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        onChange={handleImageChange}
-                                    />
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 pointer-events-none">
-                                        <Upload className="w-8 h-8 mb-2" />
-                                        <span className="text-sm">Clique para enviar imagem</span>
-                                    </div>
-                                </div>
-                            )}
+                    {/* 1. PRODUCT TYPE SELECTOR */}
+                    <div className="space-y-4">
+                        <Label className="text-base font-semibold">O que deseja cadastrar?</Label>
+                        <div className="grid grid-cols-3 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => updateProductType('liquid')}
+                                className={cn(
+                                    "flex items-center justify-center p-2 rounded-lg border-2 transition-all gap-2 h-12",
+                                    productType === 'liquid'
+                                        ? "border-yellow-500 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500"
+                                        : "border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950"
+                                )}
+                            >
+                                <SprayCan className="w-5 h-5" />
+                                <span className="text-xs font-bold">Produto</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateProductType('accessory')}
+                                className={cn(
+                                    "flex items-center justify-center p-2 rounded-lg border-2 transition-all gap-2 h-12",
+                                    productType === 'accessory'
+                                        ? "border-yellow-500 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500"
+                                        : "border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950"
+                                )}
+                            >
+                                <Brush className="w-5 h-5" />
+                                <span className="text-xs font-bold">Acessório</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateProductType('machine')}
+                                className={cn(
+                                    "flex items-center justify-center p-2 rounded-lg border-2 transition-all gap-2 h-12",
+                                    productType === 'machine'
+                                        ? "border-yellow-500 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500"
+                                        : "border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950"
+                                )}
+                            >
+                                <Zap className="w-5 h-5" />
+                                <span className="text-xs font-bold">Máquina</span>
+                            </button>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name" className="!text-foreground">Nome do Produto *</Label>
-                                <Input
-                                    id="name"
-                                    {...register("name")}
-                                    className="bg-white dark:bg-zinc-800"
-                                    placeholder="Ex: Cera de Carnaúba"
-                                />
-                            </div>
-                            <input type="hidden" {...register("code")} />
-                        </div>
-
+                    {/* 2. MANDATORY FIELDS */}
+                    <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label>Destinação do Produto</Label>
-                            <div className="flex gap-4 pt-2">
-                                <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="usageType"
-                                        checked={!watch("is_for_sale")}
-                                        onChange={() => setValue("is_for_sale", false)}
-                                        className="accent-yellow-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm font-medium">Uso Próprio</span>
-                                </label>
-                                <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="usageType"
-                                        checked={watch("is_for_sale")}
-                                        onChange={() => setValue("is_for_sale", true)}
-                                        className="accent-yellow-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm font-medium">Revenda</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Descrição</Label>
-                            <Textarea
-                                id="description"
-                                {...register("description")}
-                                className="bg-white dark:bg-zinc-800 min-h-[60px] resize-y"
-                                maxLength={500}
-                                rows={2}
-                                placeholder="Máximo 500 caracteres"
+                            <Label htmlFor="name">Nome do Produto <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="name"
+                                {...register("name")}
+                                className="bg-white dark:bg-zinc-950 border-input"
+                                placeholder="Ex: Cera de Carnaúba"
                             />
-                            <div className="text-xs text-right text-muted-foreground">
-                                {watch("description")?.length || 0}/500
-                            </div>
+                            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                         </div>
 
-                        <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="price" className="!text-foreground">Preço de Custo (R$) *</Label>
-                                <Input
-                                    id="price"
-                                    type="number"
-                                    step="0.01"
-                                    {...register("price")}
-                                    className="bg-white dark:bg-zinc-800"
-                                    placeholder="R$ 0,00"
-                                />
+                                <Label htmlFor="price">Qt. Pagou (R$) <span className="text-red-500">*</span></Label>
+                                <div className="relative">
+                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        id="price"
+                                        type="number"
+                                        step="0.01"
+                                        {...register("price")}
+                                        className="bg-white dark:bg-zinc-950 border-input pl-9"
+                                        placeholder="0,00"
+                                    />
+                                </div>
                                 {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
                             </div>
 
-                            {watch("is_for_sale") && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
-                                    <Input id="sale_price" type="number" step="0.01" {...register("sale_price")} className="bg-white dark:bg-zinc-800" />
-                                </div>
-                            )}
-
                             <div className="space-y-2">
-                                <Label htmlFor="stock_quantity" className="!text-foreground">Estoque *</Label>
+                                <Label htmlFor="stock_quantity">Estoque <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="stock_quantity"
                                     type="number"
                                     {...register("stock_quantity")}
-                                    className="bg-white dark:bg-zinc-800"
-                                    placeholder="Ex: 10"
+                                    className="bg-white dark:bg-zinc-950 border-input"
+                                    placeholder="0"
                                 />
                                 {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity.message}</p>}
                             </div>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* 3. CONDITIONAL FIELDS (LIQUID ONLY) */}
+                    {productType === 'liquid' && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="space-y-2">
-                                <Label htmlFor="container_size_ml" className="!text-foreground">Tamanho da Embalagem (ml) *</Label>
+                                <Label htmlFor="container_size_ml">Tamanho da Embalagem (ml) <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="container_size_ml"
                                     type="number"
                                     placeholder="Ex: 5000"
                                     {...register("container_size_ml")}
-                                    className="bg-white dark:bg-zinc-800"
+                                    className="bg-white dark:bg-zinc-950 border-input"
                                 />
                                 {errors.container_size_ml && <p className="text-sm text-destructive">{errors.container_size_ml.message}</p>}
-                                <span className="text-xs text-zinc-500">Volume total em ml (ex: 5L = 5000)</span>
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Tipo de Produto</Label>
-                                <div className="flex gap-4 pt-2">
-                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                <Label>Tipo de Uso</Label>
+                                <div className="flex gap-4 pt-1">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex-1 border border-transparent has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-500/5">
                                         <input
                                             type="radio"
                                             name="dilutionType"
-                                            value="ready"
-                                            checked={dilutionType === 'ready'}
+                                            checked={!watch("is_dilutable")}
                                             onChange={() => {
-                                                setDilutionType('ready');
                                                 setValue('is_dilutable', false);
                                                 setValue('dilution_ratio', '');
                                             }}
                                             className="accent-yellow-500 w-4 h-4"
                                         />
-                                        <span className="text-sm font-medium whitespace-nowrap">Pronto Uso</span>
+                                        <span className="text-sm font-medium">Pronto Uso</span>
                                     </label>
-                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex-1 border border-transparent has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-500/5">
                                         <input
                                             type="radio"
                                             name="dilutionType"
-                                            value="dilution"
-                                            checked={dilutionType === 'dilution'}
-                                            onChange={() => {
-                                                setDilutionType('dilution');
-                                                setValue('is_dilutable', true);
-                                            }}
+                                            checked={watch("is_dilutable")}
+                                            onChange={() => setValue('is_dilutable', true)}
                                             className="accent-yellow-500 w-4 h-4"
                                         />
                                         <span className="text-sm font-medium">Diluível</span>
                                     </label>
                                 </div>
                             </div>
-                        </div>
 
-                        {dilutionType === 'dilution' && (
-                            <div ref={dilutionFieldRef} className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                                <div className="space-y-2">
-                                    <Label htmlFor="dilution_ratio" className="!text-foreground">Proporção da Diluição *</Label>
+                            {watch("is_dilutable") && (
+                                <div ref={dilutionFieldRef} className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                    <Label htmlFor="dilution_ratio">Proporção (1:X) <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="dilution_ratio"
                                         placeholder="Ex: 1:10"
                                         {...register("dilution_ratio")}
-                                        className="bg-white dark:bg-zinc-800"
+                                        className="bg-white dark:bg-zinc-950 border-input"
                                     />
                                     {errors.dilution_ratio && <p className="text-sm text-destructive">{errors.dilution_ratio.message}</p>}
-                                    <span className="text-xs text-zinc-500">Ex: 1:10, 1:20, 1:100</span>
                                 </div>
-                            </div>
-                        )}
-                    </form>
-                </div>
+                            )}
+                        </div>
+                    )}
 
-                <div className="p-4 shadow-[0_-2px_8px_rgba(0,0,0,0.1)] bg-white dark:bg-zinc-900">
-                    <Button
-                        onClick={handleSaveClick}
-                        disabled={isLoading}
-                        className="w-full border-none bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition-all hover:scale-[1.02] flex items-center justify-between"
-                    >
-                        <span className="flex items-center">
-                            {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                            {productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
-                        </span>
-                        <CircleCheckBig className="h-8 w-8 shrink-0" style={{ minWidth: '32px', minHeight: '32px' }} />
-                    </Button>
-                </div>            </SheetContent>
-        </Sheet >
+                    <div className="border-t border-zinc-200 dark:border-zinc-800 my-4" />
+
+
+
+                    {/* 4. OPTIONAL FIELDS TOGGLES */}
+                    <div className="space-y-4 pt-4">
+                        <Label className="text-base text-muted-foreground">Campos opcionais</Label>
+                        <div className="flex flex-wrap gap-2">
+                            <StandardSheetToggle
+                                label="Descrição"
+                                active={showDescription}
+                                onClick={() => setShowDescription(!showDescription)}
+                                icon={<FileText className="h-4 w-4" />}
+                            />
+                            <StandardSheetToggle
+                                label="Revenda"
+                                active={showResale}
+                                onClick={() => setShowResale(!showResale)}
+                                icon={<Tag className="h-4 w-4" />}
+                            />
+                            <StandardSheetToggle
+                                label="Foto"
+                                active={showPhoto}
+                                onClick={() => setShowPhoto(!showPhoto)}
+                                icon={<Image className="h-4 w-4" />}
+                            />
+                        </div>
+                    </div>
+
+                    {/* 5. OPTIONAL SECTIONS RENDER */}
+                    {showDescription && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                            <Label htmlFor="description">Descrição do Produto</Label>
+                            <Textarea
+                                id="description"
+                                {...register("description")}
+                                className="bg-white dark:bg-zinc-950 min-h-[80px]"
+                                placeholder="Detalhes adicionais..."
+                                maxLength={500}
+                            />
+                            <div className="text-xs text-right text-muted-foreground">
+                                {watch("description")?.length || 0}/500
+                            </div>
+                        </div>
+                    )}
+
+                    {showResale && (
+                        <div className="space-y-4 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Disponível para Revenda?</Label>
+                                    <p className="text-sm text-muted-foreground">Ative para vender este item diretamente</p>
+                                </div>
+                                <Switch
+                                    checked={watch("is_for_sale")}
+                                    onCheckedChange={(checked) => setValue("is_for_sale", checked)}
+                                />
+                            </div>
+                            {watch("is_for_sale") && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                    <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
+                                    <div className="relative">
+                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="sale_price"
+                                            type="number"
+                                            step="0.01"
+                                            {...register("sale_price")}
+                                            className="bg-white dark:bg-zinc-950 border-input pl-9"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {showPhoto && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                            <Label>Imagem do Produto</Label>
+                            <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
+                                {imagePreview ? (
+                                    <div className="relative w-40 h-40 group">
+                                        <img
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover rounded-md shadow-sm"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveImage}
+                                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm z-10"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+
+                                        <label
+                                            htmlFor="file-upload-change"
+                                            className="absolute bottom-2 right-2 bg-black/70 hover:bg-black/90 text-white text-xs px-2 py-1 rounded cursor-pointer z-10"
+                                        >
+                                            Alterar
+                                        </label>
+                                        <input
+                                            id="file-upload-change"
+                                            type="file"
+                                            className="hidden"
+                                            onChange={handleImageChange}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="text-center w-full">
+                                        <label
+                                            htmlFor="file-upload"
+                                            className="relative cursor-pointer flex flex-col items-center justify-center w-full h-full py-6 rounded-md font-medium text-primary hover:text-primary/90 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+                                        >
+                                            <div className="mx-auto h-12 w-12 text-zinc-400">
+                                                <Upload className="h-full w-full" />
+                                            </div>
+                                            <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                                                <span>Enviar foto</span>
+                                            </div>
+                                            <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
+                                        </label>
+                                        <p className="text-xs text-zinc-500 mt-1">PNG, JPG, WEBP até 5MB</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                </form>
+            </div>
+        </StandardSheet>
     );
 }
