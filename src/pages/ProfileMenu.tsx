@@ -9,19 +9,15 @@ import {
     LogOut,
     ChevronRight,
     Moon,
-    Sun,
-    Monitor
+    Sun
 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 
 export const ProfileMenu = () => {
     const navigate = useNavigate()
     const { theme, toggleTheme } = useTheme()
     const [userProfile, setUserProfile] = useState<{ name: string; avatar_url: string | null } | null>(null)
-    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         getProfile()
@@ -54,8 +50,6 @@ export const ProfileMenu = () => {
             }
         } catch (error) {
             console.error('Error loading profile:', error)
-        } finally {
-            setLoading(false)
         }
     }
 
