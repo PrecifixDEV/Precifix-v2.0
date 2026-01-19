@@ -133,11 +133,11 @@ export const ProductCostCalculator = () => {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                         <Calculator className="h-8 w-8 text-primary" />
                         Calculadora de Custos
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1">
                         Descubra quanto custa cada ml ou aplicação dos seus produtos.
                     </p>
                 </div>
@@ -148,7 +148,7 @@ export const ProductCostCalculator = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Beaker className="h-5 w-5 text-blue-500" /> Configurar Cálculo
+                            <Beaker className="h-5 w-5 text-yellow-500" /> Configurar Cálculo
                         </CardTitle>
                         <CardDescription>Selecione um produto do seu estoque para calcular.</CardDescription>
                     </CardHeader>
@@ -177,7 +177,7 @@ export const ProductCostCalculator = () => {
 
                         {selectedProduct && (
                             <>
-                                <div className="flex items-center justify-between border p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50">
+                                <div className="flex items-center justify-between border p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
                                     <div className="space-y-0.5">
                                         <Label>Produto Diluído?</Label>
                                         <p className="text-xs text-muted-foreground">O produto será misturado com água?</p>
@@ -215,7 +215,7 @@ export const ProductCostCalculator = () => {
                                             onChange={(e) => setQuantityUsed(e.target.value)}
                                             placeholder={isDiluted ? "Volume total da solução pronta" : "Volume do produto puro"}
                                         />
-                                        <span className="absolute right-3 top-2.5 text-sm text-slate-400">ml</span>
+                                        <span className="absolute right-3 top-2.5 text-sm text-zinc-400">ml</span>
                                     </div>
                                 </div>
 
@@ -230,7 +230,7 @@ export const ProductCostCalculator = () => {
                 {/* Results Card */}
                 <div className="space-y-6">
                     {costResult ? (
-                        <Card className="bg-slate-900 text-white border-slate-800 shadow-xl overflow-hidden relative">
+                        <Card className="bg-zinc-900 text-white border-zinc-800 shadow-xl overflow-hidden relative">
                             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none text-white">
                                 <DollarSign className="w-48 h-48" />
                             </div>
@@ -240,25 +240,25 @@ export const ProductCostCalculator = () => {
                             </CardHeader>
                             <CardContent className="space-y-6 relative z-10">
                                 <div>
-                                    <p className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Custo da Aplicação</p>
+                                    <p className="text-zinc-400 text-sm font-medium uppercase tracking-wider mb-1">Custo da Aplicação</p>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-5xl font-bold text-green-400">{formatMoneyHighPrecision(costResult.costOfUsage)}</span>
-                                        <span className="text-slate-400">/ {quantityUsed}ml</span>
+                                        <span className="text-zinc-400">/ {quantityUsed}ml</span>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-700">
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-700">
                                     <div>
-                                        <p className="text-slate-400 text-xs uppercase font-bold mb-1">Custo por Litro (Pronto)</p>
+                                        <p className="text-zinc-400 text-xs uppercase font-bold mb-1">Custo por Litro (Pronto)</p>
                                         <p className="text-xl font-semibold">{formatMoney(costResult.costPerUnit * 1000)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400 text-xs uppercase font-bold mb-1">Custo por ML</p>
+                                        <p className="text-zinc-400 text-xs uppercase font-bold mb-1">Custo por ML</p>
                                         <p className="text-xl font-semibold">{formatMoneyHighPrecision(costResult.costPerUnit)}</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-800/50 p-4 rounded-lg text-sm text-slate-300">
+                                <div className="bg-zinc-800/50 p-4 rounded-lg text-sm text-zinc-300">
                                     <p>
                                         Você precisará usar <strong>{formatMoneyHighPrecision(costResult.costOfUsage)}</strong> de produto concentrado para realizar este serviço/aplicação.
                                     </p>
@@ -266,7 +266,7 @@ export const ProductCostCalculator = () => {
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-slate-50 dark:bg-slate-900/50 rounded-xl border-dashed border-2">
+                        <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border-dashed border-2">
                             <TrendingDown className="h-12 w-12 mb-4 opacity-50" />
                             <h3 className="text-lg font-semibold mb-2">Aguardando Cálculo</h3>
                             <p className="max-w-xs">

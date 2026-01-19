@@ -50,7 +50,7 @@ export const SubscriptionTag = ({ status, trialEndsAt }: SubscriptionTagProps) =
 
     if (status === 'active' || status === 'pro') {
         return (
-            <div className="px-3 py-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold rounded-full shadow-sm">
+            <div className="px-3 py-1 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700 text-xs font-bold rounded-full shadow-sm">
                 PRO
             </div>
         )

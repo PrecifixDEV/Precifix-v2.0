@@ -9,7 +9,7 @@ export const Clock = () => {
     }, [])
 
     return (
-        <div className="text-sm font-mono text-slate-500 dark:text-slate-400 hidden lg:block">
+        <div className="text-sm font-mono text-zinc-500 dark:text-zinc-400 hidden lg:block">
             {date.toLocaleString('pt-BR')}
         </div>
     )

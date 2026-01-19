@@ -14,19 +14,16 @@ export function SpeedDialMenu({ isOpen, onClose }: SpeedDialMenuProps) {
             label: "Nova Venda",
             icon: ShoppingCart,
             href: "/sales/new",
-            color: "bg-green-500",
         },
         {
             label: "Novo Orçamento",
             icon: FileText,
             href: "/quotes/new",
-            color: "bg-blue-500",
         },
         {
             label: "Novo Agendamento",
             icon: Calendar,
             href: "/schedule/new",
-            color: "bg-purple-500",
         },
     ];
 
@@ -46,7 +43,7 @@ export function SpeedDialMenu({ isOpen, onClose }: SpeedDialMenuProps) {
                         href={action.href}
                         className={`
                             flex items-center gap-4 px-6 py-4 rounded-2xl
-                            bg-yellow-500 text-slate-950 border border-yellow-400
+                            bg-yellow-500 text-zinc-950 border border-yellow-400
                             transform transition-all duration-200
                             hover:scale-105 active:scale-95
                             animate-in slide-in-from-bottom-2

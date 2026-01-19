@@ -15,14 +15,14 @@ export const EmailConfirmation = () => {
 
             <h2 className="text-2xl font-bold text-white mb-4">Verifique seu e-mail</h2>
 
-            <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
                 Enviamos um link de confirmação para o seu endereço de e-mail.
                 <br />
                 Por favor, clique no link para ativar sua conta e começar a usar o Precifix.
             </p>
 
-            <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-800 mb-8 max-w-sm mx-auto">
-                <p className="text-xs text-slate-500">
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800 mb-8 max-w-sm mx-auto">
+                <p className="text-xs text-zinc-500">
                     Não recebeu? Verifique sua pasta de Spam ou Lixo Eletrônico.
                 </p>
             </div>
@@ -30,7 +30,7 @@ export const EmailConfirmation = () => {
             <Button
                 variant="outline"
                 onClick={() => navigate('/login')}
-                className="w-full group bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
+                className="w-full group bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700"
             >
                 <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                 Voltar para o Login

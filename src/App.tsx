@@ -23,12 +23,16 @@ import { ProductCostCalculator } from './pages/tools/ProductCostCalculator'
 import FinancialCategories from './pages/settings/FinancialCategories';
 
 
+import { ProfileMenu } from './pages/ProfileMenu'
 import { MobileMenu } from './pages/MobileMenu'
+import { ScrollToTop } from './components/ScrollToTop'
+import { Toaster } from './components/ui/sonner'
 
 function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
@@ -42,6 +46,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile-menu" element={<ProfileMenu />} />
             <Route path="/minha-empresa" element={<MyCompany />} />
             <Route path="/menu" element={<MobileMenu />} />
             <Route path="/custos" element={<ManageCosts />} />
@@ -53,10 +58,10 @@ function App() {
             <Route path="/cadastros/produtos" element={<Products />} />
             <Route path="/cadastros/servicos" element={<Services />} />
             <Route path="/cadastros/clientes" element={<Clients />} />
-            <Route path="/cadastros/formas-pagamento" element={<div className="text-slate-900 dark:text-white p-6">Formas de Pagamento (Em breve)</div>} />
+            <Route path="/cadastros/formas-pagamento" element={<div className="text-zinc-900 dark:text-white p-6">Formas de Pagamento (Em breve)</div>} />
 
-            <Route path="/sales" element={<div className="text-slate-900 dark:text-white p-6">Vendas (Em breve)</div>} />
-            <Route path="/schedule" element={<div className="text-slate-900 dark:text-white p-6">Agenda (Em breve)</div>} />
+            <Route path="/sales" element={<div className="text-zinc-900 dark:text-white p-6">Vendas (Em breve)</div>} />
+            <Route path="/schedule" element={<div className="text-zinc-900 dark:text-white p-6">Agenda (Em breve)</div>} />
             <Route path="/financial" element={<FinancialOverview />} />
 
             <Route path="/settings/categories" element={<FinancialCategories />} />
@@ -69,6 +74,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </ThemeProvider>
   )
 }

@@ -257,8 +257,8 @@ export const Clients = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Clientes</h1>
-                    <p className="text-slate-500 dark:text-slate-400 hidden md:block">Gerencie seus clientes</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Clientes</h1>
+                    <p className="text-zinc-500 dark:text-zinc-400 hidden md:block">Gerencie seus clientes</p>
                 </div>
                 <Button onClick={handleCreate} className="w-full md:w-auto">
                     Adicionar Novo Cliente
@@ -278,7 +278,7 @@ export const Clients = () => {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-slate-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}`}>
+                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-zinc-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : ''}`}>
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -297,14 +297,14 @@ export const Clients = () => {
                             placeholder="Buscar clientes..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-white dark:bg-slate-900"
+                            className="pl-9 bg-white dark:bg-zinc-900"
                         />
                     </div>
 
                     <div className="md:hidden flex items-center gap-2">
                         {selectedClients.length > 0 && (
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
                                     <Printer className="h-4 w-4" />
                                 </Button>
                                 <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
@@ -318,7 +318,7 @@ export const Clients = () => {
                 <div className="hidden md:flex items-center gap-2">
                     {selectedClients.length > 0 && (
                         <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
                                 <Printer className="h-4 w-4" />
                             </Button>
                             <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
@@ -329,7 +329,7 @@ export const Clients = () => {
                 </div>
             </div>
 
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
                 <CardContent className="p-0 md:p-6">
                     {filteredClients.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
@@ -338,7 +338,7 @@ export const Clients = () => {
                     ) : (
                         <>
                             {/* Mobile View - List */}
-                            <div className="md:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-800">
+                            <div className="md:hidden flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
                                 {paginatedClients.map((client) => {
                                     const vehicleCounts = { carro: 0, moto: 0, caminhao: 0 };
                                     client.vehicles?.forEach(v => {
@@ -348,7 +348,7 @@ export const Clients = () => {
                                     });
 
                                     return (
-                                        <div key={client.id} className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                        <div key={client.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0">
                                             <div className="flex items-center justify-between gap-3 mb-2">
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <Checkbox
@@ -392,13 +392,13 @@ export const Clients = () => {
                                                     <span>{client.phone || "-"}</span>
                                                 </div>
                                                 <div
-                                                    className="flex items-center gap-1 mt-1 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1 -ml-1 rounded transition-colors"
+                                                    className="flex items-center gap-1 mt-1 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
                                                     onClick={() => handleView(client)}
                                                 >
                                                     <span className="font-bold mr-1">Veículos:</span>
                                                     <div className="flex gap-1.5 flex-wrap">
                                                         {vehicleCounts.carro > 0 && (
-                                                            <div className="flex items-center text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                                                            <div className="flex items-center text-[10px] bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">
                                                                 <Car className="w-3 h-3 mr-1" /> {vehicleCounts.carro}
                                                             </div>
                                                         )}
@@ -422,9 +422,9 @@ export const Clients = () => {
                             </div>
 
                             {/* Desktop View - Table */}
-                            <div className="hidden md:block rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+                            <div className="hidden md:block rounded-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                                 <Table>
-                                    <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
+                                    <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
                                         <TableRow>
                                             <TableHead className="w-[50px] text-center">
                                                 <Checkbox
@@ -444,7 +444,7 @@ export const Clients = () => {
                                         {paginatedClients.map((client) => (
                                             <TableRow
                                                 key={client.id}
-                                                className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+                                                className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer"
                                                 onClick={() => handleEdit(client)}
                                             >
                                                 <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
@@ -454,7 +454,7 @@ export const Clients = () => {
                                                     />
                                                 </TableCell>
                                                 <TableCell className="font-medium">{client.name}</TableCell>
-                                                <TableCell className="text-slate-500">{client.document || "-"}</TableCell>
+                                                <TableCell className="text-zinc-500">{client.document || "-"}</TableCell>
                                                 <TableCell>{client.city ? `${client.city}/${client.state}` : "-"}</TableCell>
                                                 <TableCell>{client.phone || "-"}</TableCell>
                                                 <TableCell>
@@ -468,7 +468,7 @@ export const Clients = () => {
                                                             });
                                                             return (
                                                                 <>
-                                                                    {counts.carro > 0 && <div className="flex items-center text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded"><Car className="w-3 h-3 mr-1" /> {counts.carro}</div>}
+                                                                    {counts.carro > 0 && <div className="flex items-center text-xs bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded"><Car className="w-3 h-3 mr-1" /> {counts.carro}</div>}
                                                                     {counts.moto > 0 && <div className="flex items-center text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded"><Bike className="w-3 h-3 mr-1" /> {counts.moto}</div>}
                                                                     {counts.caminhao > 0 && <div className="flex items-center text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded"><Truck className="w-3 h-3 mr-1" /> {counts.caminhao}</div>}
                                                                     {client.vehicles?.length === 0 && <span className="text-muted-foreground text-xs">-</span>}
@@ -479,14 +479,14 @@ export const Clients = () => {
                                                 </TableCell>
                                                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                                     <div className="flex justify-end gap-1">
-                                                        <Button variant="ghost" size="icon" onClick={() => handleView(client)} className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100">
+                                                        <Button variant="ghost" size="icon" onClick={() => handleView(client)} className="h-8 w-8 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100">
                                                             <Info className="h-4 w-4" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => handleEdit(client)}
-                                                            className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                                                            className="h-8 w-8 text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100"
                                                         >
                                                             <Pencil className="h-4 w-4" />
                                                         </Button>
@@ -599,7 +599,7 @@ export const Clients = () => {
                                     <h4 className="font-semibold flex items-center gap-2">
                                         <Car className="w-4 h-4" /> Veículos Cadastrados
                                     </h4>
-                                    <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+                                    <span className="text-xs bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-full">
                                         {clientToView.vehicles?.length || 0} Total
                                     </span>
                                 </div>
@@ -607,25 +607,25 @@ export const Clients = () => {
                                 {clientToView.vehicles && clientToView.vehicles.length > 0 ? (
                                     <div className="grid gap-3">
                                         {clientToView.vehicles.map(v => (
-                                            <div key={v.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex items-start gap-3">
-                                                <div className="mt-1 p-2 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
-                                                    {v.type === 'moto' ? <Bike className="w-4 h-4 text-slate-600 dark:text-slate-400" /> :
-                                                        v.type === 'caminhao' ? <Truck className="w-4 h-4 text-slate-600 dark:text-slate-400" /> :
-                                                            <Car className="w-4 h-4 text-slate-600 dark:text-slate-400" />}
+                                            <div key={v.id} className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 flex items-start gap-3">
+                                                <div className="mt-1 p-2 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700">
+                                                    {v.type === 'moto' ? <Bike className="w-4 h-4 text-zinc-600 dark:text-zinc-400" /> :
+                                                        v.type === 'caminhao' ? <Truck className="w-4 h-4 text-zinc-600 dark:text-zinc-400" /> :
+                                                            <Car className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h5 className="font-medium text-sm truncate">{v.model}</h5>
                                                     <p className="text-xs text-muted-foreground">{v.brand} • {v.year}</p>
                                                     <div className="flex gap-2 mt-1.5">
-                                                        <span className="text-[10px] bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border font-mono uppercase">{v.plate || 'S/ Placa'}</span>
-                                                        {v.color && <span className="text-[10px] bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border">{v.color}</span>}
+                                                        <span className="text-[10px] bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border font-mono uppercase">{v.plate || 'S/ Placa'}</span>
+                                                        {v.color && <span className="text-[10px] bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{v.color}</span>}
                                                     </div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-6 text-muted-foreground bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-dashed">
+                                    <div className="text-center py-6 text-muted-foreground bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-dashed">
                                         <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
                                         <p className="text-sm">Nenhum veículo cadastrado.</p>
                                     </div>

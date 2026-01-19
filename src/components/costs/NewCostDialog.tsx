@@ -364,7 +364,7 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                     control={form.control}
                     name="is_recurring"
                     render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-slate-50 dark:bg-slate-900/50">
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm bg-zinc-50 dark:bg-zinc-900/50">
                             <FormLabel className="text-base">Despesa Recorrente?</FormLabel>
                             <FormControl>
                                 <Switch
@@ -379,7 +379,7 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                 />
 
                 {isRecurring && (
-                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border rounded-md border-t-0 rounded-t-none -mt-3 bg-slate-50 dark:bg-slate-900/50 mb-2">
+                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 p-3 border rounded-md border-t-0 rounded-t-none -mt-3 bg-zinc-50 dark:bg-zinc-900/50 mb-2">
                         <FormField
                             control={form.control}
                             name="recurrence_frequency"
@@ -582,7 +582,7 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                     {formContent}
                 </div>
 
-                <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t mt-auto p-4 bg-slate-50 dark:bg-slate-900/50">
+                <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t mt-auto p-4 bg-zinc-50 dark:bg-zinc-900/50">
                     <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none bg-background">Cancelar</Button>
                     <Button
                         className="flex-1 sm:flex-none"

@@ -161,7 +161,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                 {step === 'form' ? (
                     <>
                         <DialogHeader>
-                            <DialogTitle className="text-center pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2">
+                            <DialogTitle className="text-center pb-2 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-center gap-2">
                                 <ThemeIcon className={cn("h-5 w-5", themeColor)} />
                                 {title}
                             </DialogTitle>
@@ -175,7 +175,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                                     {selectedAcc ? (
                                         <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300">
                                             {selectedAcc.type === 'bank' && selectedAcc.bank_code ? (
-                                                <div className="h-14 w-14 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 dark:border-slate-700 shadow-md mb-2">
+                                                <div className="h-14 w-14 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-zinc-100 dark:border-zinc-700 shadow-md mb-2">
                                                     <BankLogo bankCode={selectedAcc.bank_code} className="h-8 w-8" showName={false} fullBleed />
                                                 </div>
                                             ) : (
@@ -266,7 +266,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                                         </Select>
                                     </div>
                                     <div className="space-y-1 relative">
-                                        <Label className="block text-slate-500">Valor</Label>
+                                        <Label className="block text-zinc-500">Valor</Label>
                                         <div className="relative">
                                             <span className={cn("absolute left-3 top-1/2 -translate-y-1/2 font-bold text-lg", themeColor)}>R$</span>
                                             <Input
@@ -303,7 +303,7 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                         </div>
                         <h2 className="text-xl font-bold text-center">{isCredit ? "Entrada Registrada!" : "Saída Registrada!"}</h2>
                         <p className="text-center text-muted-foreground text-sm px-4">
-                            {isCredit ? "Entrada" : "Saída"} de <strong className="text-slate-900 dark:text-slate-100">R$ {amount}</strong> registrada com sucesso.
+                            {isCredit ? "Entrada" : "Saída"} de <strong className="text-zinc-900 dark:text-zinc-100">R$ {amount}</strong> registrada com sucesso.
                         </p>
                     </div>
                 )}

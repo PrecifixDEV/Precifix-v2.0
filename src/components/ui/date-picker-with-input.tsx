@@ -64,7 +64,7 @@ export function DatePickerWithInput({
                     value={inputValue}
                     onChange={handleInputChange}
                     placeholder={placeholder}
-                    className={cn("bg-white dark:bg-slate-800", className)}
+                    className={cn("bg-white dark:bg-zinc-800", className)}
                     endIcon={
                         <PopoverTrigger asChild>
                             <Button

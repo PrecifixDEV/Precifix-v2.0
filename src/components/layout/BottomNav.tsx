@@ -39,7 +39,7 @@ export function BottomNav() {
                             fillRule="evenodd"
                             clipRule="evenodd"
                             d="M0 20C0 10 10 0 20 0H132C137 0 142 5 145 9C151 18 160 25 173 25H202C215 25 224 18 230 9C233 5 238 0 243 0H355C366 0 375 9 375 20V80H0V20Z"
-                            className="fill-slate-950"
+                            className="fill-black"
                         />
                     </svg>
 
@@ -52,7 +52,7 @@ export function BottomNav() {
                             }}
                             className={`
                                 flex h-16 w-16 items-center justify-center rounded-full 
-                                bg-yellow-500 text-slate-950 shadow-xl ring-4 ring-slate-950 
+                                bg-yellow-500 text-black shadow-xl ring-4 ring-black 
                                 transition-transform active:scale-95
                                 ${isSpeedDialOpen ? "rotate-45" : ""}
                             `}
@@ -68,7 +68,7 @@ export function BottomNav() {
                             onClick={() => navigate("/")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/")
                                 ? "text-yellow-500"
-                                : "text-slate-400 hover:text-yellow-500"
+                                : "text-zinc-400 hover:text-yellow-500"
                                 }`}
                         >
                             <Home className="h-6 w-6" />
@@ -80,7 +80,7 @@ export function BottomNav() {
                             onClick={() => navigate("/menu")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/menu")
                                 ? "text-yellow-500"
-                                : "text-slate-400 hover:text-yellow-500"
+                                : "text-zinc-400 hover:text-yellow-500"
                                 }`}
                         >
                             <LayoutGrid className="h-6 w-6" />
@@ -95,19 +95,19 @@ export function BottomNav() {
                             onClick={() => navigate("/sales")}
                             className={`flex flex-col items-center gap-1 transition-colors ${isActive("/sales")
                                 ? "text-yellow-500"
-                                : "text-slate-400 hover:text-yellow-500"
+                                : "text-zinc-400 hover:text-yellow-500"
                                 }`}
                         >
                             <ClipboardList className="h-6 w-6" />
                             <span className="text-[10px] font-medium">Vendas</span>
                         </button>
 
-                        {/* Perfil */}
+                        {/* Perfil (Updated to Profile Menu) */}
                         <button
-                            onClick={() => navigate("/profile")}
-                            className={`flex flex-col items-center gap-1 transition-colors ${isActive("/profile")
+                            onClick={() => navigate("/profile-menu")}
+                            className={`flex flex-col items-center gap-1 transition-colors ${isActive("/profile-menu")
                                 ? "text-yellow-500"
-                                : "text-slate-400 hover:text-yellow-500"
+                                : "text-zinc-400 hover:text-yellow-500"
                                 }`}
                         >
                             <User className="h-6 w-6" />

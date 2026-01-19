@@ -60,7 +60,7 @@ export const ErpTester = () => {
     }
 
     return (
-        <div className="p-4 border rounded bg-slate-100 dark:bg-slate-900 my-4 text-xs">
+        <div className="p-4 border rounded bg-zinc-100 dark:bg-zinc-900 my-4 text-xs">
             <h3 className="font-bold mb-2">ERP Service Tester (Temporary)</h3>
             <div className="flex gap-2 flex-wrap mb-4">
                 <Button onClick={testInventory} variant="outline" size="sm">Estoque</Button>
@@ -68,7 +68,7 @@ export const ErpTester = () => {
                 <Button onClick={testNegativeExpense} variant="outline" size="sm">Add Despesa -R$10</Button>
                 <Button onClick={testProfit} variant="outline" size="sm">Calc Lucro Mês</Button>
             </div>
-            <div className="bg-slate-950 text-green-400 p-2 rounded h-32 overflow-y-auto font-mono">
+            <div className="bg-zinc-950 text-green-400 p-2 rounded h-32 overflow-y-auto font-mono">
                 {logs.length === 0 ? 'Logs aparecerão aqui...' : logs.map((l, i) => <div key={i}>{l}</div>)}
             </div>
         </div>

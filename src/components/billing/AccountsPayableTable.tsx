@@ -338,7 +338,7 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
 
             <div className="rounded-md border bg-background shadow-sm overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-slate-100 dark:bg-slate-800">
+                    <TableHeader className="bg-zinc-100 dark:bg-zinc-800">
                         <TableRow>
                             <TableHead>Descrição</TableHead>
                             <TableHead>Vencimento</TableHead>
@@ -469,7 +469,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         case 'paid':
             return <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 hover:bg-green-100">Paga</Badge>;
         case 'partially_paid':
-            return <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">Pago Parcial</Badge>;
+            return <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100">Pago Parcial</Badge>;
         case 'overdue':
             return <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Atrasada</Badge>;
         case 'pending':

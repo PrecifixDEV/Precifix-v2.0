@@ -126,9 +126,9 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
     };
 
     return (
-        <div className="space-y-4 p-4 border rounded-lg bg-slate-50 dark:bg-slate-900/50">
+        <div className="space-y-4 p-4 border rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
             <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Consulta Tabela FIPE</Label>
+                <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Consulta Tabela FIPE</Label>
                 <Button variant="ghost" size="sm" onClick={handleClear} className="h-6 text-xs text-muted-foreground hover:text-destructive">
                     <X className="w-3 h-3 mr-1" />
                     Limpar
@@ -140,7 +140,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                 <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Tipo</Label>
                     <Select value={type} onValueChange={(val: VehicleType) => setType(val)}>
-                        <SelectTrigger className="bg-white dark:bg-slate-800">
+                        <SelectTrigger className="bg-white dark:bg-zinc-800">
                             <SelectValue placeholder="Selecione o tipo" />
                         </SelectTrigger>
                         <SelectContent>
@@ -160,7 +160,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBrand}
-                                className="w-full justify-between bg-white dark:bg-slate-800"
+                                className="w-full justify-between bg-white dark:bg-zinc-800"
                                 disabled={loadingBrands}
                             >
                                 {selectedBrand
@@ -210,7 +210,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openModel}
-                                className="w-full justify-between bg-white dark:bg-slate-800"
+                                className="w-full justify-between bg-white dark:bg-zinc-800"
                                 disabled={!selectedBrand || loadingModels}
                             >
                                 {selectedModel
@@ -255,7 +255,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                 <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Ano</Label>
                     <Select value={selectedYear} onValueChange={handleYearSelect} disabled={!selectedModel || loadingYears}>
-                        <SelectTrigger className="bg-white dark:bg-slate-800">
+                        <SelectTrigger className="bg-white dark:bg-zinc-800">
                             <SelectValue placeholder="Selecione o ano" />
                         </SelectTrigger>
                         <SelectContent>

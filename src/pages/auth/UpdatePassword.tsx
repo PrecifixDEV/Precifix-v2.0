@@ -72,7 +72,7 @@ export const UpdatePassword = () => {
         <div>
             <div className="mb-8 text-center">
                 <h2 className="text-2xl font-bold text-white mb-2">Criar Nova Senha</h2>
-                <p className="text-slate-400 text-sm">
+                <p className="text-zinc-400 text-sm">
                     Sua nova senha deve ser diferente das anteriores por segurança.
                 </p>
             </div>
@@ -90,30 +90,30 @@ export const UpdatePassword = () => {
                         icon={<Lock className="w-5 h-5 text-white" />}
                         endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
-                        className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
+                        className="bg-transparent border-zinc-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                         labelClassName="text-white"
                         required
                     />
 
                     {showPasswordRules && (
-                        <div className="absolute left-0 bottom-full mb-2 w-full bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl z-10">
-                            <p className="text-xs text-slate-400 mb-2 font-medium">Sua senha deve conter:</p>
+                        <div className="absolute left-0 bottom-full mb-2 w-full bg-zinc-800 border border-zinc-700 rounded-lg p-3 shadow-xl z-10">
+                            <p className="text-xs text-zinc-400 mb-2 font-medium">Sua senha deve conter:</p>
                             <ul className="space-y-1">
-                                <li className={`text-xs flex items-center gap-2 ${hasMinLength ? 'text-green-500' : 'text-slate-500'}`}>
+                                <li className={`text-xs flex items-center gap-2 ${hasMinLength ? 'text-green-500' : 'text-zinc-500'}`}>
                                     {hasMinLength ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                                     Mínimo de 6 caracteres
                                 </li>
-                                <li className={`text-xs flex items-center gap-2 ${hasUpperCase ? 'text-green-500' : 'text-slate-500'}`}>
+                                <li className={`text-xs flex items-center gap-2 ${hasUpperCase ? 'text-green-500' : 'text-zinc-500'}`}>
                                     {hasUpperCase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                                     Pelo menos uma letra maiúscula
                                 </li>
-                                <li className={`text-xs flex items-center gap-2 ${hasNumber ? 'text-green-500' : 'text-slate-500'}`}>
+                                <li className={`text-xs flex items-center gap-2 ${hasNumber ? 'text-green-500' : 'text-zinc-500'}`}>
                                     {hasNumber ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                                     Pelo menos um número
                                 </li>
                             </ul>
                             {/* Seta do balão */}
-                            <div className="absolute left-4 -bottom-1.5 w-3 h-3 bg-slate-800 border-b border-l border-slate-700 transform -rotate-45"></div>
+                            <div className="absolute left-4 -bottom-1.5 w-3 h-3 bg-zinc-800 border-b border-l border-zinc-700 transform -rotate-45"></div>
                         </div>
                     )}
                 </div>
@@ -127,7 +127,7 @@ export const UpdatePassword = () => {
                     icon={<Lock className="w-5 h-5 text-white" />}
                     endIcon={showConfirmPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                     onEndIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
+                    className="bg-transparent border-zinc-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />
@@ -141,7 +141,7 @@ export const UpdatePassword = () => {
                 <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold"
                 >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     ALTERAR SENHA

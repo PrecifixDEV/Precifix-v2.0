@@ -89,7 +89,7 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
 
         if (acc.type === 'bank' && acc.bank_code) {
             return (
-                <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-zinc-100 dark:border-zinc-700 shadow-sm">
                     <BankLogo bankCode={acc.bank_code} className="h-8 w-8" showName={false} fullBleed />
                 </div>
             )
@@ -120,7 +120,7 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                 {step === 'form' ? (
                     <>
                         <DialogHeader>
-                            <DialogTitle className="text-center pb-2 border-b border-slate-100 dark:border-slate-800">Transferência entre Contas</DialogTitle>
+                            <DialogTitle className="text-center pb-2 border-b border-zinc-100 dark:border-zinc-800">Transferência entre Contas</DialogTitle>
                         </DialogHeader>
 
                         {/* Visual Transfer Flow */}
@@ -129,8 +129,8 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                             <div className="flex flex-col items-center gap-2">
                                 <div className={cn("transition-all duration-300 transform", fromAccount ? "scale-100" : "scale-90 opacity-50 grayscale")}>
                                     {fromAccount ? getAccountIcon(fromAccount) : (
-                                        <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center">
-                                            <span className="text-xs text-slate-400">De</span>
+                                        <div className="h-12 w-12 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center">
+                                            <span className="text-xs text-zinc-400">De</span>
                                         </div>
                                     )}
                                 </div>
@@ -140,7 +140,7 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                             </div>
 
                             {/* ARROW */}
-                            <div className="flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                            <div className="flex flex-col items-center justify-center text-zinc-300 dark:text-zinc-600">
                                 <ArrowRight className="h-6 w-6" />
                             </div>
 
@@ -148,8 +148,8 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                             <div className="flex flex-col items-center gap-2">
                                 <div className={cn("transition-all duration-300 transform", toAccount ? "scale-100" : "scale-90 opacity-50 grayscale")}>
                                     {toAccount ? getAccountIcon(toAccount) : (
-                                        <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center">
-                                            <span className="text-xs text-slate-400">Para</span>
+                                        <div className="h-12 w-12 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center">
+                                            <span className="text-xs text-zinc-400">Para</span>
                                         </div>
                                     )}
                                 </div>
@@ -205,7 +205,7 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                             <div className="space-y-2">
                                 <Label className="text-center block">Valor a transferir</Label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">R$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium">R$</span>
                                     <Input
                                         value={amount}
                                         onChange={handleAmountChange}
@@ -233,15 +233,15 @@ export function TransferDialog({ open, onOpenChange, accounts }: TransferDialogP
                         </div>
                         <h2 className="text-xl font-bold text-center">Transferência Realizada!</h2>
                         <p className="text-center text-muted-foreground text-sm px-4">
-                            Valor de <strong className="text-slate-900 dark:text-slate-100">R$ {amount}</strong> transferido com sucesso.
+                            Valor de <strong className="text-zinc-900 dark:text-zinc-100">R$ {amount}</strong> transferido com sucesso.
                         </p>
-                        <div className="flex items-center gap-2 mt-4 text-sm text-slate-500">
+                        <div className="flex items-center gap-2 mt-4 text-sm text-zinc-500">
                             <span>{fromAccData?.name}</span>
                             <ArrowRight className="h-4 w-4" />
                             <span>{toAccData?.name}</span>
                         </div>
                         {description && (
-                            <p className="text-xs text-slate-400 mt-2 italic">"{description}"</p>
+                            <p className="text-xs text-zinc-400 mt-2 italic">"{description}"</p>
                         )}
                     </div>
                 )}

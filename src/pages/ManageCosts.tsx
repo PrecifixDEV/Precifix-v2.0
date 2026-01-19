@@ -197,7 +197,7 @@ export const ManageCosts = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent hidden md:block">
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 bg-clip-text text-transparent hidden md:block">
                             Gerenciar Despesas
                         </h1>
                         <p className="text-muted-foreground mt-1">Análise detalhada de custos e despesas operacionais.</p>
@@ -238,7 +238,7 @@ export const ManageCosts = () => {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <DollarSign className="h-24 w-24" />
                     </div>
@@ -246,7 +246,7 @@ export const ManageCosts = () => {
                         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total do Mês</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-slate-900 dark:text-slate-50">{formatMoney(totalExpenses)}</div>
+                        <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{formatMoney(totalExpenses)}</div>
                         <div className="flex items-center mt-2 text-sm">
                             {percentChange > 0 ? (
                                 <span className="text-red-500 flex items-center font-medium">
@@ -264,7 +264,7 @@ export const ManageCosts = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden md:col-span-2">
+                <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden md:col-span-2">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Evolução Mensal</CardTitle>
                     </CardHeader>
@@ -309,7 +309,7 @@ export const ManageCosts = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left: Detailed List (DRE Style) */}
                 <div className="lg:col-span-2 space-y-6">
-                    <Card className="h-full border-slate-200 dark:border-slate-800 shadow-sm">
+                    <Card className="h-full border-zinc-200 dark:border-zinc-800 shadow-sm">
                         <CardHeader className="flex flex-row items-center justify-between pb-4">
                             <div>
                                 <CardTitle>Detalhamento por Categoria</CardTitle>
@@ -337,48 +337,48 @@ export const ManageCosts = () => {
                                         {costsByCategory.map((categoryGroup) => (
                                             <div key={categoryGroup.category} className="space-y-3">
                                                 {/* Category Header */}
-                                                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                                                <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-lg border border-zinc-100 dark:border-zinc-800">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                                        <div className="h-8 w-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
                                                             <CalendarRange className="h-4 w-4" />
                                                         </div>
-                                                        <span className="font-semibold text-slate-800 dark:text-slate-200">{categoryGroup.category}</span>
+                                                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">{categoryGroup.category}</span>
                                                         <Badge variant="secondary" className="ml-2 text-xs font-normal">
                                                             {categoryGroup.items.length} itens
                                                         </Badge>
                                                     </div>
-                                                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                                                    <span className="font-bold text-zinc-900 dark:text-zinc-100">
                                                         {formatMoney(categoryGroup.total)}
                                                     </span>
                                                 </div>
 
                                                 {/* Items List */}
-                                                <div className="pl-4 border-l-2 border-slate-100 dark:border-slate-800 ml-4 space-y-1">
+                                                <div className="pl-4 border-l-2 border-zinc-100 dark:border-zinc-800 ml-4 space-y-1">
                                                     {categoryGroup.items.map((cost) => (
                                                         <div
                                                             key={cost.id}
-                                                            className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors group text-sm"
+                                                            className="flex items-center justify-between p-2 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-colors group text-sm"
                                                         >
                                                             <div className="flex items-center gap-3 overflow-hidden">
-                                                                <span className="text-slate-400 font-mono text-xs shrink-0">
+                                                                <span className="text-zinc-400 font-mono text-xs shrink-0">
                                                                     {cost.expense_date ? format(parseISO(cost.expense_date), 'dd') : '--'}
                                                                 </span>
-                                                                <span className="truncate max-w-[200px] md:max-w-[300px] text-slate-600 dark:text-slate-300">
+                                                                <span className="truncate max-w-[200px] md:max-w-[300px] text-zinc-600 dark:text-zinc-300">
                                                                     {cost.description}
                                                                 </span>
                                                                 {cost.type === 'variable' && (
-                                                                    <Badge variant="outline" className="text-[10px] h-4 px-1 text-slate-400 border-slate-200">Var</Badge>
+                                                                    <Badge variant="outline" className="text-[10px] h-4 px-1 text-zinc-400 border-zinc-200">Var</Badge>
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-4">
-                                                                <span className="text-slate-700 dark:text-slate-300 font-medium">
+                                                                <span className="text-zinc-700 dark:text-zinc-300 font-medium">
                                                                     {formatMoney(cost.value)}
                                                                 </span>
                                                                 <div className="flex items-center">
                                                                     <Button
                                                                         size="icon"
                                                                         variant="ghost"
-                                                                        className="h-8 w-8 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                                        className="h-8 w-8 text-zinc-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                                                                         onClick={() => setHistoryCostId(cost.id)}
                                                                         title="Ver Histórico"
                                                                     >
@@ -387,7 +387,7 @@ export const ManageCosts = () => {
                                                                     <Button
                                                                         size="icon"
                                                                         variant="ghost"
-                                                                        className="h-6 w-6 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all ml-1"
+                                                                        className="h-6 w-6 text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all ml-1"
                                                                         onClick={() => setCostToDelete(cost.id)}
                                                                     >
                                                                         <Plus className="h-3 w-3 rotate-45" /> {/* Delete Icon X */}
@@ -408,7 +408,7 @@ export const ManageCosts = () => {
 
                 {/* Right: Distribution Chart */}
                 <div className="space-y-6">
-                    <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+                    <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm">
                         <CardHeader>
                             <CardTitle>Distribuição</CardTitle>
                             <CardDescription>Onde seu dinheiro está indo</CardDescription>
@@ -447,7 +447,7 @@ export const ManageCosts = () => {
                                     <div key={item.category} className="flex items-center justify-between text-sm">
                                         <div className="flex items-center gap-2">
                                             <div className="h-2 w-2 rounded-full bg-primary/80" style={{ opacity: 1 - index * 0.15 }} />
-                                            <span className="text-slate-600 dark:text-slate-300">{item.category}</span>
+                                            <span className="text-zinc-600 dark:text-zinc-300">{item.category}</span>
                                         </div>
                                         <span className="font-medium">{Math.round((item.total / totalExpenses) * 100)}%</span>
                                     </div>
@@ -456,12 +456,12 @@ export const ManageCosts = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-none shadow-lg">
+                    <Card className="bg-gradient-to-br from-zinc-800 to-zinc-900 text-white border-zinc-700 shadow-lg">
                         <CardHeader>
                             <CardTitle className="text-white">Dica Financeira</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-blue-50 text-sm">
+                            <p className="text-zinc-300 text-sm">
                                 Analise mensalmente suas <strong>despesas fixas</strong>. Uma redução de 10% nesses custos pode impactar significativamente seu lucro líquido anual.
                             </p>
                         </CardContent>

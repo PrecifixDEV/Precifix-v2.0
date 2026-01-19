@@ -54,7 +54,7 @@ export function CostHistorySheet({ open, onOpenChange, costId, allCosts }: CostH
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent className="sm:max-w-[400px] w-full">
-                <SheetHeader className="pb-4 border-b border-slate-100 dark:border-slate-800">
+                <SheetHeader className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
                     <SheetTitle>Histórico da Despesa</SheetTitle>
                     <SheetDescription>
                         Acompanhe o status e histórico de pagamentos desta recorrência.
@@ -84,9 +84,9 @@ export function CostHistorySheet({ open, onOpenChange, costId, allCosts }: CostH
                             <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium uppercase">Pago</span>
                             <div className="text-lg font-bold text-emerald-700 dark:text-emerald-300">{formatMoney(totalPaid)}</div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                            <span className="text-xs text-slate-500 font-medium uppercase">Em Aberto</span>
-                            <div className="text-lg font-bold text-slate-700 dark:text-slate-300">{formatMoney(totalOpen)}</div>
+                        <div className="bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                            <span className="text-xs text-zinc-500 font-medium uppercase">Em Aberto</span>
+                            <div className="text-lg font-bold text-zinc-700 dark:text-zinc-300">{formatMoney(totalOpen)}</div>
                         </div>
                     </div>
 
@@ -99,31 +99,31 @@ export function CostHistorySheet({ open, onOpenChange, costId, allCosts }: CostH
                         </h4>
 
                         <ScrollArea className="h-[400px] -mr-4 pr-4">
-                            <div className="space-y-0 relative border-l border-slate-200 dark:border-slate-800 ml-2.5 my-2">
+                            <div className="space-y-0 relative border-l border-zinc-200 dark:border-zinc-800 ml-2.5 my-2">
                                 {historyItems.map((item) => {
                                     const date = item.expense_date ? parseISO(item.expense_date) : new Date();
                                     const isPaid = isBefore(date, today) || isSameDay(date, today); // Simple logic: Past = Paid
                                     const isCurrent = item.id === costId;
 
                                     return (
-                                        <div key={item.id} className={cn("relative pl-6 py-3 transition-colors rounded-r-md group", isCurrent && "bg-slate-50 dark:bg-slate-900/50")}>
+                                        <div key={item.id} className={cn("relative pl-6 py-3 transition-colors rounded-r-md group", isCurrent && "bg-zinc-50 dark:bg-zinc-900/50")}>
                                             {/* Timeline Dot */}
                                             <div className={cn(
                                                 "absolute -left-1.5 top-5 h-3 w-3 rounded-full border-2 bg-background z-10",
                                                 isPaid
                                                     ? "border-emerald-500 bg-emerald-500"
-                                                    : "border-slate-300 dark:border-slate-600"
+                                                    : "border-zinc-300 dark:border-zinc-600"
                                             )} />
 
                                             <div className="flex items-center justify-between">
                                                 <div className="space-y-0.5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className={cn("text-sm font-medium", isPaid ? "text-slate-900 dark:text-slate-100" : "text-slate-500")}>
+                                                        <span className={cn("text-sm font-medium", isPaid ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}>
                                                             {format(date, "d 'de' MMMM, yyyy", { locale: ptBR })}
                                                         </span>
                                                         {isCurrent && <Badge variant="secondary" className="text-[10px] h-4 px-1">Atual</Badge>}
                                                     </div>
-                                                    <div className={cn("text-xs flex items-center gap-1", isPaid ? "text-emerald-600" : "text-slate-400")}>
+                                                    <div className={cn("text-xs flex items-center gap-1", isPaid ? "text-emerald-600" : "text-zinc-400")}>
                                                         {isPaid ? <CheckCircle2 className="h-3 w-3" /> : <Circle className="h-3 w-3" />}
                                                         {isPaid ? "Pago" : "Em aberto"}
                                                     </div>

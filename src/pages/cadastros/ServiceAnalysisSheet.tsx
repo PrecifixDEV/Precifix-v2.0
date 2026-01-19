@@ -101,15 +101,15 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
 
                         {/* Financial Overview */}
                         <div className="grid grid-cols-2 gap-4">
-                            <Card className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                            <Card className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
                                 <CardContent className="pt-6">
                                     <div className="text-sm font-medium text-muted-foreground mb-1">Valor Cobrado</div>
-                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                                    <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                                         {formatMoney(servicePrice)}
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                            <Card className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
                                 <CardContent className="pt-6">
                                     <div className="text-sm font-medium text-muted-foreground mb-1">Lucro Líquido</div>
                                     <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-500'}`}>
@@ -160,18 +160,18 @@ export const ServiceAnalysisSheet = ({ open, onOpenChange, service }: ServiceAna
                         </div>
 
                         {/* Sales Performance */}
-                        <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-lg p-4 space-y-3">
-                            <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                        <div className="bg-zinc-50 dark:bg-zinc-900/10 border border-zinc-100 dark:border-zinc-900/20 rounded-lg p-4 space-y-3">
+                            <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                                 <DollarSign className="h-4 w-4" /> Performance de Vendas
                             </h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-xs text-blue-700 dark:text-blue-300">Qtd. Vendas</p>
-                                    <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{service?.total_sales_count || 0}</p>
+                                    <p className="text-xs text-zinc-700 dark:text-zinc-300">Qtd. Vendas</p>
+                                    <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{service?.total_sales_count || 0}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-blue-700 dark:text-blue-300">Receita Total</p>
-                                    <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                                    <p className="text-xs text-zinc-700 dark:text-zinc-300">Receita Total</p>
+                                    <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                                         {formatMoney(service?.total_sales_value || 0)}
                                     </p>
                                 </div>

@@ -1,15 +1,15 @@
+﻿import colors from 'tailwindcss/colors'
 /** @type {import('tailwindcss').Config} */
 import animate from "tailwindcss-animate"
 
 export default {
-    darkMode: ["class", "selector"], // Merging 'class' (shadcn) and 'selector' (tremor uses selector sometimes, shadcn uses class)
+    darkMode: ["class", "selector"],
     content: [
         './pages/**/*.{ts,tsx}',
         './components/**/*.{ts,tsx}',
         './app/**/*.{ts,tsx}',
         './src/**/*.{ts,tsx}',
         "./index.html",
-        // Path to Tremor module
         "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
     ],
     theme: {
@@ -22,7 +22,7 @@ export default {
         },
         extend: {
             colors: {
-                // Shadcn colors
+                zinc: colors.neutral,
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
@@ -56,64 +56,62 @@ export default {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
-
-                // Tremor Colors
                 tremor: {
                     brand: {
-                        faint: "#0B1229",
-                        muted: "#172554",
-                        subtle: "#1e40af",
-                        DEFAULT: "#3b82f6",
-                        emphasis: "#60a5fa",
-                        inverted: "#030712",
+                        faint: "#fefce8", // yellow-50
+                        muted: "#fef08a", // yellow-200
+                        subtle: "#facc15", // yellow-400
+                        DEFAULT: "#eab308", // yellow-500
+                        emphasis: "#ca8a04", // yellow-600
+                        inverted: "#000000", // black
                     },
                     background: {
-                        muted: "#131A2B",
-                        subtle: "#1f2937",
-                        DEFAULT: "#111827",
-                        emphasis: "#374151",
+                        muted: "#fafafa", // zinc-50
+                        subtle: "#f4f4f5", // zinc-100
+                        DEFAULT: "#ffffff", // white
+                        emphasis: "#e4e4e7", // zinc-200
                     },
                     border: {
-                        DEFAULT: "#1f2937",
+                        DEFAULT: "#e4e4e7", // zinc-200
                     },
                     ring: {
-                        DEFAULT: "#1f2937",
+                        DEFAULT: "#e4e4e7", // zinc-200
                     },
                     content: {
-                        subtle: "#4b5563",
-                        DEFAULT: "#6b7280",
-                        emphasis: "#e5e7eb",
-                        strong: "#f9fafb",
-                        inverted: "#000000",
+                        subtle: "#a1a1aa", // zinc-400
+                        DEFAULT: "#52525b", // zinc-600
+                        emphasis: "#18181b", // zinc-900
+                        strong: "#09090b", // zinc-950
+                        inverted: "#ffffff", // white
                     },
                 },
                 "dark-tremor": {
                     brand: {
-                        faint: "#0B1229",
-                        muted: "#172554",
-                        subtle: "#1e40af",
-                        DEFAULT: "#3b82f6",
-                        emphasis: "#60a5fa",
-                        inverted: "#030712",
+                        faint: "#422006", // yellow-950
+                        muted: "#713f12", // yellow-800
+                        subtle: "#eab308", // yellow-500
+                        DEFAULT: "#facc15", // yellow-400 (brighter for dark mode)
+                        emphasis: "#fef08a", // yellow-200
+                        inverted: "#000000", // black
                     },
                     background: {
-                        muted: "#131A2B",
-                        subtle: "#1f2937",
-                        DEFAULT: "#111827",
-                        emphasis: "#374151",
+                        muted: "#000000", // Pure Black
+                        subtle: "#18181b", // Zinc 900
+                        DEFAULT: "#09090b", // Zinc 950
+                        emphasis: "#27272a", // Zinc 800
                     },
                     border: {
-                        DEFAULT: "#1f2937",
+                        DEFAULT: "#27272a", // Zinc 800
                     },
                     ring: {
-                        DEFAULT: "#1f2937",
+                        DEFAULT: "#27272a", // Zinc 800
                     },
                     content: {
-                        subtle: "#4b5563",
-                        DEFAULT: "#6b7280",
-                        emphasis: "#e5e7eb",
-                        strong: "#f9fafb",
-                        inverted: "#000000",
+                        subtle: "#71717a", // Zinc 400
+                        DEFAULT: "#a1a1aa", // Zinc 400
+                        emphasis: "#f4f4f5", // Zinc 100
+                        strong: "#fafafa", // Zinc 50
+                        inverted: "#000000", // Black
                     },
                 },
             },

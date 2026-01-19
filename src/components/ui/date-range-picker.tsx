@@ -100,7 +100,7 @@ export function DateRangePicker({
                         variant={"outline"}
                         size="icon"
                         className={cn(
-                            "bg-slate-50 dark:bg-slate-900/50 border-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            "bg-zinc-50 dark:bg-zinc-900/50 border-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                         )}
                         title="Selecionar Período"
                     >

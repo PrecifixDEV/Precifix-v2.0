@@ -24,7 +24,7 @@ export function MagicCard({
             />
 
             {/* O Conteúdo (Mask Layer) - Fundo escuro para cobrir o centro */}
-            <div className="relative h-full w-full rounded-xl bg-white dark:bg-slate-950 px-6 py-4 text-slate-950 dark:text-slate-100 backdrop-blur-3xl">
+            <div className="relative h-full w-full rounded-xl bg-white dark:bg-zinc-950 px-6 py-4 text-zinc-950 dark:text-zinc-100 backdrop-blur-3xl">
                 {children}
             </div>
         </div>

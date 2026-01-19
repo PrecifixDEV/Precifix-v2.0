@@ -7,10 +7,10 @@ export function ThemeToggle() {
 
     return (
         <div className="flex items-center justify-center p-2">
-            <div className="relative flex w-full max-w-[200px] items-center rounded-full border border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-900">
+            <div className="relative flex w-full max-w-[200px] items-center rounded-full border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-800 dark:bg-zinc-900">
                 <div
                     className={cn(
-                        "absolute inset-y-1 w-[calc(50%-4px)] rounded-full bg-white shadow-sm transition-all duration-200 dark:bg-slate-800",
+                        "absolute inset-y-1 w-[calc(50%-4px)] rounded-full bg-white shadow-sm transition-all duration-200 dark:bg-zinc-800",
                         theme === "dark" ? "left-[50%]" : "left-1"
                     )}
                 />
@@ -19,8 +19,8 @@ export function ThemeToggle() {
                     className={cn(
                         "z-10 flex w-1/2 items-center justify-center gap-2 rounded-full py-1.5 text-sm font-medium transition-colors",
                         theme === "light"
-                            ? "text-slate-900"
-                            : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                            ? "text-zinc-900"
+                            : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                     )}
                 >
                     <Sun className="h-4 w-4" />
@@ -32,7 +32,7 @@ export function ThemeToggle() {
                         "z-10 flex w-1/2 items-center justify-center gap-2 rounded-full py-1.5 text-sm font-medium transition-colors",
                         theme === "dark"
                             ? "text-white"
-                            : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                            : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                     )}
                 >
                     <Moon className="h-4 w-4" />

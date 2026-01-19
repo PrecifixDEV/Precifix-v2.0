@@ -14,7 +14,7 @@ export function ResponsiveAddButton({ onClick, label, className }: ResponsiveAdd
             onClick={onClick}
             className={cn(
                 // Mobile Styles (Default)
-                "bg-yellow-500 hover:bg-yellow-600 text-slate-900 shadow-md transition-all", // Using text-slate-900 for better theme consistency than pure black
+                "bg-yellow-500 hover:bg-yellow-600 text-zinc-900 shadow-md transition-all", // Using text-zinc-900 for better theme consistency than pure black
                 "h-12 w-12 rounded-full p-0 flex items-center justify-center", // Ensure centering
                 // Desktop Styles (md)
                 "md:h-10 md:w-auto md:rounded-md md:px-4 md:py-2",

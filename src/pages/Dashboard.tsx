@@ -29,23 +29,23 @@ const servicePopularityData = [
 const chartConfig = {
     amount: {
         label: "Faturamento",
-        color: "#d97706", // amber-600
+        color: "#eab308", // yellow-500
     },
     wash: {
         label: "Lavagem Técnica",
-        color: "#0ea5e9", // sky-500
+        color: "#ca8a04", // yellow-600
     },
     polish: {
         label: "Polimento",
-        color: "#6366f1", // indigo-500
+        color: "#a1a1aa", // zinc-400
     },
     clean: {
         label: "Higienização",
-        color: "#8b5cf6", // violet-500
+        color: "#52525b", // zinc-600
     },
     glass: {
         label: "Vitrificação",
-        color: "#ec4899", // pink-500
+        color: "#facc15", // yellow-400
     },
 } satisfies ChartConfig
 
@@ -133,24 +133,24 @@ export const Dashboard = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Warning Alert if Profile incomplete */}
             {showProfileAlert && (
-                <div className="mt-4 p-4 rounded-lg bg-slate-100 dark:bg-slate-800 border border-yellow-500/50 border-l-4 border-l-yellow-500 shadow-sm">
+                <div className="mt-4 p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-yellow-500/50 border-l-4 border-l-yellow-500 shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-yellow-500/10 rounded-full">
                                 <AlertTriangle className="w-6 h-6 text-yellow-500" />
                             </div>
                             <div>
-                                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
                                     Perfil Incompleto
                                 </h3>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">
                                     Complete seu cadastro (CNPJ/CPF, Endereço, Empresa) para liberar todos os recursos.
                                 </p>
                             </div>
                         </div>
                         <Link
                             to="/profile"
-                            className="whitespace-nowrap bg-yellow-500 text-slate-900 font-medium px-4 py-2 rounded-lg text-sm shadow-sm hover:none active:bg-yellow-600 transition-none"
+                            className="whitespace-nowrap bg-yellow-500 text-zinc-900 font-medium px-4 py-2 rounded-lg text-sm shadow-sm hover:none active:bg-yellow-600 transition-none"
                         >
                             Completar Perfil
                         </Link>
@@ -161,8 +161,8 @@ export const Dashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-slate-900 dark:text-white text-2xl font-bold hidden md:block">Painel Principal</h1>
-                    <p className="text-slate-400 capitalize">
+                    <h1 className="text-zinc-900 dark:text-white text-2xl font-bold hidden md:block">Painel Principal</h1>
+                    <p className="text-zinc-400 capitalize">
                         {currentMonth} {currentYear}
                     </p>
                 </div>
@@ -171,12 +171,12 @@ export const Dashboard = () => {
                 {/* <ErpTester /> */}
 
                 {/* Date Filter Mockup */}
-                <div className="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
-                    <button className="px-3 py-1.5 text-sm text-slate-300 hover:text-white transition-colors">
+                <div className="flex items-center gap-2 bg-zinc-800 p-1 rounded-lg border border-zinc-700">
+                    <button className="px-3 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors">
                         &lt;
                     </button>
                     <span className="text-sm font-medium text-white px-2 capitalize">{currentMonth}</span>
-                    <button className="px-3 py-1.5 text-sm text-slate-300 hover:text-white transition-colors">
+                    <button className="px-3 py-1.5 text-sm text-zinc-300 hover:text-white transition-colors">
                         &gt;
                     </button>
                 </div>
@@ -186,17 +186,17 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
-                        <p className="text-slate-500 dark:text-slate-400 text-sm">Faturamento do Mês</p>
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{valueFormatter(stats.revenue)}</div>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">Faturamento do Mês</p>
+                        <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{valueFormatter(stats.revenue)}</div>
                         <div className="h-1 w-12 bg-green-500 rounded mt-4"></div>
                     </CardContent>
                 </Card>
 
                 <Card className="shadow-sm dark:shadow-none">
                     <CardContent className="p-6">
-                        <p className="text-slate-500 dark:text-slate-400 text-sm">Receita Líquida</p>
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{valueFormatter(stats.netRevenue)}</div>
-                        <div className="h-1 w-12 bg-blue-500 rounded mt-4"></div>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">Receita Líquida</p>
+                        <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{valueFormatter(stats.netRevenue)}</div>
+                        <div className="h-1 w-12 bg-zinc-500 rounded mt-4"></div>
                     </CardContent>
                 </Card>
 
@@ -204,10 +204,10 @@ export const Dashboard = () => {
                     <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm">Serviços Concluídos</p>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{stats.completedServices}</div>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-sm">Serviços Concluídos</p>
+                                <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{stats.completedServices}</div>
                             </div>
-                            <CheckCircle className="w-8 h-8 text-slate-400 dark:text-slate-700" />
+                            <CheckCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-700" />
                         </div>
                     </CardContent>
                 </Card>
@@ -216,10 +216,10 @@ export const Dashboard = () => {
                     <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm">Carros Atendidos</p>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{stats.carsServiced}</div>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-sm">Carros Atendidos</p>
+                                <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{stats.carsServiced}</div>
                             </div>
-                            <Car className="w-8 h-8 text-slate-400 dark:text-slate-700" />
+                            <Car className="w-8 h-8 text-zinc-400 dark:text-zinc-700" />
                         </div>
                     </CardContent>
                 </Card>
@@ -230,7 +230,7 @@ export const Dashboard = () => {
                 {/* Daily Revenue Chart */}
                 <Card className="lg:col-span-2 shadow-sm dark:shadow-none">
                     <CardHeader>
-                        <CardTitle className="text-slate-900 dark:text-white">Faturamento Diário</CardTitle>
+                        <CardTitle className="text-zinc-900 dark:text-white">Faturamento Diário</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={chartConfig} className="min-h-[200px] w-full h-72">
@@ -258,7 +258,7 @@ export const Dashboard = () => {
                 {/* Popular Services Donut */}
                 <Card className="shadow-sm dark:shadow-none flex flex-col">
                     <CardHeader>
-                        <CardTitle className="text-slate-900 dark:text-white">Serviços Mais Populares</CardTitle>
+                        <CardTitle className="text-zinc-900 dark:text-white">Serviços Mais Populares</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 pb-0">
                         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
@@ -286,9 +286,9 @@ export const Dashboard = () => {
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                            <h3 className="font-semibold text-slate-900 dark:text-white">Próximos Agendamentos</h3>
+                            <h3 className="font-semibold text-zinc-900 dark:text-white">Próximos Agendamentos</h3>
                         </div>
-                        <div className="text-center py-12 text-slate-500 text-sm">
+                        <div className="text-center py-12 text-zinc-500 text-sm">
                             Nenhum agendamento para hoje.
                         </div>
                     </CardContent>
@@ -298,9 +298,9 @@ export const Dashboard = () => {
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                            <h3 className="font-semibold text-slate-900 dark:text-white">Resumo de Agendamentos</h3>
+                            <h3 className="font-semibold text-zinc-900 dark:text-white">Resumo de Agendamentos</h3>
                         </div>
-                        <div className="text-center py-12 text-slate-500 text-sm">
+                        <div className="text-center py-12 text-zinc-500 text-sm">
                             Nenhum dado disponível.
                         </div>
                     </CardContent>

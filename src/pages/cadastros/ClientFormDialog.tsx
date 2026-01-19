@@ -319,9 +319,9 @@ export function ClientFormDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col p-0" aria-describedby={undefined}>
+            <DialogContent className="max-w-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 max-h-[90vh] overflow-hidden flex flex-col p-0" aria-describedby={undefined}>
                 <DialogHeader className="p-6 pb-2">
-                    <DialogTitle className="text-slate-900 dark:text-white">
+                    <DialogTitle className="text-zinc-900 dark:text-white">
                         {activeClient ? "Editar Cliente" : "Novo Cliente"}
                     </DialogTitle>
                     <DialogDescription>
@@ -358,7 +358,7 @@ export function ClientFormDialog({
                                                     <Tooltip open={!!errors.name}>
                                                         <TooltipTrigger asChild>
                                                             <FormControl>
-                                                                <Input placeholder="Nome do cliente" {...field} className="bg-white dark:bg-slate-800" />
+                                                                <Input placeholder="Nome do cliente" {...field} className="bg-white dark:bg-zinc-800" />
                                                             </FormControl>
                                                         </TooltipTrigger>
                                                         <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
@@ -383,7 +383,7 @@ export function ClientFormDialog({
                                                                 <Input
                                                                     placeholder="000.000.000-00"
                                                                     {...field}
-                                                                    className="bg-white dark:bg-slate-800"
+                                                                    className="bg-white dark:bg-zinc-800"
                                                                     onChange={(e) => handleDocumentChange(e, field.onChange)}
                                                                     maxLength={18}
                                                                 />
@@ -405,7 +405,7 @@ export function ClientFormDialog({
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="email@exemplo.com" {...field} className="bg-white dark:bg-slate-800" />
+                                                    <Input placeholder="email@exemplo.com" {...field} className="bg-white dark:bg-zinc-800" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -425,7 +425,7 @@ export function ClientFormDialog({
                                                                 <Input
                                                                     placeholder="(00) 00000-0000"
                                                                     {...field}
-                                                                    className="bg-white dark:bg-slate-800"
+                                                                    className="bg-white dark:bg-zinc-800"
                                                                     onChange={(e) => handlePhoneChange(e, field.onChange)}
                                                                     maxLength={15}
                                                                 />
@@ -455,7 +455,7 @@ export function ClientFormDialog({
                                                             placeholder="00000-000"
                                                             {...field}
                                                             onBlur={handleCepBlur}
-                                                            className="bg-white dark:bg-slate-800"
+                                                            className="bg-white dark:bg-zinc-800"
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -470,7 +470,7 @@ export function ClientFormDialog({
                                                 <FormItem className="md:col-span-2">
                                                     <FormLabel>Endereço</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Rua, Av..." {...field} className="bg-white dark:bg-slate-800" />
+                                                        <Input placeholder="Rua, Av..." {...field} className="bg-white dark:bg-zinc-800" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -484,7 +484,7 @@ export function ClientFormDialog({
                                                 <FormItem>
                                                     <FormLabel>Número</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="123" {...field} className="bg-white dark:bg-slate-800" />
+                                                        <Input placeholder="123" {...field} className="bg-white dark:bg-zinc-800" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -498,7 +498,7 @@ export function ClientFormDialog({
                                                 <FormItem className="md:col-span-2">
                                                     <FormLabel>Complemento</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Apto, Sala..." {...field} className="bg-white dark:bg-slate-800" />
+                                                        <Input placeholder="Apto, Sala..." {...field} className="bg-white dark:bg-zinc-800" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -512,7 +512,7 @@ export function ClientFormDialog({
                                                 <FormItem>
                                                     <FormLabel>Bairro</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Bairro" {...field} className="bg-white dark:bg-slate-800" />
+                                                        <Input placeholder="Bairro" {...field} className="bg-white dark:bg-zinc-800" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -526,7 +526,7 @@ export function ClientFormDialog({
                                                 <FormItem>
                                                     <FormLabel>Cidade</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Cidade" {...field} className="bg-white dark:bg-slate-800" />
+                                                        <Input placeholder="Cidade" {...field} className="bg-white dark:bg-zinc-800" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -540,7 +540,7 @@ export function ClientFormDialog({
                                                 <FormItem>
                                                     <FormLabel>Estado</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="UF" maxLength={2} {...field} className="bg-white dark:bg-slate-800" />
+                                                        <Input placeholder="UF" maxLength={2} {...field} className="bg-white dark:bg-zinc-800" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -557,7 +557,7 @@ export function ClientFormDialog({
                                         type="submit"
                                         disabled={isLoading || !isValid}
                                         className={cn(
-                                            "text-slate-900 duration-200",
+                                            "text-zinc-900 duration-200",
                                             !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 shadow-md hover:shadow-lg"
                                         )}
                                     >
@@ -576,7 +576,7 @@ export function ClientFormDialog({
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
                                         <h3 className="text-sm font-medium">Veículos Cadastrados</h3>
-                                        <Button size="sm" onClick={() => setIsAddingVehicle(true)} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 shadow-sm">
+                                        <Button size="sm" onClick={() => setIsAddingVehicle(true)} className="bg-yellow-500 hover:bg-yellow-600 text-zinc-900 shadow-sm">
                                             <Plus className="w-4 h-4 mr-2" />
                                             Adicionar Veículo
                                         </Button>
@@ -594,21 +594,21 @@ export function ClientFormDialog({
                                     ) : (
                                         <div className="grid gap-3">
                                             {vehicles.map(vehicle => (
-                                                <Card key={vehicle.id} className="bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                                <Card key={vehicle.id} className="bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                                                     <CardContent className="p-4 flex justify-between items-center">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="p-2 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
-                                                                {vehicle.type === 'moto' ? <Bike className="w-5 h-5 text-slate-600 dark:text-slate-400" /> :
-                                                                    vehicle.type === 'caminhao' ? <Truck className="w-5 h-5 text-slate-600 dark:text-slate-400" /> :
-                                                                        <Car className="w-5 h-5 text-slate-600 dark:text-slate-400" />}
+                                                            <div className="p-2 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700">
+                                                                {vehicle.type === 'moto' ? <Bike className="w-5 h-5 text-zinc-600 dark:text-zinc-400" /> :
+                                                                    vehicle.type === 'caminhao' ? <Truck className="w-5 h-5 text-zinc-600 dark:text-zinc-400" /> :
+                                                                        <Car className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />}
                                                             </div>
                                                             <div>
                                                                 <h4 className="font-semibold text-sm">{vehicle.model}</h4>
                                                                 <div className="text-xs text-muted-foreground flex flex-wrap gap-2 mt-1">
-                                                                    <span className="bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border">{vehicle.brand}</span>
-                                                                    <span className="bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border">{vehicle.year}</span>
-                                                                    <span className="bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border font-mono uppercase">{vehicle.plate || 'S/ Placa'}</span>
-                                                                    {vehicle.color && <span className="bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border">{vehicle.color}</span>}
+                                                                    <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{vehicle.brand}</span>
+                                                                    <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{vehicle.year}</span>
+                                                                    <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border font-mono uppercase">{vehicle.plate || 'S/ Placa'}</span>
+                                                                    {vehicle.color && <span className="bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{vehicle.color}</span>}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -633,10 +633,10 @@ export function ClientFormDialog({
                                     <FipeVehicleSelector onVehicleSelected={onFipeSelected} />
 
                                     {fipeData && (
-                                        <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-800 space-y-4 animate-in fade-in zoom-in-95 duration-300 shadow-sm">
+                                        <div className="bg-zinc-100 dark:bg-zinc-900/50 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 space-y-4 animate-in fade-in zoom-in-95 duration-300 shadow-sm">
                                             <div className="flex items-start gap-4">
-                                                <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm">
-                                                    <Car className="w-6 h-6 text-slate-500" />
+                                                <div className="p-3 bg-white dark:bg-zinc-800 rounded-full shadow-sm">
+                                                    <Car className="w-6 h-6 text-zinc-500" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <h4 className="font-bold text-lg leading-tight">{fipeData.Modelo}</h4>
@@ -652,7 +652,7 @@ export function ClientFormDialog({
                                                         value={newVehiclePlate}
                                                         onChange={(e) => setNewVehiclePlate(e.target.value.toUpperCase())}
                                                         maxLength={8}
-                                                        className="bg-white dark:bg-slate-800 font-mono"
+                                                        className="bg-white dark:bg-zinc-800 font-mono"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
@@ -661,7 +661,7 @@ export function ClientFormDialog({
                                                         placeholder="Ex: Prata"
                                                         value={newVehicleColor}
                                                         onChange={(e) => setNewVehicleColor(e.target.value)}
-                                                        className="bg-white dark:bg-slate-800"
+                                                        className="bg-white dark:bg-zinc-800"
                                                     />
                                                 </div>
                                             </div>
@@ -683,7 +683,7 @@ export function ClientFormDialog({
                             <Button type="button" variant="outline" onClick={handleClose}>
                                 Cancelar
                             </Button>
-                            <Button type="button" onClick={handleClose} className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200">
+                            <Button type="button" onClick={handleClose} className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
                                 Salvar Cliente
                             </Button>
                         </div>

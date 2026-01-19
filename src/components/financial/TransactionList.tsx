@@ -244,17 +244,17 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
     if (isLoading) {
         return (
-            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+            <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm">
                 <CardHeader>
                     <CardTitle className="text-lg font-medium">Extrato de Movimentações</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="flex items-center justify-between animate-pulse">
-                            <div className="h-10 w-10 bg-slate-200 dark:bg-slate-800 rounded-full" />
+                            <div className="h-10 w-10 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
                             <div className="flex-1 ml-4 space-y-2">
-                                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/3" />
-                                <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/4" />
+                                <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3" />
+                                <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4" />
                             </div>
                         </div>
                     ))}
@@ -264,17 +264,17 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
     }
 
     return (
-        <Card className="border-slate-200 dark:border-slate-800 shadow-sm print:border-none print:shadow-none">
+        <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm print:border-none print:shadow-none">
             <div className="hidden print:block mb-8 space-y-4">
                 {consolidatedBalance !== undefined && (
-                    <div className="text-left border-b pb-4 border-slate-200">
-                        <p className="text-sm text-slate-500 uppercase tracking-wider font-medium">{balanceLabel}</p>
-                        <h1 className="text-3xl font-bold text-slate-900">{formatMoney(consolidatedBalance)}</h1>
+                    <div className="text-left border-b pb-4 border-zinc-200">
+                        <p className="text-sm text-zinc-500 uppercase tracking-wider font-medium">{balanceLabel}</p>
+                        <h1 className="text-3xl font-bold text-zinc-900">{formatMoney(consolidatedBalance)}</h1>
                     </div>
                 )}
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900">Extrato de Movimentações</h2>
-                    <div className="text-sm text-slate-500 mt-1 flex gap-4">
+                    <h2 className="text-xl font-bold text-zinc-900">Extrato de Movimentações</h2>
+                    <div className="text-sm text-zinc-500 mt-1 flex gap-4">
                         {dateRange?.from ? (
                             <span>Período: {format(dateRange.from, "dd/MM/yyyy")} - {dateRange.to ? format(dateRange.to, "dd/MM/yyyy") : format(dateRange.from, "dd/MM/yyyy")}</span>
                         ) : <span>Período: Todo o histórico</span>}
@@ -297,7 +297,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         <DateRangePicker
                             date={dateRange}
                             setDate={setDateRange}
-                            className="bg-slate-50 dark:bg-slate-900/50 border-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className="bg-zinc-50 dark:bg-zinc-900/50 border-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                         />
                     </div>
                     <div className="sm:hidden w-[36px] overflow-hidden">
@@ -321,7 +321,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                     "shrink-0 transition-all relative",
                                     hasActiveFilters
                                         ? "bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border-yellow-400"
-                                        : "bg-slate-50 dark:bg-slate-900/50 border-none"
+                                        : "bg-zinc-50 dark:bg-zinc-900/50 border-none"
                                 )}
                                 title="Filtrar Extrato"
                             >
@@ -340,13 +340,13 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                     {/* 1. Status Filter (Active/Deleted) */}
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Status do Registro</label>
-                                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                        <div className="flex gap-2 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
                                             <button
                                                 className={cn(
                                                     "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                     !draftShowDeletedOnly
-                                                        ? "bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-slate-100"
-                                                        : "text-slate-500 hover:text-slate-700"
+                                                        ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100"
+                                                        : "text-zinc-500 hover:text-zinc-700"
                                                 )}
                                                 onClick={() => setDraftShowDeletedOnly(false)}
                                             >
@@ -356,8 +356,8 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                                 className={cn(
                                                     "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                     draftShowDeletedOnly
-                                                        ? "bg-white dark:bg-slate-700 shadow-sm text-red-600"
-                                                        : "text-slate-500 hover:text-slate-700"
+                                                        ? "bg-white dark:bg-zinc-700 shadow-sm text-red-600"
+                                                        : "text-zinc-500 hover:text-zinc-700"
                                                 )}
                                                 onClick={() => setDraftShowDeletedOnly(true)}
                                             >
@@ -435,14 +435,14 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                     <Button
                         variant="outline"
                         size="icon"
-                        className="bg-slate-50 dark:bg-slate-900/50 border-none shrink-0"
+                        className="bg-zinc-50 dark:bg-zinc-900/50 border-none shrink-0"
                         onClick={handlePrint}
                         title="Imprimir Extrato"
                     >
                         <Printer className="h-4 w-4" />
                     </Button>
 
-                    <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
+                    <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700 mx-1" />
 
                     {/* Delete Mode Toggle - Green if Restore Mode, Red if Delete Mode */}
                     <Button
@@ -450,7 +450,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         size="icon"
                         className={cn(
                             "shrink-0 transition-all",
-                            !isDeleteMode && (showDeletedOnly ? "bg-slate-50 border-none text-slate-500 hover:text-emerald-600" : "bg-slate-50 dark:bg-slate-900/50 border-none text-slate-500 hover:text-red-600"),
+                            !isDeleteMode && (showDeletedOnly ? "bg-zinc-50 border-none text-zinc-500 hover:text-emerald-600" : "bg-zinc-50 dark:bg-zinc-900/50 border-none text-zinc-500 hover:text-red-600"),
                             isDeleteMode && showDeletedOnly && "bg-emerald-600 hover:bg-emerald-700 text-white"
                         )}
                         onClick={() => setIsDeleteMode(!isDeleteMode)}
@@ -493,21 +493,21 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         Nenhuma movimentação encontrada.
                     </div>
                 ) : (
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                         {sortedDates.map((date) => (
                             <div key={date}>
-                                <div className="bg-slate-50/50 dark:bg-slate-900/30 px-6 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky top-0 backdrop-blur-sm">
+                                <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-6 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky top-0 backdrop-blur-sm">
                                     {format(new Date(date + 'T00:00:00'), "EEEE, d 'de' MMMM", { locale: ptBR })}
                                 </div>
-                                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                                     {groupedTransactions[date].map((transaction) => (
                                         <div
                                             key={transaction.id}
                                             className={cn(
                                                 "flex items-center justify-between px-6 py-4 print:py-1 transition-colors group relative border-b last:border-0",
                                                 transaction.is_deleted
-                                                    ? "bg-slate-100 dark:bg-slate-900/20 opacity-80"
-                                                    : "hover:bg-slate-50 dark:hover:bg-slate-900/50"
+                                                    ? "bg-zinc-100 dark:bg-zinc-900/20 opacity-80"
+                                                    : "hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
                                             )}
                                         >
                                             <div className="flex items-center gap-4 flex-1 min-w-0 mr-4 print:gap-2">
@@ -547,8 +547,8 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className={cn("font-medium text-slate-900 dark:text-slate-100 truncate pr-2", transaction.is_deleted && "line-through text-slate-500")}>{transaction.description}</p>
-                                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500 print:text-xs">
+                                                    <p className={cn("font-medium text-zinc-900 dark:text-zinc-100 truncate pr-2", transaction.is_deleted && "line-through text-zinc-500")}>{transaction.description}</p>
+                                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-500 print:text-xs">
                                                         <span className="text-xs whitespace-nowrap">{transaction.category || 'Geral'}</span>
                                                         {transaction.commercial_accounts?.name && (
                                                             <>
@@ -569,7 +569,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                                 <span className={cn(
                                                     "font-bold block whitespace-nowrap",
                                                     transaction.is_deleted
-                                                        ? "text-slate-400 dark:text-slate-600"
+                                                        ? "text-zinc-400 dark:text-zinc-600"
                                                         : (transaction.type === 'credit' ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")
                                                 )}>
                                                     {transaction.type === 'credit' ? '+' : '-'} {formatMoney(Number(transaction.amount))}
@@ -591,9 +591,9 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
             {/* Pagination */}
             {filteredTransactions.length > 0 && (
-                <div className="border-t border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between print:hidden">
+                <div className="border-t border-zinc-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between print:hidden">
                     {/* Left: Nav Buttons */}
-                    <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
+                    <div className="flex items-center gap-4 text-sm text-zinc-500 font-medium">
                         <button
                             onClick={() => setCurrentPage(1)}
                             disabled={currentPage === 1}
@@ -601,7 +601,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         >
                             Primeira
                         </button>
-                        <span className="text-slate-300">|</span>
+                        <span className="text-zinc-300">|</span>
                         <button
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
@@ -616,7 +616,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         <select
                             value={currentPage}
                             onChange={(e) => setCurrentPage(Number(e.target.value))}
-                            className="h-8 w-16 rounded-md border border-slate-200 bg-slate-50 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-800 dark:bg-slate-900"
+                            className="h-8 w-16 rounded-md border border-zinc-200 bg-zinc-50 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-zinc-800 dark:bg-zinc-900"
                         >
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                 <option key={page} value={page}>{page}</option>
@@ -625,7 +625,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                     </div>
 
                     {/* Right: Nav Buttons & Info */}
-                    <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
+                    <div className="flex items-center gap-4 text-sm text-zinc-500 font-medium">
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}
@@ -633,7 +633,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         >
                             Próxima
                         </button>
-                        <span className="text-slate-300">|</span>
+                        <span className="text-zinc-300">|</span>
                         <button
                             onClick={() => setCurrentPage(totalPages)}
                             disabled={currentPage === totalPages}

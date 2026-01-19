@@ -16,7 +16,7 @@ export function ActiveFilters({ filters, onClearAll }: ActiveFiltersProps) {
     if (!filters || filters.length === 0) return null;
 
     return (
-        <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
             <span className="text-sm text-muted-foreground">Filtros:</span>
             {filters.map((filter, index) => (
                 <Badge key={index} variant="secondary" className="gap-1">

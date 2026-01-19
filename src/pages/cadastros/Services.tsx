@@ -270,8 +270,8 @@ export const Services = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Serviços</h1>
-                    <p className="text-slate-500 dark:text-slate-400 hidden md:block">Gerencie os serviços oferecidos</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Serviços</h1>
+                    <p className="text-zinc-500 dark:text-zinc-400 hidden md:block">Gerencie os serviços oferecidos</p>
                 </div>
                 <Button onClick={handleCreate} className="w-full md:w-auto">
                     Adicionar Novo Serviço
@@ -291,7 +291,7 @@ export const Services = () => {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-slate-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-slate-900 border-yellow-500' : ''}`}>
+                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-zinc-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : ''}`}>
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -311,7 +311,7 @@ export const Services = () => {
                             placeholder="Buscar serviços..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-white dark:bg-slate-900 w-full"
+                            className="pl-9 bg-white dark:bg-zinc-900 w-full"
                         />
                     </div>
 
@@ -319,7 +319,7 @@ export const Services = () => {
                     <div className="md:hidden flex items-center gap-2">
                         {selectedServices.length > 0 && (
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
                                     <Printer className="h-4 w-4" />
                                 </Button>
                                 <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
@@ -334,7 +334,7 @@ export const Services = () => {
                 <div className="hidden md:flex items-center gap-2">
                     {selectedServices.length > 0 && (
                         <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-slate-900">
+                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
                                 <Printer className="h-4 w-4" />
                             </Button>
                             <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
@@ -345,7 +345,7 @@ export const Services = () => {
                 </div>
             </div>
 
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
                 <CardContent className="p-0 md:p-6">
                     {filteredServices.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
@@ -354,11 +354,11 @@ export const Services = () => {
                     ) : (
                         <>
                             {/* Mobile List View */}
-                            <div className="md:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-800">
+                            <div className="md:hidden flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
                                 {filteredServices.map((service) => {
                                     const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                     return (
-                                        <div key={service.id} className="px-6 py-4 flex flex-col hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                        <div key={service.id} className="px-6 py-4 flex flex-col hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0">
                                             <div className="flex items-start justify-between gap-3 mb-2">
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <Checkbox
@@ -371,7 +371,7 @@ export const Services = () => {
                                                     </div>
 
                                                     <div className="flex flex-col gap-0.5 min-w-0">
-                                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2">
+                                                        <h3 className="font-bold text-sm text-zinc-900 dark:text-white line-clamp-2">
                                                             {service.name}
                                                         </h3>
                                                         <p className="text-xs text-muted-foreground line-clamp-1">
@@ -382,7 +382,7 @@ export const Services = () => {
 
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-slate-400">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-zinc-400">
                                                             <span className="sr-only">Abrir menu</span>
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
@@ -415,12 +415,12 @@ export const Services = () => {
 
                                             <div className="pl-0 text-xs text-muted-foreground">
                                                 <div onClick={() => handleEdit(service)} className="cursor-pointer space-y-1">
-                                                    <div className="font-medium text-slate-900 dark:text-slate-200">
+                                                    <div className="font-medium text-zinc-900 dark:text-zinc-200">
                                                         Preço: R$ {(service.base_price || 0).toFixed(2)}
                                                     </div>
                                                     <div>Duração: {service.duration_minutes} min</div>
                                                     <div
-                                                        className="flex items-center gap-1 mt-1 font-medium text-blue-600 dark:text-blue-400"
+                                                        className="flex items-center gap-1 mt-1 font-medium text-muted-foreground hover:text-primary transition-colors"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleShowProducts(service);
@@ -437,9 +437,9 @@ export const Services = () => {
                             </div>
 
                             {/* Desktop View - Table */}
-                            <div className="hidden md:block rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+                            <div className="hidden md:block rounded-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                                 <Table>
-                                    <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
+                                    <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
                                         <TableRow>
                                             <TableHead className="w-[50px] text-center">
                                                 <Checkbox
@@ -462,7 +462,7 @@ export const Services = () => {
                                         {paginatedServices.map((service) => {
                                             const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                             return (
-                                                <TableRow key={service.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer" onClick={() => handleEdit(service)}>
+                                                <TableRow key={service.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer" onClick={() => handleEdit(service)}>
                                                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                         <Checkbox
                                                             checked={selectedServices.includes(service.id)}
@@ -475,15 +475,15 @@ export const Services = () => {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="font-medium">{service.name}</TableCell>
-                                                    <TableCell className="text-slate-500 max-w-[200px] truncate" title={service.description || ""}>
+                                                    <TableCell className="text-zinc-500 max-w-[200px] truncate" title={service.description || ""}>
                                                         {service.description || "-"}
                                                     </TableCell>
                                                     <TableCell className="text-center">
-                                                        <div className="inline-flex items-center justify-center px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-medium">
+                                                        <div className="inline-flex items-center justify-center px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium">
                                                             {service.total_sales_count || 0}
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="text-right font-medium text-slate-700 dark:text-slate-300">
+                                                    <TableCell className="text-right font-medium text-zinc-700 dark:text-zinc-300">
                                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(service.total_sales_value || 0)}
                                                     </TableCell>
                                                     <TableCell className="text-center">

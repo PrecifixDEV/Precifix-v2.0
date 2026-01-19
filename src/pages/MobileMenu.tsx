@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
     Search,
     LayoutDashboard,
@@ -12,22 +12,16 @@ import {
     Building2,
     Calculator,
     CreditCard,
-    LogOut,
     Package,
     Users,
     Receipt
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { supabase } from '@/lib/supabase'
+
 
 export const MobileMenu = () => {
-    const navigate = useNavigate()
-    const [searchTerm, setSearchTerm] = useState('')
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
-        navigate('/login')
-    }
+    const [searchTerm, setSearchTerm] = useState('')
 
     const menuItems = [
         {
@@ -76,7 +70,7 @@ export const MobileMenu = () => {
     })).filter(section => section.items.length > 0)
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pb-24">
             <div className="p-4 space-y-6">
                 {/* Header / Search */}
                 <div className="space-y-2">
@@ -86,9 +80,9 @@ export const MobileMenu = () => {
                             placeholder="Buscar funcionalidade..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-white dark:bg-slate-900"
+                            className="pl-9 bg-white dark:bg-zinc-900"
                         />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 z-10 pointer-events-none" />
                     </div>
                 </div>
 
@@ -96,7 +90,7 @@ export const MobileMenu = () => {
                 <div className="space-y-6">
                     {filteredMenu.map((section) => (
                         <div key={section.category} className="space-y-3">
-                            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider px-1">
+                            <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider px-1">
                                 {section.category}
                             </h2>
                             <div className="grid grid-cols-2 gap-3">
@@ -104,12 +98,12 @@ export const MobileMenu = () => {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className="flex flex-col items-start p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm active:scale-95 transition-transform"
+                                        className="flex flex-col items-start p-4 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm active:scale-95 transition-transform"
                                     >
-                                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg mb-3">
-                                            <item.icon className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                                        <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg mb-3">
+                                            <item.icon className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
                                         </div>
-                                        <span className="font-medium text-slate-900 dark:text-white text-sm">
+                                        <span className="font-medium text-zinc-900 dark:text-white text-sm">
                                             {item.name}
                                         </span>
                                     </Link>
@@ -120,21 +114,8 @@ export const MobileMenu = () => {
 
                     {/* Show message if no results */}
                     {filteredMenu.length === 0 && (
-                        <div className="text-center py-8 text-slate-500">
+                        <div className="text-center py-8 text-zinc-500">
                             Nenhuma funcionalidade encontrada para "{searchTerm}"
-                        </div>
-                    )}
-
-                    {/* Logout Button (Only show when not searching or if explicitly looking for logout) */}
-                    {(searchTerm === '' || 'sair logout'.includes(searchTerm.toLowerCase())) && (
-                        <div className="pt-4">
-                            <button
-                                onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-2 p-4 text-red-600 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20 active:scale-95 transition-transform font-medium"
-                            >
-                                <LogOut className="w-5 h-5" />
-                                Sair da conta
-                            </button>
                         </div>
                     )}
                 </div>

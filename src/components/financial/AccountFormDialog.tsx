@@ -167,8 +167,8 @@ export function AccountFormDialog({ open, onOpenChange, trigger, accountToEdit }
                             <div
                                 onClick={() => setType('bank')}
                                 className={cn(
-                                    "cursor-pointer rounded-lg border p-3 flex flex-col items-center gap-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-900",
-                                    type === 'bank' ? "border-primary bg-primary/5 text-primary" : "border-slate-200 dark:border-slate-800",
+                                    "cursor-pointer rounded-lg border p-3 flex flex-col items-center gap-2 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-900",
+                                    type === 'bank' ? "border-primary bg-primary/5 text-primary" : "border-zinc-200 dark:border-zinc-800",
                                     isEditing && "opacity-50 cursor-not-allowed" // Disable changing type logic for simplicity? User only asked for Name.
                                 )}
                             // Allow type change but might be weird if transactions exist? Let's allow.
@@ -179,8 +179,8 @@ export function AccountFormDialog({ open, onOpenChange, trigger, accountToEdit }
                             <div
                                 onClick={() => { setType('cash'); setSelectedBankCode('999'); if (!isEditing) setName('Caixa Físico'); }}
                                 className={cn(
-                                    "cursor-pointer rounded-lg border p-3 flex flex-col items-center gap-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-900",
-                                    type === 'cash' ? "border-primary bg-primary/5 text-primary" : "border-slate-200 dark:border-slate-800"
+                                    "cursor-pointer rounded-lg border p-3 flex flex-col items-center gap-2 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-900",
+                                    type === 'cash' ? "border-primary bg-primary/5 text-primary" : "border-zinc-200 dark:border-zinc-800"
                                 )}
                             >
                                 <Wallet className="h-5 w-5" />

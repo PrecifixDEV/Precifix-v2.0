@@ -111,9 +111,9 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800" aria-describedby={undefined}>
+            <DialogContent className="sm:max-w-[425px] bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800" aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle className="text-slate-900 dark:text-white">{cost ? 'Editar Custo' : 'Adicionar Novo Custo'}</DialogTitle>
+                    <DialogTitle className="text-zinc-900 dark:text-white">{cost ? 'Editar Custo' : 'Adicionar Novo Custo'}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
@@ -122,12 +122,12 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="bg-white dark:bg-slate-800"
+                            className="bg-white dark:bg-zinc-800"
                         />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="value">Valor (R$) *</Label>
-                        <Input id="value" type="number" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} className="bg-white dark:bg-slate-800" />
+                        <Input id="value" type="number" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} className="bg-white dark:bg-zinc-800" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="cost-type">Tipo de Custo</Label>
@@ -135,7 +135,7 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
                             value={type}
                             onValueChange={(value: 'fixed' | 'variable') => setType(value)}
                         >
-                            <SelectTrigger className="bg-white dark:bg-slate-800">
+                            <SelectTrigger className="bg-white dark:bg-zinc-800">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -171,7 +171,7 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
                                     value={recurrenceFrequency}
                                     onValueChange={(value: any) => setRecurrenceFrequency(value)}
                                 >
-                                    <SelectTrigger className="bg-white dark:bg-slate-800">
+                                    <SelectTrigger className="bg-white dark:bg-zinc-800">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -195,7 +195,7 @@ export const CostFormDialog = ({ isOpen, onClose, cost, defaultDescription, defa
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                    <Button onClick={handleSubmit} disabled={upsertCostMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900">
+                    <Button onClick={handleSubmit} disabled={upsertCostMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-zinc-900">
                         {upsertCostMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {cost ? "Salvar Alterações" : "Adicionar Custo"}
                     </Button>

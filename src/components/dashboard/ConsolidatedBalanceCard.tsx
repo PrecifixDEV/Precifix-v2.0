@@ -13,7 +13,7 @@ interface ConsolidatedBalanceCardProps {
 
 export function ConsolidatedBalanceCard({ totalBalance, accounts }: ConsolidatedBalanceCardProps) {
     return (
-        <Card className="w-full h-full flex flex-col justify-between border-slate-200 dark:border-slate-800 shadow-xl transition-all hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20">
+        <Card className="w-full h-full flex flex-col justify-between border-zinc-200 dark:border-zinc-800 shadow-xl transition-all hover:border-yellow-500/50 hover:bg-yellow-50/50 dark:hover:bg-yellow-950/20">
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Wallet className="h-4 w-4" />
@@ -21,7 +21,7 @@ export function ConsolidatedBalanceCard({ totalBalance, accounts }: Consolidated
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                <div className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
                     {formatMoney(totalBalance)}
                 </div>
             </CardContent>
@@ -31,7 +31,7 @@ export function ConsolidatedBalanceCard({ totalBalance, accounts }: Consolidated
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="w-full text-xs text-muted-foreground h-auto py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary justify-between group border border-dashed border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all font-normal"
+                            className="w-full text-xs text-muted-foreground h-auto py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-primary justify-between group border border-dashed border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 transition-all font-normal"
                         >
                             Ver detalhamento bancário
                             <ChevronDown className="h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
@@ -51,10 +51,10 @@ export function ConsolidatedBalanceCard({ totalBalance, accounts }: Consolidated
                                 const isZero = balance === 0;
 
                                 return (
-                                    <div key={acc.id} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                    <div key={acc.id} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                                         <div className="flex items-center gap-2">
                                             {acc.type === 'bank' && acc.bank_code ? (
-                                                <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-zinc-100 dark:border-zinc-700 shadow-sm">
                                                     <BankLogo bankCode={acc.bank_code} className="h-5 w-5" showName={false} fullBleed />
                                                 </div>
                                             ) : (
@@ -69,7 +69,7 @@ export function ConsolidatedBalanceCard({ totalBalance, accounts }: Consolidated
                                                 {acc.name}
                                             </span>
                                         </div>
-                                        <span className={`font-mono font-medium ${isZero ? 'text-slate-500' : isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+                                        <span className={`font-mono font-medium ${isZero ? 'text-zinc-500' : isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
                                             {!isZero ? (isPositive ? '+ ' : '- ') : ''}
                                             {formatMoney(Math.abs(balance))}
                                         </span>

@@ -1,3 +1,20 @@
+# Handoff Log - 2026-01-19
+
+## Work Completed
+1.  **Mobile Profile Menu (`ProfileMenu.tsx`)**:
+    -   **New Page**: Implemented a dedicated mobile profile menu (`/profile-menu`) to replace the side drawer logic.
+    -   **Features**: Includes user avatar/info, links to "Minha Empresa", "Meu Plano", "Configurações", Light/Dark mode toggle, and Logout.
+    -   **Navigation**: Updated `BottomNav` to link "Perfil" to this new menu.
+    -   **Experience**: Configured `TopHeader` to display "Perfil" and hide the back button for this route. Whitelisted `/profile-menu` in `TopHeader` and `AppLayout` to ensure correct layout behavior (BottomNav visibility).
+
+2.  **Theme Refinement (Dark Mode)**:
+    -   **Industrial Theme**: Updated `index.css` to switch from Slate/Zinc mix to a strict two-tier dark mode.
+    -   **Colors**: Backgrounds are now `Zinc-900` (Dark Gray) for pages and `Black` (`#000000`) for navigation bars (`TopHeader`, `BottomNav`).
+    -   **Encoding Fixes**: Fixed corrupted characters (Portuguese accents) in `ProductFormDialog.tsx`, `ProductSaleDialog.tsx`, and other files caused by previous regex operations.
+
+3.  **Cleanup**:
+    -   **MobileMenu**: Removed redundant logout logic.
+
 # Handoff Log - 2026-01-17
 
 ## Work Completed

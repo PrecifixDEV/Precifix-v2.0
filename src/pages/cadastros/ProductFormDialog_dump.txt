@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,12 +22,12 @@ import { cn } from '@/lib/utils';
 import { useMobile } from '@/hooks/useMobile';
 
 const productSchema = z.object({
-    name: z.string().min(1, "Nome Ã© obrigatÃ³rio"),
+    name: z.string().min(1, "Nome é obrigatório"),
     code: z.string().optional(),
-    description: z.string().max(500, "DescriÃ§Ã£o deve ter no mÃ¡ximo 500 caracteres").optional(),
+    description: z.string().max(500, "Descrição deve ter no máximo 500 caracteres").optional(),
     price: z.union([z.string(), z.number()])
         .transform((v) => (v === "" ? undefined : Number(v)))
-        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "PreÃ§o deve ser positivo" }),
+        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Preço deve ser positivo" }),
     stock_quantity: z.union([z.string(), z.number()])
         .transform((v) => (v === "" ? undefined : Number(v)))
         .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Estoque deve ser positivo" }),
@@ -36,14 +36,14 @@ const productSchema = z.object({
     dilution_ratio: z.string().optional(),
     container_size_ml: z.union([z.string(), z.number()])
         .transform((v) => (v === "" ? undefined : Number(v)))
-        .refine((v) => v !== undefined && !isNaN(v) && v > 0, { message: "Tamanho da embalagem Ã© obrigatÃ³rio" }),
+        .refine((v) => v !== undefined && !isNaN(v) && v > 0, { message: "Tamanho da embalagem é obrigatório" }),
     is_for_sale: z.boolean().optional(),
     sale_price: z.coerce.number().optional(),
 }).superRefine((data, ctx) => {
     if (data.is_dilutable && !data.dilution_ratio) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "ProporÃ§Ã£o da diluiÃ§Ã£o Ã© obrigatÃ³ria para produtos diluÃ­veis",
+            message: "Proporção da diluição é obrigatória para produtos diluíveis",
             path: ["dilution_ratio"],
         });
     }
@@ -163,17 +163,17 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
         if (!isValid) {
             const fieldLabels: Record<string, string> = {
                 name: 'Nome do Produto',
-                price: 'PreÃ§o de Custo',
+                price: 'Preço de Custo',
                 stock_quantity: 'Estoque',
                 container_size_ml: 'Tamanho da Embalagem',
-                dilution_ratio: 'ProporÃ§Ã£o da DiluiÃ§Ã£o'
+                dilution_ratio: 'Proporção da Diluição'
             };
 
             const missingFields = Object.keys(errors)
                 .map(key => fieldLabels[key] || key)
                 .join(', ');
 
-            toast.error('Preencha os campos obrigatÃ³rios', {
+            toast.error('Preencha os campos obrigatórios', {
                 description: missingFields,
                 duration: 5000
             });
@@ -189,7 +189,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             const user = userResponse.data.user;
 
             if (!user) {
-                throw new Error("UsuÃ¡rio nÃ£o autenticado");
+                throw new Error("Usuário não autenticado");
             }
 
             const excludeId = (productToEdit && productToEdit.id) ? productToEdit.id : undefined;
@@ -200,7 +200,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
             let hasError = false;
             if (availability.nameExists) {
-                setError('name', { type: 'manual', message: 'JÃ¡ existe um produto com este nome.' });
+                setError('name', { type: 'manual', message: 'Já existe um produto com este nome.' });
                 hasError = true;
             }
 
@@ -221,7 +221,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     const compressedFile = await compressAndConvertToWebP(imageFile);
                     imageUrl = await productService.uploadProductImage(compressedFile);
                 } catch (error) {
-                    console.error("Erro na compressÃ£o:", error);
+                    console.error("Erro na compressão:", error);
                     imageUrl = await productService.uploadProductImage(imageFile);
                 }
             } else if (!imagePreview) {
@@ -256,7 +256,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             onOpenChange(false);
         } catch (error) {
             console.error("Erro ao salvar produto:", error);
-            alert("Erro ao salvar produto. Verifique se vocÃª estÃ¡ logado ou tente novamente.");
+            alert("Erro ao salvar produto. Verifique se você está logado ou tente novamente.");
         } finally {
             setIsLoading(false);
         }
@@ -332,14 +332,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                     id="name"
                                     {...register("name")}
                                     className="bg-white dark:bg-zinc-800"
-                                    placeholder="Ex: Cera de CarnaÃºba"
+                                    placeholder="Ex: Cera de Carnaúba"
                                 />
                             </div>
                             <input type="hidden" {...register("code")} />
                         </div>
 
                         <div className="space-y-2">
-                            <Label>DestinaÃ§Ã£o do Produto</Label>
+                            <Label>Destinação do Produto</Label>
                             <div className="flex gap-4 pt-2">
                                 <label className="flex items-center space-x-2 cursor-pointer">
                                     <input
@@ -349,7 +349,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                         onChange={() => setValue("is_for_sale", false)}
                                         className="accent-yellow-500 w-4 h-4"
                                     />
-                                    <span className="text-sm font-medium">Uso PrÃ³prio</span>
+                                    <span className="text-sm font-medium">Uso Próprio</span>
                                 </label>
                                 <label className="flex items-center space-x-2 cursor-pointer">
                                     <input
@@ -365,14 +365,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description">DescriÃ§Ã£o</Label>
+                            <Label htmlFor="description">Descrição</Label>
                             <Textarea
                                 id="description"
                                 {...register("description")}
                                 className="bg-white dark:bg-zinc-800 min-h-[60px] resize-y"
                                 maxLength={500}
                                 rows={2}
-                                placeholder="MÃ¡ximo 500 caracteres"
+                                placeholder="Máximo 500 caracteres"
                             />
                             <div className="text-xs text-right text-muted-foreground">
                                 {watch("description")?.length || 0}/500
@@ -381,7 +381,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                         <div className={cn("grid gap-4", watch("is_for_sale") ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
                             <div className="space-y-2">
-                                <Label htmlFor="price" className="!text-foreground">PreÃ§o de Custo (R$) *</Label>
+                                <Label htmlFor="price" className="!text-foreground">Preço de Custo (R$) *</Label>
                                 <Input
                                     id="price"
                                     type="number"
@@ -395,7 +395,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                             {watch("is_for_sale") && (
                                 <div className="space-y-2">
-                                    <Label htmlFor="sale_price">PreÃ§o de Venda (R$)</Label>
+                                    <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
                                     <Input id="sale_price" type="number" step="0.01" {...register("sale_price")} className="bg-white dark:bg-zinc-800" />
                                 </div>
                             )}
@@ -457,7 +457,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                             }}
                                             className="accent-yellow-500 w-4 h-4"
                                         />
-                                        <span className="text-sm font-medium">DiluÃ­vel</span>
+                                        <span className="text-sm font-medium">Diluível</span>
                                     </label>
                                 </div>
                             </div>
@@ -466,7 +466,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         {dilutionType === 'dilution' && (
                             <div ref={dilutionFieldRef} className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
                                 <div className="space-y-2">
-                                    <Label htmlFor="dilution_ratio" className="!text-foreground">ProporÃ§Ã£o da DiluiÃ§Ã£o *</Label>
+                                    <Label htmlFor="dilution_ratio" className="!text-foreground">Proporção da Diluição *</Label>
                                     <Input
                                         id="dilution_ratio"
                                         placeholder="Ex: 1:10"
@@ -489,7 +489,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     >
                         <span className="flex items-center">
                             {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                            {productToEdit && productToEdit.id ? 'Salvar AlteraÃ§Ãµes' : 'Criar Produto'}
+                            {productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
                         </span>
                         <CircleCheckBig className="h-8 w-8 shrink-0" style={{ minWidth: '32px', minHeight: '32px' }} />
                     </Button>

@@ -48,11 +48,11 @@ export const DilutionCalculator = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 pb-20">
             <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                     <Calculator className="h-8 w-8 text-primary" />
                     Calculadora de Diluição
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-2">
+                <p className="text-zinc-500 dark:text-zinc-400 mt-2">
                     Calcule a quantidade exata de produto e água necessária para realizar a diluição correta.
                 </p>
             </div>
@@ -136,12 +136,12 @@ export const DilutionCalculator = () => {
 
                 {/* Results - Only visible after calculation */}
                 {showResult && (
-                    <Card className="bg-slate-50 dark:bg-slate-900 border-dashed border-2 flex flex-col justify-center animate-in fade-in slide-in-from-left-4 duration-500">
+                    <Card className="bg-zinc-50 dark:bg-zinc-900 border-dashed border-2 flex flex-col justify-center animate-in fade-in slide-in-from-left-4 duration-500">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 Resultado Final
                                 {resultProductAmount > 0 && (
-                                    <span className="ml-auto text-sm font-normal text-muted-foreground bg-white dark:bg-slate-800 px-3 py-1 rounded-full border">
+                                    <span className="ml-auto text-sm font-normal text-muted-foreground bg-white dark:bg-zinc-800 px-3 py-1 rounded-full border">
                                         Proporção 1:{resultWaterPart / resultProductPart}
                                     </span>
                                 )}
@@ -166,19 +166,19 @@ export const DilutionCalculator = () => {
                                         <span className="text-2xl font-bold text-yellow-500">{resultProductAmount.toFixed(0)}ml</span>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                    <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-500/10 border border-zinc-500/20">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                                <Droplets className="h-5 w-5 text-blue-500" />
+                                            <div className="h-10 w-10 rounded-full bg-zinc-500/20 flex items-center justify-center">
+                                                <Droplets className="h-5 w-5 text-zinc-500" />
                                             </div>
                                             <span className="text-sm font-medium text-muted-foreground">Água</span>
                                         </div>
-                                        <span className="text-2xl font-bold text-blue-500">{resultWaterAmount.toFixed(0)}ml</span>
+                                        <span className="text-2xl font-bold text-zinc-500">{resultWaterAmount.toFixed(0)}ml</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border text-sm text-center">
+                            <div className="bg-white dark:bg-zinc-800 p-4 rounded-lg border text-sm text-center">
                                 Para um recipiente de <strong>{resultContainerSize}ml</strong>, misture <strong>{resultProductAmount.toFixed(0)}ml</strong> de produto com <strong>{resultWaterAmount.toFixed(0)}ml</strong> de água.
                             </div>
                         </CardContent>

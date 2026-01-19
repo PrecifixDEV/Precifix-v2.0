@@ -66,8 +66,8 @@ export const ImageCropper = ({
 
     return (
         <Dialog open={open} onOpenChange={(openState) => !openState && !processing && onClose()}>
-            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0 gap-0 bg-slate-900 border-slate-800 text-white" aria-describedby={undefined}>
-                <DialogHeader className="p-4 border-b border-slate-800">
+            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0 gap-0 bg-zinc-900 border-zinc-800 text-white" aria-describedby={undefined}>
+                <DialogHeader className="p-4 border-b border-zinc-800">
                     <DialogTitle>Ajustar Imagem</DialogTitle>
                 </DialogHeader>
 
@@ -89,7 +89,7 @@ export const ImageCropper = ({
 
                 <div className="p-4 space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium w-12 text-slate-400">Zoom</span>
+                        <span className="text-sm font-medium w-12 text-zinc-400">Zoom</span>
                         <Slider
                             value={[zoom]}
                             min={1}
@@ -101,19 +101,19 @@ export const ImageCropper = ({
                     </div>
                 </div>
 
-                <DialogFooter className="p-4 bg-slate-900 border-t border-slate-800 gap-2">
+                <DialogFooter className="p-4 bg-zinc-900 border-t border-zinc-800 gap-2">
                     <Button
                         variant="ghost"
                         onClick={onClose}
                         disabled={processing}
-                        className="hover:bg-slate-800 text-slate-300"
+                        className="hover:bg-zinc-800 text-zinc-300"
                     >
                         Cancelar
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={processing}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-slate-900"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-zinc-900"
                     >
                         {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                         Salvar Recorte

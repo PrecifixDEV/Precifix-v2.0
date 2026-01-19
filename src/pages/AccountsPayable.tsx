@@ -27,8 +27,8 @@ const AccountsPayable = () => {
         <div className="container mx-auto px-4 py-8 space-y-6">
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white hidden md:block">Contas a Pagar</h1>
-                    <p className="text-slate-500 dark:text-slate-400">
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Contas a Pagar</h1>
+                    <p className="text-zinc-500 dark:text-zinc-400">
                         Visualize e gerencie seus pagamentos mensais.
                     </p>
                 </div>

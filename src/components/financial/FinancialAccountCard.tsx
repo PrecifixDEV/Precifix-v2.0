@@ -16,7 +16,7 @@ interface FinancialAccountCardProps {
 
 export function FinancialAccountCard({ account, onDelete, onDetail, onEdit, hideActions = false }: FinancialAccountCardProps) {
     return (
-        <Card className="h-full border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-colors group relative overflow-hidden flex flex-col justify-between">
+        <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-primary/50 transition-colors group relative overflow-hidden flex flex-col justify-between">
             {/* Colored Stripe */}
             <div
                 className="absolute left-0 top-0 bottom-0 w-1"
@@ -33,15 +33,15 @@ export function FinancialAccountCard({ account, onDelete, onDetail, onEdit, hide
                             </div>
                         )}
                         <div>
-                            <h3 className="font-semibold text-slate-900 dark:text-slate-100 truncate w-[120px] sm:w-auto" title={account.name}>{account.name}</h3>
-                            <p className="text-xs text-slate-500 capitalize">{account.type === 'bank' ? 'Conta Bancária' : 'Caixa Físico'}</p>
+                            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate w-[120px] sm:w-auto" title={account.name}>{account.name}</h3>
+                            <p className="text-xs text-zinc-500 capitalize">{account.type === 'bank' ? 'Conta Bancária' : 'Caixa Físico'}</p>
                         </div>
                     </div>
 
                     {!hideActions && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 -mr-2 -mt-2">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-600 -mr-2 -mt-2">
                                     <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -68,7 +68,7 @@ export function FinancialAccountCard({ account, onDelete, onDetail, onEdit, hide
                 </div>
 
                 <div>
-                    <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 block truncate">
+                    <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 block truncate">
                         {formatMoney(Number(account.current_balance))}
                     </span>
                 </div>

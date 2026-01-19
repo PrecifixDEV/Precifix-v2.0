@@ -1,4 +1,4 @@
-import { Bell, ChevronLeft } from "lucide-react";
+﻿import { Bell, ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/precifix-logo.png";
 
@@ -22,9 +22,10 @@ const PAGE_TITLES: Record<string, string> = {
     "/tools/product-cost": "Ferramentas",
     "/ferramentas/calculadora-diluicao": "Ferramentas",
     "/menu": "Menu",
+    "/profile-menu": "Perfil",
 };
 
-const ROOT_PATHS = ['/', '/menu', '/sales', '/profile'];
+const ROOT_PATHS = ['/', '/menu', '/sales', '/profile', '/profile-menu'];
 
 export function TopHeader() {
     const location = useLocation();
@@ -34,13 +35,13 @@ export function TopHeader() {
     const showBackButton = !ROOT_PATHS.includes(location.pathname);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4">
+        <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-black border-b border-zinc-900 flex items-center justify-between px-4">
             {/* Left Section: Back Button (only if not root path) */}
             <div className="flex items-center w-10 z-20">
                 {showBackButton && (
                     <button
                         onClick={() => navigate(-1)}
-                        className="text-white p-1 hover:bg-slate-800 rounded-full transition-colors"
+                        className="text-white p-1 hover:bg-zinc-800 rounded-full transition-colors"
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
@@ -58,9 +59,9 @@ export function TopHeader() {
 
             {/* Right Section: Notifications */}
             <div className="flex items-center justify-end w-10 z-20">
-                <button className="relative p-2 text-white hover:bg-slate-800 rounded-full transition-colors">
+                <button className="relative p-2 text-white hover:bg-zinc-800 rounded-full transition-colors">
                     <Bell className="w-5 h-5" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-slate-950"></span>
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-zinc-950"></span>
                 </button>
             </div>
         </header>

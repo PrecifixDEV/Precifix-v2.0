@@ -39,7 +39,7 @@ export const Login = () => {
         <div>
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo ao Precifix</h2>
-                <p className="text-slate-400 text-sm">
+                <p className="text-zinc-400 text-sm">
                     Sistema de gestão facilitada para estética automotiva.
                 </p>
             </div>
@@ -52,7 +52,7 @@ export const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-5 h-5 text-white" />}
-                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
+                    className="bg-transparent border-zinc-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />
@@ -67,14 +67,14 @@ export const Login = () => {
                         icon={<Lock className="w-5 h-5 text-white" />}
                         endIcon={showPassword ? <EyeOff className="w-5 h-5 text-white" /> : <Eye className="w-5 h-5 text-white" />}
                         onEndIconClick={() => setShowPassword(!showPassword)}
-                        className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
+                        className="bg-transparent border-zinc-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                         labelClassName="text-white"
                         required
                     />
                     <div className="flex justify-end pt-1">
                         <Link
                             to="/forgot-password"
-                            className="text-xs text-slate-400 hover:text-yellow-500 transition-colors"
+                            className="text-xs text-zinc-400 hover:text-yellow-500 transition-colors"
                         >
                             Esqueceu sua senha?
                         </Link>
@@ -100,7 +100,7 @@ export const Login = () => {
             <div className="mt-6 text-center">
                 <Link
                     to="/register"
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-zinc-400 hover:text-white transition-colors"
                 >
                     Não tem uma conta? <span className="text-yellow-500 font-medium ml-1">Crie uma</span>
                 </Link>

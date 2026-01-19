@@ -369,11 +369,11 @@ export const FinancialOverview = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 pb-20">
             <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white items-center gap-2 hidden md:flex">
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white items-center gap-2 hidden md:flex">
                     <Calculator className="h-8 w-8 text-primary" />
                     Custo Hora da Empresa
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-2">
+                <p className="text-zinc-500 dark:text-zinc-400 mt-2">
                     Entenda quanto custa cada hora da sua empresa funcionando, baseada nos seus custos fixos e horário de trabalho.
                 </p>
             </div>
@@ -383,28 +383,28 @@ export const FinancialOverview = () => {
                 <MagicCard className="md:col-span-2 shadow-2xl" gradientColor="#22c55e 55%, transparent 100%">
                     <div className="space-y-6">
                         <div>
-                            <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+                            <h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
                                 <TrendingUp className="h-5 w-5 text-green-500 dark:text-green-400" />
                                 Seu Custo Hora Calculado
                             </h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                                 Este é o valor mínimo que você precisa cobrar por hora apenas para pagar os custos da empresa.
                             </p>
                         </div>
 
                         <div className="flex flex-col md:flex-row items-baseline gap-6">
-                            <span className="text-6xl font-bold text-slate-900 dark:text-white tracking-tight">
+                            <span className="text-6xl font-bold text-zinc-900 dark:text-white tracking-tight">
                                 {formatMoney(stats.hourlyRate + (includeInvestment ? hourlyAddon : 0) + (includeWorkingCapital ? workingCapitalAddon : 0))}
                             </span>
-                            <div className="flex flex-col text-sm text-slate-500 dark:text-slate-400">
+                            <div className="flex flex-col text-sm text-zinc-500 dark:text-zinc-400">
                                 <span>/ hora trabalhada</span>
                                 <span className="text-xs opacity-70">(100% produtividade)</span>
                             </div>
                         </div>
 
                         {(includeInvestment || includeWorkingCapital) && (
-                            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                                <span className="text-xs font-medium text-slate-500 mr-1 mt-1">Inclui:</span>
+                            <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                                <span className="text-xs font-medium text-zinc-500 mr-1 mt-1">Inclui:</span>
                                 {includeInvestment && (
                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/20">
                                         + {formatMoney(hourlyAddon)} ROI
@@ -423,15 +423,15 @@ export const FinancialOverview = () => {
 
 
                 {/* Costs per Day Card (New) */}
-                <Card className="border-blue-200/50 shadow-sm bg-gradient-to-br from-blue-50 to-white dark:from-slate-900 dark:to-slate-900">
+                <Card className="border-yellow-200/50 shadow-sm bg-gradient-to-br from-yellow-50 to-white dark:from-zinc-900 dark:to-zinc-900">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                        <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                             Custo por Dia de Trabalho
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-col gap-1">
-                            <span className="text-3xl font-bold text-slate-800 dark:text-white">
+                            <span className="text-3xl font-bold text-zinc-800 dark:text-white">
                                 {formatMoney(stats.hourlyRate * (stats.hoursPerDay || 0))}
                             </span>
                             <span className="text-xs text-muted-foreground">
@@ -442,7 +442,7 @@ export const FinancialOverview = () => {
                 </Card>
 
                 {/* Summary Box */}
-                <Card className="bg-slate-50 dark:bg-slate-800/50 border-dashed">
+                <Card className="bg-zinc-50 dark:bg-zinc-800/50 border-dashed">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base text-muted-foreground">Resumo do Mês</CardTitle>
                     </CardHeader>
@@ -451,15 +451,15 @@ export const FinancialOverview = () => {
                             <span className="text-sm font-medium">Custos Totais</span>
                             <span className="text-base font-bold text-red-500">{formatMoney(totalCosts)}</span>
                         </div>
-                        <div className="w-full bg-slate-200 dark:bg-slate-700 h-px"></div>
+                        <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-px"></div>
                         <div className="flex justify-between items-center">
                             <div className="flex flex-col">
                                 <span className="text-sm font-medium">Horas Produtivas</span>
                                 <span className="text-[10px] text-muted-foreground">4.345 semanas/mês</span>
                             </div>
-                            <span className="text-base font-bold text-blue-500">{stats.monthlyHours.toFixed(1)}h</span>
+                            <span className="text-base font-bold text-yellow-500">{stats.monthlyHours.toFixed(1)}h</span>
                         </div>
-                        <div className="w-full bg-slate-200 dark:bg-slate-700 h-px"></div>
+                        <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-px"></div>
                         <div className="pt-2">
                             <div className="p-3 bg-yellow-100/50 dark:bg-yellow-900/10 rounded-lg text-xs leading-relaxed text-yellow-700 dark:text-yellow-500 flex gap-2">
                                 <Info className="h-4 w-4 shrink-0 mt-0.5" />
@@ -475,7 +475,7 @@ export const FinancialOverview = () => {
             {/* Business Investment ROI Section */}
             < div className="space-y-4" >
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-800 dark:text-white">
+                    <h2 className="text-xl font-semibold flex items-center gap-2 text-zinc-800 dark:text-white">
                         <BarChart3 className="h-5 w-5 text-purple-600" />
                         Retorno do Investimento Inicial
                     </h2>
@@ -491,14 +491,14 @@ export const FinancialOverview = () => {
                         <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                             <div className="space-y-6 flex-1">
                                 <div>
-                                    <h3 className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-1">Custo Adicional por Hora</h3>
+                                    <h3 className="text-lg font-medium text-zinc-500 dark:text-zinc-400 mb-1">Custo Adicional por Hora</h3>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-5xl font-bold text-purple-600 dark:text-purple-400 tracking-tight">
                                             + {formatMoney(hourlyAddon)}
                                         </span>
-                                        <span className="text-sm text-slate-400">/ hora</span>
+                                        <span className="text-sm text-zinc-400">/ hora</span>
                                     </div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+                                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 max-w-md">
                                         Para recuperar seu investimento de <strong>{formatMoney(investment.initialValue)}</strong> em <strong>{investment.returnMonths} meses</strong>,
                                         você deve adicionar este valor ao seu custo hora base.
                                     </p>
@@ -520,45 +520,45 @@ export const FinancialOverview = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Custo Hora Final Sugerido</p>
-                                        <p className="text-2xl font-bold text-slate-700 dark:text-slate-200">{formatMoney(stats.hourlyRate + hourlyAddon)}</p>
+                                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-zinc-100 dark:border-zinc-800">
+                                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Custo Hora Final Sugerido</p>
+                                        <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-200">{formatMoney(stats.hourlyRate + hourlyAddon)}</p>
                                     </div>
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Horas Totais Necessárias</p>
-                                        <p className="text-xl font-semibold text-slate-700 dark:text-slate-200">{(stats.monthlyHours * investment.returnMonths).toFixed(0)} horas</p>
+                                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-zinc-100 dark:border-zinc-800">
+                                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Horas Totais Necessárias</p>
+                                        <p className="text-xl font-semibold text-zinc-700 dark:text-zinc-200">{(stats.monthlyHours * investment.returnMonths).toFixed(0)} horas</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-800/80 rounded-xl p-6 border border-slate-200 dark:border-slate-700 space-y-4">
-                                <h4 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                            <div className="w-full md:w-80 bg-zinc-50 dark:bg-zinc-800/80 rounded-xl p-6 border border-zinc-200 dark:border-zinc-700 space-y-4">
+                                <h4 className="font-semibold text-zinc-800 dark:text-white mb-4 flex items-center gap-2">
                                     <Calculator className="w-4 h-4 text-purple-500" /> Simule seu Retorno
                                 </h4>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-slate-500 dark:text-slate-400">Investimento Inicial (R$)</Label>
+                                    <Label className="text-xs text-zinc-500 dark:text-zinc-400">Investimento Inicial (R$)</Label>
                                     <div className="relative">
-                                        <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                        <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="number"
                                             value={investment.initialValue || ''}
                                             onChange={(e) => updateInvestment('initialValue', Number(e.target.value))}
-                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-zinc-200 dark:border-zinc-700 pl-9"
                                             placeholder="0,00"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-slate-500 dark:text-slate-400">Tempo de Retorno (Meses)</Label>
+                                    <Label className="text-xs text-zinc-500 dark:text-zinc-400">Tempo de Retorno (Meses)</Label>
                                     <div className="relative">
-                                        <Clock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                        <Clock className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="number"
                                             value={investment.returnMonths || ''}
                                             onChange={(e) => updateInvestment('returnMonths', Number(e.target.value))}
-                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-zinc-200 dark:border-zinc-700 pl-9"
                                             placeholder="36"
                                         />
                                     </div>
@@ -568,7 +568,7 @@ export const FinancialOverview = () => {
                     </Card>
 
                     {/* Explainer Card for Investment */}
-                    <Card className="bg-purple-50 dark:bg-slate-800/50 border-purple-100 dark:border-slate-700">
+                    <Card className="bg-purple-50 dark:bg-zinc-800/50 border-purple-100 dark:border-zinc-700">
                         <CardHeader>
                             <CardTitle className="text-base text-purple-700 dark:text-purple-400">Por que calcular isso?</CardTitle>
                         </CardHeader>
@@ -590,7 +590,7 @@ export const FinancialOverview = () => {
             {/* Working Capital Section */}
             < div className="space-y-4" >
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-800 dark:text-white">
+                    <h2 className="text-xl font-semibold flex items-center gap-2 text-zinc-800 dark:text-white">
                         <PiggyBank className="h-5 w-5 text-emerald-600" />
                         Capital de Giro
                     </h2>
@@ -605,14 +605,14 @@ export const FinancialOverview = () => {
                         <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                             <div className="space-y-6 flex-1">
                                 <div>
-                                    <h3 className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-1">Custo Adicional por Hora</h3>
+                                    <h3 className="text-lg font-medium text-zinc-500 dark:text-zinc-400 mb-1">Custo Adicional por Hora</h3>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-5xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
                                             + {formatMoney(workingCapitalAddon)}
                                         </span>
-                                        <span className="text-sm text-slate-400">/ hora</span>
+                                        <span className="text-sm text-zinc-400">/ hora</span>
                                     </div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+                                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 max-w-md">
                                         Para acumular <strong>{formatMoney(workingCapital.goal)}</strong> em <strong>{workingCapital.months} meses</strong>,
                                         adicione este valor ao seu custo hora.
                                     </p>
@@ -634,41 +634,41 @@ export const FinancialOverview = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Horas Totais</p>
-                                        <p className="text-xl font-semibold text-slate-700 dark:text-slate-200">{(stats.monthlyHours * workingCapital.months).toFixed(0)} horas</p>
+                                    <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-zinc-100 dark:border-zinc-800">
+                                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Horas Totais</p>
+                                        <p className="text-xl font-semibold text-zinc-700 dark:text-zinc-200">{(stats.monthlyHours * workingCapital.months).toFixed(0)} horas</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-800/80 rounded-xl p-6 border border-slate-200 dark:border-slate-700 space-y-4">
-                                <h4 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                            <div className="w-full md:w-80 bg-zinc-50 dark:bg-zinc-800/80 rounded-xl p-6 border border-zinc-200 dark:border-zinc-700 space-y-4">
+                                <h4 className="font-semibold text-zinc-800 dark:text-white mb-4 flex items-center gap-2">
                                     <Calculator className="w-4 h-4 text-emerald-500" /> Configurar Meta
                                 </h4>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-slate-500 dark:text-slate-400">Meta Capital de Giro (R$)</Label>
+                                    <Label className="text-xs text-zinc-500 dark:text-zinc-400">Meta Capital de Giro (R$)</Label>
                                     <div className="relative">
-                                        <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                        <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="number"
                                             value={workingCapital.goal || ''}
                                             onChange={(e) => updateWorkingCapital('goal', Number(e.target.value))}
-                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-zinc-200 dark:border-zinc-700 pl-9"
                                             placeholder="0,00"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-slate-500 dark:text-slate-400">Prazo (Meses)</Label>
+                                    <Label className="text-xs text-zinc-500 dark:text-zinc-400">Prazo (Meses)</Label>
                                     <div className="relative">
-                                        <Clock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                        <Clock className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="number"
                                             value={workingCapital.months || ''}
                                             onChange={(e) => updateWorkingCapital('months', Number(e.target.value))}
-                                            className="bg-input border-slate-200 dark:border-slate-700 pl-9"
+                                            className="bg-input border-zinc-200 dark:border-zinc-700 pl-9"
                                             placeholder="12"
                                         />
                                     </div>
@@ -678,7 +678,7 @@ export const FinancialOverview = () => {
                     </Card>
 
                     {/* Explainer Card for Working Capital */}
-                    <Card className="bg-emerald-50 dark:bg-slate-800/50 border-emerald-100 dark:border-slate-700">
+                    <Card className="bg-emerald-50 dark:bg-zinc-800/50 border-emerald-100 dark:border-zinc-700">
                         <CardHeader>
                             <CardTitle className="text-base text-emerald-700 dark:text-emerald-400">Capital de Giro</CardTitle>
                         </CardHeader>
@@ -712,8 +712,8 @@ export const FinancialOverview = () => {
                         <p className="text-sm text-muted-foreground mb-4">
                             Soma de todas as despesas lançadas com data de vencimento neste mês.
                         </p>
-                        <div className="rounded-md border p-4 bg-slate-50 dark:bg-slate-900/50 flex flex-col items-center justify-center py-8">
-                            <span className="text-3xl font-light text-slate-700 dark:text-slate-300">
+                        <div className="rounded-md border p-4 bg-zinc-50 dark:bg-zinc-900/50 flex flex-col items-center justify-center py-8">
+                            <span className="text-3xl font-light text-zinc-700 dark:text-zinc-300">
                                 {formatMoney(totalCosts)}
                             </span>
                             <span className="text-xs text-muted-foreground mt-2">
@@ -731,20 +731,20 @@ export const FinancialOverview = () => {
             < div className="space-y-4" >
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-blue-500" />
+                        <Clock className="h-5 w-5 text-zinc-500" />
                         2. Detalhe do Tempo (Matemática)
                     </h2>
                     <Link to="/minha-empresa" className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-foreground px-3 py-1 rounded text-xs font-medium transition-colors">
                         Ajustar Horários <ArrowRight className="h-3 w-3" />
                     </Link>
                 </div>
-                <Card className="bg-card border-2 border-blue-100 dark:border-blue-900/50 shadow-lg transition-all hover:border-blue-200 dark:hover:border-blue-800">
+                <Card className="bg-card border-2 border-zinc-100 dark:border-zinc-800/50 shadow-lg transition-all hover:border-zinc-200 dark:hover:border-zinc-700">
                     <CardContent className="pt-6 space-y-4">
                         <div className="flex items-center gap-2 text-sm">
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">Dias Trabalhados:</span>
+                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">Dias Trabalhados:</span>
                             <div className="flex flex-wrap gap-1">
                                 {activeDaysList.map(day => (
-                                    <span key={day} className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-[10px] uppercase font-bold">
+                                    <span key={day} className="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] uppercase font-bold">
                                         {day}
                                     </span>
                                 ))}
@@ -759,20 +759,20 @@ export const FinancialOverview = () => {
                                 <span className="col-span-1 text-right">Produtivo</span>
                             </div>
                             {hoursBreakdown.map((item) => (
-                                <div key={item.day} className="px-4 py-2 grid grid-cols-4 gap-2 items-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                                <div key={item.day} className="px-4 py-2 grid grid-cols-4 gap-2 items-center hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
                                     <span className="font-medium col-span-1">{item.day}</span>
                                     <span className="text-xs text-center text-muted-foreground col-span-1">{item.start} - {item.end}</span>
                                     <span className="text-xs text-center text-red-400 col-span-1">-1h</span>
                                     <span className="text-right font-mono font-medium col-span-1">{item.netHours}h</span>
                                 </div>
                             ))}
-                            <div className="bg-blue-50/50 dark:bg-blue-900/10 px-4 py-3 grid grid-cols-4 gap-2 font-bold text-blue-700 dark:text-blue-400">
+                            <div className="bg-zinc-50/50 dark:bg-zinc-900/10 px-4 py-3 grid grid-cols-4 gap-2 font-bold text-zinc-700 dark:text-zinc-400">
                                 <span className="col-span-3">Total por Semana</span>
                                 <span className="text-right">{stats.totalWeeklyHours.toFixed(1)}h</span>
                             </div>
                         </div>
 
-                        <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md text-xs space-y-1">
+                        <div className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded-md text-xs space-y-1">
                             <div className="flex justify-between">
                                 <span>Horas Semanais:</span>
                                 <span className="font-mono">{stats.totalWeeklyHours.toFixed(2)}h</span>
@@ -781,7 +781,7 @@ export const FinancialOverview = () => {
                                 <span>Média Semanas/Mês:</span>
                                 <span className="font-mono">x 4.345</span>
                             </div>
-                            <div className="border-t border-slate-300 dark:border-slate-600 my-1 pt-1 flex justify-between font-bold text-slate-900 dark:text-white">
+                            <div className="border-t border-zinc-300 dark:border-zinc-600 my-1 pt-1 flex justify-between font-bold text-zinc-900 dark:text-white">
                                 <span>Total Mensal:</span>
                                 <span className="font-mono">{stats.monthlyHours.toFixed(1)}h</span>
                             </div>

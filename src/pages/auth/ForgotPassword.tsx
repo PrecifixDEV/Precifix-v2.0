@@ -44,19 +44,19 @@ export const ForgotPassword = () => {
 
                 <h2 className="text-2xl font-bold text-white mb-4">E-mail enviado!</h2>
 
-                <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+                <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
                     Se este e-mail estiver cadastrado, você receberá um link para redefinir sua senha em instantes.
                 </p>
 
                 <Button
                     variant="default"
                     onClick={() => setSuccess(false)}
-                    className="w-full mb-4 bg-slate-800 hover:bg-slate-700 text-white border-slate-700 from-neutral-500"
+                    className="w-full mb-4 bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700 from-neutral-500"
                 >
                     Tentar outro e-mail
                 </Button>
 
-                <Link to="/login" className="text-sm text-slate-500 hover:text-white transition-colors">
+                <Link to="/login" className="text-sm text-zinc-500 hover:text-white transition-colors">
                     Voltar para o Login
                 </Link>
             </div>
@@ -66,12 +66,12 @@ export const ForgotPassword = () => {
     return (
         <div>
             <div className="mb-8">
-                <Link to="/login" className="inline-flex items-center text-sm text-slate-400 hover:text-white transition-colors mb-6">
+                <Link to="/login" className="inline-flex items-center text-sm text-zinc-400 hover:text-white transition-colors mb-6">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Voltar
                 </Link>
                 <h2 className="text-2xl font-bold text-white mb-2">Recuperar Senha</h2>
-                <p className="text-slate-400 text-sm">
+                <p className="text-zinc-400 text-sm">
                     Informe seu e-mail para receber as instruções de recuperação.
                 </p>
             </div>
@@ -84,7 +84,7 @@ export const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-5 h-5 text-white" />}
-                    className="bg-transparent border-slate-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
+                    className="bg-transparent border-zinc-700 text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-yellow-500"
                     labelClassName="text-white"
                     required
                 />
@@ -98,7 +98,7 @@ export const ForgotPassword = () => {
                 <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold"
                 >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     ENVIAR INSTRUÇÕES

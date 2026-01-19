@@ -69,11 +69,11 @@ const SprayBottleVisual: React.FC<SprayBottleVisualProps> = ({ percentage }) => 
                     d={pathContorno}
                     fill="none"
                     strokeWidth="5"
-                    className="stroke-black dark:stroke-slate-400 transition-colors duration-200"
+                    className="stroke-black dark:stroke-zinc-400 transition-colors duration-200"
                 />
 
                 {/* 3. GATILHO (Topo) */}
-                <g className="fill-black dark:fill-slate-400 transition-colors duration-200">
+                <g className="fill-black dark:fill-zinc-400 transition-colors duration-200">
                     <path d={pathGatilhoPrincipal} />
                     <path d={pathGatilhoDetalhe} />
                 </g>

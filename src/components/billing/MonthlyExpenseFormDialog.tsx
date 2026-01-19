@@ -209,7 +209,7 @@ export const MonthlyExpenseFormDialog = ({ isOpen, onClose, monthlyBillingId, ex
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                    <Button onClick={handleSubmit} disabled={upsertMonthlyExpenseMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-slate-900">
+                    <Button onClick={handleSubmit} disabled={upsertMonthlyExpenseMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-zinc-900">
                         {upsertMonthlyExpenseMutation.isPending ? (expense ? "Salvando..." : "Adicionando...") : (expense ? "Salvar Alterações" : "Adicionar Despesa")}
                     </Button>
                 </DialogFooter>

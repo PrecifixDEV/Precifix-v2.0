@@ -233,9 +233,9 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
+            <DialogContent className="max-w-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle className="text-slate-900 dark:text-white">{serviceToEdit ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
+                    <DialogTitle className="text-zinc-900 dark:text-white">{serviceToEdit ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>
@@ -273,7 +273,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                             <Input
                                                                 placeholder="Ex: Lavagem Simples"
                                                                 {...field}
-                                                                className="bg-white dark:bg-slate-800"
+                                                                className="bg-white dark:bg-zinc-800"
                                                                 onChange={(e) => {
                                                                     field.onChange(e);
                                                                     handleNameChange(e);
@@ -296,7 +296,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                         <FormItem>
                                             <FormLabel>Descrição</FormLabel>
                                             <FormControl>
-                                                <Textarea placeholder="Detalhes do serviço..." {...field} className="bg-white dark:bg-slate-800" />
+                                                <Textarea placeholder="Detalhes do serviço..." {...field} className="bg-white dark:bg-zinc-800" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -318,7 +318,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                     <FormControl>
                                                         <div className="relative">
                                                             <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                            <Input type="number" step="0.01" placeholder="0.00" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                            <Input type="number" step="0.01" placeholder="0.00" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
                                                         </div>
                                                     </FormControl>
                                                 </TooltipTrigger>
@@ -345,7 +345,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                                             <Input
                                                                 type="text"
                                                                 placeholder="HH:MM"
-                                                                className="pl-8 bg-white dark:bg-slate-800"
+                                                                className="pl-8 bg-white dark:bg-zinc-800"
                                                                 value={durationInput}
                                                                 onChange={(e) => {
                                                                     let val = e.target.value.replace(/[^0-9:]/g, "");
@@ -384,7 +384,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                     <FormItem>
                                         <div className="flex items-center justify-between">
                                             <FormLabel>Custo Hora (R$)</FormLabel>
-                                            <Button type="button" variant="ghost" size="sm" onClick={handleLoadSystemHourlyRate} className="h-5 text-xs text-blue-500 px-2 py-0">
+                                            <Button type="button" variant="ghost" size="sm" onClick={handleLoadSystemHourlyRate} className="h-5 text-xs text-muted-foreground hover:text-primary px-2 py-0">
                                                 <RefreshCw className="w-3 h-3 mr-1" />
                                                 Do Sistema
                                             </Button>
@@ -392,7 +392,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                         <FormControl>
                                             <div className="relative">
                                                 <Users className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
                                             </div>
                                         </FormControl>
                                     </FormItem>
@@ -407,7 +407,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                         <FormControl>
                                             <div className="relative">
                                                 <Percent className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input type="number" step="0.1" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                <Input type="number" step="0.1" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
                                             </div>
                                         </FormControl>
                                     </FormItem>
@@ -422,7 +422,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                         <FormControl>
                                             <div className="relative">
                                                 <Tag className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-slate-800" />
+                                                <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
                                             </div>
                                         </FormControl>
                                     </FormItem>
@@ -439,7 +439,7 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                                 disabled={loading || !isValid}
                                 className={cn(
                                     "border-none",
-                                    !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 text-slate-900"
+                                    !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 text-zinc-900"
                                 )}
                             >
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

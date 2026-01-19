@@ -23,11 +23,11 @@ export const BankLogo = ({ bankCode, bankName, className, showName = false, full
 
     const displayName = bankName || bank?.shortName || bank?.name || "Banco";
     const initials = displayName.substring(0, 2).toUpperCase();
-    const bgColor = bank?.color || "#64748b"; // Default slate-500
+    const bgColor = bank?.color || "#64748b"; // Default zinc-500
 
     return (
         <div className={cn("flex items-center gap-3", className)}>
-            <Avatar className={cn("h-10 w-10 border border-slate-100 dark:border-slate-800 bg-white shadow-sm", className)}>
+            <Avatar className={cn("h-10 w-10 border border-zinc-100 dark:border-zinc-800 bg-white shadow-sm", className)}>
                 <AvatarImage
                     src={logoUrl}
                     alt={displayName}
@@ -44,7 +44,7 @@ export const BankLogo = ({ bankCode, bankName, className, showName = false, full
                 </AvatarFallback>
             </Avatar>
             {showName && (
-                <span className="font-medium text-slate-700 dark:text-slate-200">
+                <span className="font-medium text-zinc-700 dark:text-zinc-200">
                     {displayName}
                 </span>
             )}
