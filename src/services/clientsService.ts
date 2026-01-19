@@ -112,8 +112,7 @@ export const clientsService = {
     },
 
     async addVehiclePhotoRef(vehicleId: string, url: string) {
-        const { data, error } = await supabase
-            // @ts-ignore
+        const { data, error } = await (supabase as any)
             .from('vehicle_photos')
             .insert({ vehicle_id: vehicleId, url })
             .select()
@@ -124,8 +123,7 @@ export const clientsService = {
     },
 
     async getVehiclePhotos(vehicleId: string) {
-        const { data, error } = await supabase
-            // @ts-ignore
+        const { data, error } = await (supabase as any)
             .from('vehicle_photos')
             .select('*')
             .eq('vehicle_id', vehicleId)
@@ -138,8 +136,7 @@ export const clientsService = {
     async deleteVehiclePhoto(id: string) {
         // Note: For now we only delete the DB reference. 
         // Ideally we should also delete from storage, but we need the path, not just full URL.
-        // @ts-ignore
-        const { error } = await supabase.from('vehicle_photos').delete().eq('id', id);
+        const { error } = await (supabase as any).from('vehicle_photos').delete().eq('id', id);
         if (error) throw error;
     },
 };
