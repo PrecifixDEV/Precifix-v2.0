@@ -8,7 +8,7 @@ import { StandardSheet, StandardSheetToggle } from "@/components/ui/StandardShee
 import { Loader2, User, Phone, Mail, Car, Trash2, Plus, FileText, MapPin, Calendar, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { clientsService, type Client, type NewClient, type Vehicle } from "@/services/clientsService";
+import { clientsService, type Client, type NewClient, type VehicleWithPhotos } from "@/services/clientsService";
 import { VehicleFormSheet } from "./VehicleFormSheet";
 
 
@@ -50,7 +50,8 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
     // Vehicle Sheet
     const [showVehicleSheet, setShowVehicleSheet] = useState(false);
     const [tempClientId, setTempClientId] = useState<string>("");
-    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [vehicles, setVehicles] = useState<VehicleWithPhotos[]>([]);
+    const [editingVehicle, setEditingVehicle] = useState<VehicleWithPhotos | null>(null);
 
     // Store local vehicles (with photos) to be saved later
     const [pendingVehicles, setPendingVehicles] = useState<{ data: any, photos: File[] }[]>([]);
@@ -121,6 +122,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
             const vs = await clientsService.getVehicles(tempClientId);
             setVehicles(vs);
         }
+        setEditingVehicle(null);
     };
 
     const formatPhone = (v: string) => {
@@ -258,10 +260,15 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
         onOpenChange(false);
     };
 
+    const closeVehicleSheet = (open: boolean) => {
+        setShowVehicleSheet(open);
+        if (!open) setEditingVehicle(null);
+    };
 
 
-    const handleDeleteVehicle = async (id: string, isPending: boolean = false) => {
-        if (!confirm("Remover veículo?")) return;
+
+    const handleDeleteVehicle = async (id: string, isPending: boolean = false, skipConfirm: boolean = false) => {
+        if (!skipConfirm && !confirm("Remover veículo?")) return;
 
         if (isPending) {
             setPendingVehicles(prev => prev.filter(v => v.data.id !== id));
@@ -276,7 +283,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
     // Combine for display
     const allVehicles = [
         ...vehicles,
-        ...pendingVehicles.map(pv => ({ ...pv.data } as Vehicle))
+        ...pendingVehicles.map(pv => ({ ...pv.data, vehicle_photos: [] } as VehicleWithPhotos))
     ];
 
 
@@ -336,7 +343,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                                 // Always allow opening logic - removed the requirement to save first
                                 setShowVehicleSheet(true);
                             }}
-                            className="bg-zinc-900 border-green-600/30 hover:border-green-500 text-green-500 hover:text-green-400 hover:bg-zinc-800 text-xs h-8"
+                            className="bg-white dark:bg-zinc-900 border-green-600/30 hover:border-green-500 text-green-600 dark:text-green-500 hover:text-green-500 dark:hover:text-green-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs h-8"
                         >
                             <Plus className="w-3 h-3 mr-1.5" />
                             Novo Veículo
@@ -350,23 +357,57 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                         </div>
                     ) : (
                         <div className="space-y-2">
-                            {allVehicles.map((vehicle) => (
-                                <div key={vehicle.id} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg group">
-                                    <div>
-                                        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{vehicle.model}</p>
-                                        <p className="text-xs text-zinc-500">{vehicle.brand} • {vehicle.plate || 'S/ Placa'}</p>
-                                        {vehicle.id.startsWith('temp-') && <span className="text-[10px] text-yellow-500 font-bold bg-yellow-500/10 px-1.5 py-0.5 rounded ml-1">NOVO</span>}
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleDeleteVehicle(vehicle.id, vehicle.id.startsWith('temp-'))}
-                                        className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                            {allVehicles.map((vehicle) => {
+                                // Safe check for vehicle_photos
+                                const hasPhoto = vehicle.vehicle_photos && vehicle.vehicle_photos.length > 0;
+                                const photoUrl = hasPhoto ? vehicle.vehicle_photos[0].url : null;
+                                const isTemp = vehicle.id.startsWith('temp-');
+
+                                return (
+                                    <div
+                                        key={vehicle.id}
+                                        onClick={() => {
+                                            setEditingVehicle(vehicle);
+                                            setShowVehicleSheet(true);
+                                        }}
+                                        className="relative overflow-hidden flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg group min-h-[72px] cursor-pointer hover:border-yellow-500/50 transition-colors"
                                     >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                                        {/* Background Image & Gradient */}
+                                        {photoUrl && (
+                                            <>
+                                                <img
+                                                    src={photoUrl}
+                                                    className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-80"
+                                                    alt="Vehicle"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-r from-zinc-50 via-zinc-50 to-transparent dark:from-zinc-900 dark:via-zinc-900 dark:to-transparent" />
+                                            </>
+                                        )}
+
+                                        <div className="relative z-10 flex-1 pr-4">
+                                            <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100 flex items-center">
+                                                {vehicle.model}
+                                                {isTemp && <span className="text-[10px] text-yellow-600 dark:text-yellow-500 font-bold bg-yellow-100 dark:bg-yellow-500/10 px-1.5 py-0.5 rounded ml-2 border border-yellow-200 dark:border-transparent">NOVO</span>}
+                                            </p>
+                                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{vehicle.brand} • {vehicle.plate || 'S/ Placa'}</p>
+                                        </div>
+
+                                        <div className="relative z-10">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteVehicle(vehicle.id, isTemp);
+                                                }}
+                                                className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all bg-white/80 dark:bg-zinc-900/50 backdrop-blur-sm"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -534,12 +575,14 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
             {/* NESTED SHEET FOR VEHICLE */}
             <VehicleFormSheet
                 open={showVehicleSheet}
-                onOpenChange={setShowVehicleSheet}
+                onOpenChange={closeVehicleSheet}
                 clientId={clientToEdit?.id || tempClientId}
                 onSuccess={refreshVehicles}
                 onLocalSave={(vData, vPhotos) => {
                     setPendingVehicles(prev => [...prev, { data: vData, photos: vPhotos }]);
                 }}
+                vehicleToEdit={editingVehicle}
+                onDelete={(id) => handleDeleteVehicle(id, id.startsWith('temp-'), true)}
             />
         </StandardSheet>
     );

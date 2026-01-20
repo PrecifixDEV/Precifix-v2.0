@@ -21,6 +21,8 @@ import { FinancialOverview } from './pages/FinancialOverview'
 import { DilutionCalculator } from './pages/tools/DilutionCalculator'
 import { ProductCostCalculator } from './pages/tools/ProductCostCalculator'
 import FinancialCategories from './pages/settings/FinancialCategories';
+import { MyFiles } from './pages/settings/MyFiles';
+import Settings from './pages/settings/Settings';
 
 
 import { ProfileMenu } from './pages/ProfileMenu'
@@ -64,7 +66,9 @@ function App() {
             <Route path="/schedule" element={<div className="text-zinc-900 dark:text-white p-6">Agenda (Em breve)</div>} />
             <Route path="/financial" element={<FinancialOverview />} />
 
+            <Route path="/settings" element={<Settings />} />
             <Route path="/settings/categories" element={<FinancialCategories />} />
+            <Route path="/settings/files" element={<MyFiles />} />
 
             {/* Tools Routes */}
             <Route path="/tools/dilution-calculator" element={<DilutionCalculator />} />

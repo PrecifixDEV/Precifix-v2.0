@@ -38,6 +38,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
     Select,
     SelectContent,
@@ -59,7 +60,7 @@ import { financialService } from "@/services/financialService";
 const costSchema = z.object({
     description: z.string().min(1, "Descrição é obrigatória"),
     observation: z.string().max(500, "Máximo de 500 caracteres").optional(),
-    value: z.string().min(1, "Valor é obrigatório"),
+    value: z.coerce.number().min(0.01, "Valor é obrigatório"),
     expense_date: z.date(),
     category: z.string().min(1, "Categoria é obrigatória"),
     is_recurring: z.boolean().default(false),
@@ -131,7 +132,7 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
         defaultValues: {
             description: "",
             observation: "",
-            value: "",
+            value: 0,
             expense_date: new Date(),
             category: "",
             is_recurring: false,
@@ -153,7 +154,7 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
             form.reset({
                 description: "",
                 observation: "",
-                value: "",
+                value: 0,
                 expense_date: new Date(),
                 category: "",
                 is_recurring: false,
@@ -168,8 +169,7 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
 
     const { mutate: saveCost, isPending } = useMutation({
         mutationFn: async (values: CostFormValues) => {
-            const formattedValue = parseFloat(values.value.replace(/\./g, '').replace(',', '.'));
-            const numValue = isNaN(formattedValue) ? 0 : formattedValue;
+            const numValue = values.value;
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Usuário não autenticado");
 
@@ -302,18 +302,10 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                             <FormItem>
                                 <FormLabel>Valor (R$)</FormLabel>
                                 <FormControl>
-                                    <Input
+                                    <CurrencyInput
                                         placeholder="0,00"
-                                        {...field}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, "");
-                                            const floatValue = Number(value) / 100;
-                                            const formatted = floatValue.toLocaleString("pt-BR", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            });
-                                            field.onChange(formatted);
-                                        }}
+                                        value={field.value}
+                                        onValueChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />

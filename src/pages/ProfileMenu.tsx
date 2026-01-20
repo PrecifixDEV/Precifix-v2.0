@@ -72,7 +72,7 @@ export const ProfileMenu = () => {
         {
             label: 'Configurações',
             icon: Settings,
-            href: '/settings/categories'
+            href: '/settings'
         }
     ]
 

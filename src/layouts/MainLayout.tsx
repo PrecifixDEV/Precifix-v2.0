@@ -436,7 +436,7 @@ export const MainLayout = () => {
 
                                 <DropdownMenuItem asChild>
                                     <Link
-                                        to="/settings/categories"
+                                        to="/settings"
                                         className="w-full cursor-pointer flex items-center gap-2"
                                     >
                                         <Settings className="w-4 h-4" />

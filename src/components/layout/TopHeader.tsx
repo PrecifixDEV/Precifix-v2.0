@@ -17,6 +17,7 @@ const PAGE_TITLES: Record<string, string> = {
     "/custos": "Gerenciar Despesas",
     "/profile": "Meu Perfil",
     "/minha-empresa": "Minha Empresa",
+    "/settings": "Configurações",
     "/settings/categories": "Configurações",
     "/tools/dilution-calculator": "Ferramentas",
     "/tools/product-cost": "Ferramentas",

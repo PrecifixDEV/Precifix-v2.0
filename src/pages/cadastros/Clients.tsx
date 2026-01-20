@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Trash2, Search, User, Pencil, Printer, Filter, Car, Bike, Truck, Info, MoreVertical } from "lucide-react";
+import { Trash2, Search, Pencil, Printer, Filter, Car, Bike, Truck, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
     Card,
@@ -28,14 +28,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     DropdownMenu,
@@ -52,6 +45,15 @@ import { clientsService } from "@/services/clientsService";
 import type { ClientWithVehicles } from "@/services/clientsService";
 import { TablePagination } from "@/components/ui/table-pagination";
 
+const getInitials = (name: string) => {
+    return name
+        .split(' ')
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+};
+
 export const Clients = () => {
     const [clients, setClients] = useState<ClientWithVehicles[]>([]);
     const [filteredClients, setFilteredClients] = useState<ClientWithVehicles[]>([]);
@@ -62,8 +64,7 @@ export const Clients = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [clientToEdit, setClientToEdit] = useState<ClientWithVehicles | null>(null);
     const [clientToDelete, setClientToDelete] = useState<ClientWithVehicles | null>(null);
-    const [clientToView, setClientToView] = useState<ClientWithVehicles | null>(null);
-    const [isSheetOpen, setIsSheetOpen] = useState(false);
+
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -219,10 +220,7 @@ export const Clients = () => {
         setIsDialogOpen(true);
     };
 
-    const handleView = (client: ClientWithVehicles) => {
-        setClientToView(client);
-        setIsSheetOpen(true);
-    };
+
 
     const handleDelete = async () => {
         if (!clientToDelete) return;
@@ -348,34 +346,49 @@ export const Clients = () => {
                                     });
 
                                     return (
-                                        <div key={client.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                                        <div
+                                            key={client.id}
+                                            className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0 cursor-pointer"
+                                            onClick={() => handleEdit(client)}
+                                        >
                                             <div className="flex items-center justify-between gap-3 mb-2">
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                    <Checkbox
-                                                        checked={selectedClients.includes(client.id)}
-                                                        onCheckedChange={() => toggleSelect(client.id)}
-                                                    />
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <Checkbox
+                                                            checked={selectedClients.includes(client.id)}
+                                                            onCheckedChange={() => toggleSelect(client.id)}
+                                                        />
+                                                    </div>
+
+                                                    {/* Avatar for Mobile List */}
+                                                    <Avatar className="h-10 w-10 border border-zinc-200 dark:border-zinc-700">
+                                                        <AvatarImage src={undefined} alt={client.name} />
+                                                        <AvatarFallback className="bg-yellow-400 text-black font-bold">
+                                                            {getInitials(client.name)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+
                                                     <div className="font-bold text-base truncate">{client.name}</div>
                                                 </div>
 
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => handleView(client)}>
-                                                            <Info className="mr-2 h-4 w-4" /> Detalhes
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleEdit(client)}>
-                                                            <Pencil className="mr-2 h-4 w-4" /> Editar
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => setClientToDelete(client)} className="text-destructive focus:text-destructive">
-                                                            <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                <div onClick={(e) => e.stopPropagation()}>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+
+                                                            <DropdownMenuItem onClick={() => handleEdit(client)}>
+                                                                <Pencil className="mr-2 h-4 w-4" /> Editar
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => setClientToDelete(client)} className="text-destructive focus:text-destructive">
+                                                                <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
                                             </div>
 
                                             <div className="grid grid-cols-1 gap-1 text-sm pl-0">
@@ -392,8 +405,7 @@ export const Clients = () => {
                                                     <span>{client.phone || "-"}</span>
                                                 </div>
                                                 <div
-                                                    className="flex items-center gap-1 mt-1 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
-                                                    onClick={() => handleView(client)}
+                                                    className="flex items-center gap-1 mt-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
                                                 >
                                                     <span className="font-bold mr-1">Veículos:</span>
                                                     <div className="flex gap-1.5 flex-wrap">
@@ -453,7 +465,18 @@ export const Clients = () => {
                                                         onCheckedChange={() => toggleSelect(client.id)}
                                                     />
                                                 </TableCell>
-                                                <TableCell className="font-medium">{client.name}</TableCell>
+                                                <TableCell className="font-medium">
+                                                    <div className="flex items-center gap-3">
+                                                        {/* Avatar for Desktop Table */}
+                                                        <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-700">
+                                                            <AvatarImage src={undefined} alt={client.name} />
+                                                            <AvatarFallback className="bg-yellow-400 text-black font-bold text-xs">
+                                                                {getInitials(client.name)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        {client.name}
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell className="text-zinc-500">{client.document || "-"}</TableCell>
                                                 <TableCell>{client.city ? `${client.city}/${client.state}` : "-"}</TableCell>
                                                 <TableCell>{client.phone || "-"}</TableCell>
@@ -479,9 +502,7 @@ export const Clients = () => {
                                                 </TableCell>
                                                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                                     <div className="flex justify-end gap-1">
-                                                        <Button variant="ghost" size="icon" onClick={() => handleView(client)} className="h-8 w-8 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100">
-                                                            <Info className="h-4 w-4" />
-                                                        </Button>
+
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
@@ -550,104 +571,7 @@ export const Clients = () => {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-                    <SheetHeader className="mb-6">
-                        <SheetTitle>Detalhes do Cliente</SheetTitle>
-                        <SheetDescription>Informações completas e veículos cadastrados.</SheetDescription>
-                    </SheetHeader>
 
-                    {clientToView && (
-                        <div className="space-y-6">
-                            {/* Personal Info */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                        <User className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-lg">{clientToView.name}</h3>
-                                        <p className="text-sm text-muted-foreground">{clientToView.email || "Sem email"}</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground text-xs font-medium uppercase">Telefone</p>
-                                        <p>{clientToView.phone || "-"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground text-xs font-medium uppercase">CPF/CNPJ</p>
-                                        <p>{clientToView.document || "-"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground text-xs font-medium uppercase">Cidade/UF</p>
-                                        <p>{clientToView.city ? `${clientToView.city}/${clientToView.state}` : "-"}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground text-xs font-medium uppercase">Endereço</p>
-                                        <p className="truncate" title={clientToView.address || ""}>{clientToView.address ? `${clientToView.address}, ${clientToView.number}` : "-"}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Separator />
-
-                            {/* Vehicles */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="font-semibold flex items-center gap-2">
-                                        <Car className="w-4 h-4" /> Veículos Cadastrados
-                                    </h4>
-                                    <span className="text-xs bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-full">
-                                        {clientToView.vehicles?.length || 0} Total
-                                    </span>
-                                </div>
-
-                                {clientToView.vehicles && clientToView.vehicles.length > 0 ? (
-                                    <div className="grid gap-3">
-                                        {clientToView.vehicles.map(v => (
-                                            <div key={v.id} className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 flex items-start gap-3">
-                                                <div className="mt-1 p-2 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700">
-                                                    {v.type === 'moto' ? <Bike className="w-4 h-4 text-zinc-600 dark:text-zinc-400" /> :
-                                                        v.type === 'caminhao' ? <Truck className="w-4 h-4 text-zinc-600 dark:text-zinc-400" /> :
-                                                            <Car className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h5 className="font-medium text-sm truncate">{v.model}</h5>
-                                                    <p className="text-xs text-muted-foreground">{v.brand} • {v.year}</p>
-                                                    <div className="flex gap-2 mt-1.5">
-                                                        <span className="text-[10px] bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border font-mono uppercase">{v.plate || 'S/ Placa'}</span>
-                                                        {v.color && <span className="text-[10px] bg-white dark:bg-zinc-950 px-1.5 py-0.5 rounded border">{v.color}</span>}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-6 text-muted-foreground bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-dashed">
-                                        <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                        <p className="text-sm">Nenhum veículo cadastrado.</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <Separator />
-
-                            {/* Stats or Actions */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <Button variant="outline" className="w-full" onClick={() => {
-                                    handleEdit(clientToView);
-                                    setIsSheetOpen(false);
-                                }}>
-                                    <Pencil className="w-4 h-4 mr-2" /> Editar Cliente
-                                </Button>
-                                {/* Future: View History or Financials */}
-                            </div>
-                        </div>
-                    )}
-                </SheetContent>
-            </Sheet>
         </div>
     );
 };

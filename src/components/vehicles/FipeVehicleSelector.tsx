@@ -143,7 +143,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                         <SelectTrigger className="bg-white dark:bg-zinc-800">
                             <SelectValue placeholder="Selecione o tipo" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[200]">
                             <SelectItem value="carros">Carros</SelectItem>
                             <SelectItem value="motos">Motos</SelectItem>
                             <SelectItem value="caminhoes">Caminhões</SelectItem>
@@ -173,7 +173,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                                 )}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
+                        <PopoverContent className="w-[300px] p-0 z-[200]">
                             <Command>
                                 <CommandInput placeholder="Buscar marca..." />
                                 <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
@@ -223,7 +223,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                                 )}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[400px] p-0">
+                        <PopoverContent className="w-[400px] p-0 z-[200]">
                             <Command>
                                 <CommandInput placeholder="Buscar modelo..." />
                                 <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
@@ -258,7 +258,7 @@ export function FipeVehicleSelector({ onVehicleSelected }: FipeVehicleSelectorPr
                         <SelectTrigger className="bg-white dark:bg-zinc-800">
                             <SelectValue placeholder="Selecione o ano" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[200]">
                             {years.map((year) => (
                                 <SelectItem key={year.codigo} value={year.codigo}>
                                     {year.nome}

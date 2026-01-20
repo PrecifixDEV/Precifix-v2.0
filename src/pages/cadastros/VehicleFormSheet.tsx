@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StandardSheet } from "@/components/ui/StandardSheet";
+
+import { compressAndConvertToWebP } from "@/utils/imageUtils";
+
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FipeVehicleSelector } from "@/components/vehicles/FipeVehicleSelector";
 import type { FipeVehicle } from "@/services/fipeService";
-import { clientsService } from "@/services/clientsService";
+import { clientsService, type VehicleWithPhotos } from "@/services/clientsService";
 import { toast } from "sonner";
 import { X, Camera } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -16,13 +19,51 @@ interface VehicleFormSheetProps {
     clientId: string;
     onSuccess: () => void;
     onLocalSave?: (vehicle: any, photos: File[]) => void;
+    vehicleToEdit?: VehicleWithPhotos | null;
+    onDelete?: (id: string) => void;
 }
 
-export function VehicleFormSheet({ open, onOpenChange, clientId, onSuccess, onLocalSave }: VehicleFormSheetProps) {
+export function VehicleFormSheet({ open, onOpenChange, clientId, onSuccess, onLocalSave, vehicleToEdit, onDelete }: VehicleFormSheetProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [fipeData, setFipeData] = useState<FipeVehicle | null>(null);
     const [plate, setPlate] = useState("");
     const [color, setColor] = useState("");
+
+
+
+    // Populate form if editing
+    useEffect(() => {
+        if (open && vehicleToEdit) {
+            setFipeData({
+                Marca: vehicleToEdit.brand || "",
+                Modelo: vehicleToEdit.model || "",
+                AnoModelo: Number(vehicleToEdit.year) || 0,
+                CodigoFipe: "",
+                MesReferencia: "",
+                TipoVeiculo: vehicleToEdit.type === 'carro' ? 1 : vehicleToEdit.type === 'moto' ? 2 : 3,
+                SiglaCombustivel: "",
+                Combustivel: "",
+                Valor: ""
+            });
+            setPlate(vehicleToEdit.plate || "");
+            setColor(vehicleToEdit.color || "");
+
+            // For existing photos, we just show them. 
+            // New uploads will be appended to `photos` state.
+            // Existing photos are in `vehicleToEdit.vehicle_photos`.
+            // We can map these to previews for display, BUT `photos` state is for FILES (new uploads).
+            // Mixed state approach:
+            setPhotoPreviews(vehicleToEdit.vehicle_photos?.map(p => p.url) || []);
+            setPhotos([]); // Clear any previous file selection
+        } else if (open && !vehicleToEdit) {
+            // Reset if opening in create mode
+            setFipeData(null);
+            setPlate("");
+            setColor("");
+            setPhotos([]);
+            setPhotoPreviews([]);
+        }
+    }, [open, vehicleToEdit]);
 
     // Photo State
     const [photos, setPhotos] = useState<File[]>([]);
@@ -32,21 +73,51 @@ export function VehicleFormSheet({ open, onOpenChange, clientId, onSuccess, onLo
         setFipeData(vehicle);
     };
 
-    const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            const newFiles = Array.from(e.target.files);
+            setIsLoading(true);
+            try {
+                const newFiles = await Promise.all(
+                    Array.from(e.target.files).map(async (file) => {
+                        return await compressAndConvertToWebP(file);
+                    })
+                );
 
-            if (photos.length + newFiles.length > 2) {
-                toast.error("Máximo de 2 fotos permitidas.");
-                return;
+                if (photos.length + newFiles.length > 2) {
+                    toast.error("Máximo de 2 fotos permitidas.");
+                    return;
+                }
+
+                const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+
+                setPhotos([...photos, ...newFiles]);
+                setPhotoPreviews([...photoPreviews, ...newPreviews]);
+            } catch (error) {
+                console.error("Erro ao processar imagens:", error);
+                toast.error("Erro ao processar imagens.");
+            } finally {
+                setIsLoading(false);
             }
-
-            const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-
-            setPhotos([...photos, ...newFiles]);
-            setPhotoPreviews([...photoPreviews, ...newPreviews]);
         }
     };
+
+
+
+    const confirmDelete = async () => {
+        if (!vehicleToEdit?.id || !onDelete) return;
+
+        try {
+            setIsLoading(true);
+            await onDelete(vehicleToEdit.id);
+            onOpenChange(false);
+        } catch (error) {
+            console.error("Erro ao deletar veículo:", error);
+            toast.error("Erro ao deletar veículo");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     const removePhoto = (index: number) => {
         const newPhotos = [...photos];
@@ -94,26 +165,35 @@ export function VehicleFormSheet({ open, onOpenChange, clientId, onSuccess, onLo
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Usuário não autenticado");
 
-            // 1. Save Vehicle
+            // 1. Save/Update Vehicle
             const vehiclePayload = {
                 ...vehiclePayloadBase,
                 client_id: clientId,
                 user_id: user.id
             };
 
-            const savedVehicle = await clientsService.addVehicle(vehiclePayload);
+            let vehicleId = "";
 
-            // 2. Upload Photos
-            if (photos.length > 0 && savedVehicle) {
+            if (vehicleToEdit) {
+                const updatedVehicle = await clientsService.updateVehicle(vehicleToEdit.id, vehiclePayload);
+                vehicleId = updatedVehicle.id;
+            } else {
+                const savedVehicle = await clientsService.addVehicle(vehiclePayload);
+                vehicleId = savedVehicle.id;
+            }
+
+            // 2. Upload Photos (New Photos only)
+            // Existing photos are already on the server. We only upload NEW files in `photos` state.
+            if (photos.length > 0 && vehicleId) {
                 for (const photo of photos) {
                     const publicUrl = await clientsService.uploadVehiclePhoto(photo);
                     if (publicUrl) {
-                        await clientsService.addVehiclePhotoRef(savedVehicle.id, publicUrl);
+                        await clientsService.addVehiclePhotoRef(vehicleId, publicUrl);
                     }
                 }
             }
 
-            toast.success("Veículo adicionado com sucesso!");
+            toast.success(vehicleToEdit ? "Veículo atualizado!" : "Veículo adicionado!");
             onSuccess();
             handleClose();
 
@@ -127,23 +207,26 @@ export function VehicleFormSheet({ open, onOpenChange, clientId, onSuccess, onLo
     };
 
     const handleClose = () => {
-        setFipeData(null);
-        setPlate("");
-        setColor("");
-        setPhotos([]);
-        setPhotoPreviews([]);
+        // Only reset if completely closing, or if we want to ensure clean state next open
+        // The useEffect handles population on open, so just closing is fine.
         onOpenChange(false);
     };
+
+
 
     return (
         <StandardSheet
             open={open}
-            onOpenChange={handleClose}
-            title="Novo Veículo"
+            onOpenChange={onOpenChange}
+            title={vehicleToEdit ? "Editar Veículo" : "Novo Veículo"}
             onSave={handleSave}
             isLoading={isLoading}
-            saveLabel="Salvar Veículo"
+            saveLabel={vehicleToEdit ? "Salvar Alterações" : "Salvar Veículo"}
             isSaveDisabled={!fipeData}
+            onDelete={vehicleToEdit?.id ? confirmDelete : undefined}
+            deleteLabel="Excluir"
+            deleteConfirmTitle="Excluir Veículo"
+            deleteConfirmDescription="Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita."
         >
             <div className="space-y-6">
                 {/* FIPE Selector */}

@@ -57,7 +57,7 @@ export const MobileMenu = () => {
                 { name: 'Agenda', href: '/schedule', icon: Calendar },
                 { name: 'Minha Empresa', href: '/minha-empresa', icon: Building2 },
                 { name: 'Meu Perfil', href: '/profile', icon: User },
-                { name: 'Configurações', href: '/settings/categories', icon: Settings },
+                { name: 'Configurações', href: '/settings', icon: Settings },
             ]
         }
     ]

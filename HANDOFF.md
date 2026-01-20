@@ -1,3 +1,19 @@
+# Handoff Log - 2026-01-20
+
+## Work Completed
+1.  **Client Avatar Refactor (`Clients.tsx`)**:
+    -   **Shadcn UI**: Replaced external `ui-avatars.com` image tags with Shadcn's `<Avatar>` component.
+    -   **Helper**: Implemented `getInitials` helper for robust fallback generation.
+    -   **Experience**: Improved visual consistency and removed external dependency.
+
+2.  **Client Details Sheet Removal (`Clients.tsx`)**:
+    -   **Refactor**: Removed the "Detalhes" side sheet as requested to simplify the UI.
+    -   **Cleanup**: Removed associated state variables, handlers, and "Info" action buttons.
+
+3.  **Standardized Delete Button (`StandardSheet.tsx`, `VehicleFormSheet.tsx`)**:
+    -   **Standardization**: Updated `StandardSheet` to accept an `onDelete` prop, rendering a standardized "Green Save + Red Trash" footer layout with internal confirmation.
+    -   **Implementation**: Refactored `VehicleFormSheet` to use this new standard, removing custom footer code.
+
 # Handoff Log - 2026-01-19
 
 ## Work Completed

@@ -2,10 +2,11 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Upload, Trash2, SprayCan, Brush, Zap, DollarSign, FileText, Tag, Image } from 'lucide-react';
+import { Upload, Trash2, SprayCan, Brush, Zap, FileText, Tag, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import { StandardSheet, StandardSheetToggle } from "@/components/ui/StandardSheet";
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -20,9 +21,7 @@ const productSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório"),
     code: z.string().optional(),
     description: z.string().max(500, "Descrição deve ter no máximo 500 caracteres").optional(),
-    price: z.union([z.string(), z.number()])
-        .transform((v) => (v === "" ? undefined : Number(v)))
-        .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Preço deve ser positivo" }),
+    price: z.coerce.number().min(0.01, "Preço deve ser positivo"),
     stock_quantity: z.union([z.string(), z.number()])
         .transform((v) => (v === "" ? undefined : Number(v)))
         .refine((v) => v !== undefined && !isNaN(v) && v >= 0, { message: "Estoque deve ser positivo" }),
@@ -76,7 +75,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
             name: '',
             code: '',
             description: '',
-            price: '' as any,
+            price: 0,
             stock_quantity: '' as any,
             size: '',
             is_dilutable: false,
@@ -134,7 +133,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                     name: '',
                     code: '',
                     description: '',
-                    price: '' as any,
+                    price: 0,
                     stock_quantity: '' as any,
                     size: '',
                     is_dilutable: false,
@@ -361,34 +360,29 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="price">Qt. Pagou (R$) <span className="text-red-500">*</span></Label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        id="price"
-                                        type="number"
-                                        step="0.01"
-                                        {...register("price")}
-                                        className="bg-white dark:bg-zinc-950 border-input pl-9"
-                                        placeholder="0,00"
-                                    />
-                                </div>
-                                {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="stock_quantity">Estoque <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="stock_quantity"
-                                    type="number"
-                                    {...register("stock_quantity")}
+                                <CurrencyInput
+                                    id="price"
+                                    placeholder="0,00"
+                                    value={watch('price')}
+                                    onValueChange={(val) => setValue('price', val)}
                                     className="bg-white dark:bg-zinc-950 border-input"
-                                    placeholder="0"
                                 />
-                                {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity.message}</p>}
                             </div>
+                            {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="stock_quantity">Estoque <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="stock_quantity"
+                                type="number"
+                                {...register("stock_quantity")}
+                                className="bg-white dark:bg-zinc-950 border-input"
+                                placeholder="0"
+                            />
+                            {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity.message}</p>}
                         </div>
                     </div>
-
                     {/* 3. CONDITIONAL FIELDS (LIQUID ONLY) */}
                     {productType === 'liquid' && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -509,16 +503,13 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                             {watch("is_for_sale") && (
                                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                     <Label htmlFor="sale_price">Preço de Venda (R$)</Label>
-                                    <div className="relative">
-                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            id="sale_price"
-                                            type="number"
-                                            step="0.01"
-                                            {...register("sale_price")}
-                                            className="bg-white dark:bg-zinc-950 border-input pl-9"
-                                        />
-                                    </div>
+                                    <CurrencyInput
+                                        id="sale_price"
+                                        placeholder="0,00"
+                                        value={watch('sale_price') || 0}
+                                        onValueChange={(val) => setValue('sale_price', val)}
+                                        className="bg-white dark:bg-zinc-950 border-input"
+                                    />
                                 </div>
                             )}
                         </div>
@@ -578,8 +569,8 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         </div>
                     )}
 
-                </form>
-            </div>
-        </StandardSheet>
+                </form >
+            </div >
+        </StandardSheet >
     );
 }
