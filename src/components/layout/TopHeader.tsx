@@ -54,7 +54,7 @@ export function TopHeader() {
                 {isHome ? (
                     <img src={logo} alt="Precifix Logo" className="h-10 w-auto object-contain" />
                 ) : (
-                    <h1 className="text-2xl font-bold text-white whitespace-nowrap">{pageTitle}</h1>
+                    <h1 className="text-2xl font-bold text-white whitespace-nowrap uppercase tracking-tight">{pageTitle}</h1>
                 )}
             </div>
 

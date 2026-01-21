@@ -6,15 +6,7 @@ export interface StorageFile {
     updated_at: string;
     created_at: string;
     last_accessed_at: string;
-    metadata: {
-        eTag: string;
-        size: number;
-        mimetype: string;
-        cacheControl: string;
-        lastModified: string;
-        contentLength: number;
-        httpStatusCode: number;
-    };
+    metadata: any;
     bucket_id: string;
     url: string; // Public URL we construct
 }
@@ -121,7 +113,7 @@ export const storageService = {
             // These are rows in 'vehicle_photos'
             // We delete the row directly by URL
             const { error } = await supabase
-                .from('vehicle_photos')
+                .from('vehicle_photos' as any)
                 .delete()
                 .eq('url', publicUrl);
 

@@ -1,10 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Tag, Package, ChevronRight, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { Tag, Package, ChevronRight } from 'lucide-react';
 
 export default function Settings() {
-    const navigate = useNavigate();
 
     const settingsItems = [
         {

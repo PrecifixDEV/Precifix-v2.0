@@ -36,7 +36,7 @@ export function ConfirmDrawer({
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={!isLoading}>
             <DrawerContent>
                 <DrawerHeader>
-                    <DrawerTitle>{title}</DrawerTitle>
+                    <DrawerTitle className="uppercase tracking-tighter">{title}</DrawerTitle>
                     <DrawerDescription>{description}</DrawerDescription>
                 </DrawerHeader>
                 <DrawerFooter>
@@ -44,12 +44,12 @@ export function ConfirmDrawer({
                         onClick={onConfirm}
                         variant={variant}
                         disabled={isLoading}
-                        className="w-full"
+                        className="w-full font-bold uppercase tracking-wider"
                     >
                         {isLoading ? "Processando..." : confirmLabel}
                     </Button>
                     <DrawerClose asChild>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full font-bold uppercase tracking-wider">
                             {cancelLabel}
                         </Button>
                     </DrawerClose>

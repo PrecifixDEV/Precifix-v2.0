@@ -218,14 +218,14 @@ export function VehicleFormSheet({ open, onOpenChange, clientId, onSuccess, onLo
         <StandardSheet
             open={open}
             onOpenChange={onOpenChange}
-            title={vehicleToEdit ? "Editar Veículo" : "Novo Veículo"}
+            title={vehicleToEdit ? "EDITAR VEÍCULO" : "NOVO VEÍCULO"}
             onSave={handleSave}
             isLoading={isLoading}
-            saveLabel={vehicleToEdit ? "Salvar Alterações" : "Salvar Veículo"}
+            saveLabel={vehicleToEdit ? "SALVAR ALTERAÇÕES" : "SALVAR VEÍCULO"}
             isSaveDisabled={!fipeData}
             onDelete={vehicleToEdit?.id ? confirmDelete : undefined}
-            deleteLabel="Excluir"
-            deleteConfirmTitle="Excluir Veículo"
+            deleteLabel="EXCLUIR"
+            deleteConfirmTitle="EXCLUIR VEÍCULO"
             deleteConfirmDescription="Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita."
         >
             <div className="space-y-6">

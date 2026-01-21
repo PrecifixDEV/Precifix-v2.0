@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trash2, Search, Pencil, Printer, Filter, Car, Bike, Truck, MoreVertical } from "lucide-react";
+import { Trash2, Search, Pencil, Printer, SlidersHorizontal, Car, Bike, Truck, MoreVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -254,76 +254,119 @@ export const Clients = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Clientes</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 hidden md:block">Gerencie seus clientes</p>
+                <div className="hidden md:block">
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white uppercase tracking-tight">Clientes</h1>
+                    <p className="text-zinc-500 dark:text-zinc-400">Gerencie seus clientes</p>
                 </div>
-                <Button onClick={handleCreate} className="w-full md:w-auto">
-                    Adicionar Novo Cliente
+                <Button
+                    onClick={handleCreate}
+                    className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-tight gap-2"
+                >
+                    <Plus className="h-5 w-5" />
+                    NOVO CLIENTE
                 </Button>
             </div>
 
-            {/* Search and Filters - Moved outside Card */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2 flex-1 w-full md:max-w-sm">
-                    {/* Mobile Select All */}
-                    <div className="md:hidden flex items-center justify-center mr-1">
-                        <Checkbox
-                            checked={selectedClients.length === filteredClients.length && filteredClients.length > 0}
-                            onCheckedChange={toggleSelectAll}
+            {/* Search and Filters */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 w-full">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
+                        <Input
+                            placeholder="Buscar clientes..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="h-10 pl-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-sm placeholder:text-zinc-400 w-full"
                         />
                     </div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-zinc-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : ''}`}>
-                                <Filter className="h-4 w-4" />
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                title="Filtrar"
+                                className={`h-10 w-10 shrink-0 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+                            >
+                                <SlidersHorizontal className="h-5 w-5" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56">
-                            <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel className="uppercase tracking-tighter font-bold">Filtrar por:</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => setFilterType('all')} className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}>
-                                Todos
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('all')}
+                                className={filterType === 'all' ? 'bg-yellow-500 dark:bg-yellow-500 text-zinc-900 dark:text-zinc-900 font-bold' : ''}
+                            >
+                                TODOS
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <div className="relative flex-1 w-full">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
-                        <Input
-                            placeholder="Buscar clientes..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-white dark:bg-zinc-900"
-                        />
-                    </div>
-
-                    <div className="md:hidden flex items-center gap-2">
+                    {/* Desktop Bulk Actions */}
+                    <div className="hidden md:flex items-center gap-2">
                         {selectedClients.length > 0 && (
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
-                                    <Printer className="h-4 w-4" />
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleBulkPrint}
+                                    title="Imprimir Selecionados"
+                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                >
+                                    <Printer className="h-5 w-5" />
                                 </Button>
-                                <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
-                                    <Trash2 className="h-4 w-4" />
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setClientToDelete({ id: 'bulk' } as any)}
+                                    title="Excluir Selecionados"
+                                    className="h-10 w-10"
+                                >
+                                    <Trash2 className="h-5 w-5" />
                                 </Button>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="hidden md:flex items-center gap-2">
-                    {selectedClients.length > 0 && (
-                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
-                                <Printer className="h-4 w-4" />
-                            </Button>
-                            <Button variant="destructive" size="icon" onClick={() => setClientToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
+                <div className="flex items-center justify-between w-full h-10">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={toggleSelectAll}>
+                        <Checkbox
+                            checked={filteredClients.length > 0 && selectedClients.length === filteredClients.length}
+                            onCheckedChange={toggleSelectAll}
+                            className="h-5 w-5"
+                        />
+                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                            Selecionar Todos
+                        </span>
+                    </div>
+
+                    {/* Mobile Bulk Actions */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {selectedClients.length > 0 && (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleBulkPrint}
+                                    title="Imprimir Selecionados"
+                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                >
+                                    <Printer className="h-5 w-5" />
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setClientToDelete({ id: 'bulk' } as any)}
+                                    title="Excluir Selecionados"
+                                    className="h-10 w-10"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -346,85 +389,87 @@ export const Clients = () => {
                                     });
 
                                     return (
-                                        <div
-                                            key={client.id}
-                                            className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0 cursor-pointer"
-                                            onClick={() => handleEdit(client)}
-                                        >
-                                            <div className="flex items-center justify-between gap-3 mb-2">
-                                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                    <div onClick={(e) => e.stopPropagation()}>
-                                                        <Checkbox
-                                                            checked={selectedClients.includes(client.id)}
-                                                            onCheckedChange={() => toggleSelect(client.id)}
-                                                        />
+                                        <div key={client.id}>
+                                            <div
+                                                className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0 cursor-pointer"
+                                                onClick={() => handleEdit(client)}
+                                            >
+                                                <div className="flex items-center justify-between gap-3 mb-2">
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                        <div onClick={(e) => e.stopPropagation()}>
+                                                            <Checkbox
+                                                                checked={selectedClients.includes(client.id)}
+                                                                onCheckedChange={() => toggleSelect(client.id)}
+                                                                className="h-5 w-5"
+                                                            />
+                                                        </div>
+
+                                                        {/* Avatar for Mobile List */}
+                                                        <Avatar className="h-10 w-10 border border-zinc-200 dark:border-zinc-700">
+                                                            <AvatarImage src={undefined} alt={client.name} />
+                                                            <AvatarFallback className="bg-yellow-400 text-black font-bold">
+                                                                {getInitials(client.name)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+
+                                                        <div className="font-bold text-base truncate">{client.name}</div>
                                                     </div>
 
-                                                    {/* Avatar for Mobile List */}
-                                                    <Avatar className="h-10 w-10 border border-zinc-200 dark:border-zinc-700">
-                                                        <AvatarImage src={undefined} alt={client.name} />
-                                                        <AvatarFallback className="bg-yellow-400 text-black font-bold">
-                                                            {getInitials(client.name)}
-                                                        </AvatarFallback>
-                                                    </Avatar>
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
 
-                                                    <div className="font-bold text-base truncate">{client.name}</div>
+                                                                <DropdownMenuItem onClick={() => handleEdit(client)}>
+                                                                    <Pencil className="mr-2 h-4 w-4" /> Editar
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => setClientToDelete(client)} className="text-destructive focus:text-destructive">
+                                                                    <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
                                                 </div>
 
-                                                <div onClick={(e) => e.stopPropagation()}>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
-                                                                <MoreVertical className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-
-                                                            <DropdownMenuItem onClick={() => handleEdit(client)}>
-                                                                <Pencil className="mr-2 h-4 w-4" /> Editar
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => setClientToDelete(client)} className="text-destructive focus:text-destructive">
-                                                                <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 gap-1 text-sm pl-0">
-                                                <div>
-                                                    <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">CPF/CNPJ:</span>
-                                                    <span>{client.document || "-"}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">Cidade/UF:</span>
-                                                    <span>{client.city ? `${client.city}/${client.state}` : "-"}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">Telefone:</span>
-                                                    <span>{client.phone || "-"}</span>
-                                                </div>
-                                                <div
-                                                    className="flex items-center gap-1 mt-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
-                                                >
-                                                    <span className="font-bold mr-1">Veículos:</span>
-                                                    <div className="flex gap-1.5 flex-wrap">
-                                                        {vehicleCounts.carro > 0 && (
-                                                            <div className="flex items-center text-[10px] bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">
-                                                                <Car className="w-3 h-3 mr-1" /> {vehicleCounts.carro}
-                                                            </div>
-                                                        )}
-                                                        {vehicleCounts.moto > 0 && (
-                                                            <div className="flex items-center text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
-                                                                <Bike className="w-3 h-3 mr-1" /> {vehicleCounts.moto}
-                                                            </div>
-                                                        )}
-                                                        {vehicleCounts.caminhao > 0 && (
-                                                            <div className="flex items-center text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
-                                                                <Truck className="w-3 h-3 mr-1" /> {vehicleCounts.caminhao}
-                                                            </div>
-                                                        )}
-                                                        {client.vehicles?.length === 0 && <span className="text-muted-foreground">-</span>}
+                                                <div className="grid grid-cols-1 gap-1 text-sm pl-0">
+                                                    <div>
+                                                        <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">CPF/CNPJ:</span>
+                                                        <span>{client.document || "-"}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">Cidade/UF:</span>
+                                                        <span>{client.city ? `${client.city}/${client.state}` : "-"}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-xs text-muted-foreground uppercase mr-1">Telefone:</span>
+                                                        <span>{client.phone || "-"}</span>
+                                                    </div>
+                                                    <div
+                                                        className="flex items-center gap-1 mt-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
+                                                    >
+                                                        <span className="font-bold mr-1">Veículos:</span>
+                                                        <div className="flex gap-1.5 flex-wrap">
+                                                            {vehicleCounts.carro > 0 && (
+                                                                <div className="flex items-center text-[10px] bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">
+                                                                    <Car className="w-3 h-3 mr-1" /> {vehicleCounts.carro}
+                                                                </div>
+                                                            )}
+                                                            {vehicleCounts.moto > 0 && (
+                                                                <div className="flex items-center text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
+                                                                    <Bike className="w-3 h-3 mr-1" /> {vehicleCounts.moto}
+                                                                </div>
+                                                            )}
+                                                            {vehicleCounts.caminhao > 0 && (
+                                                                <div className="flex items-center text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                                                    <Truck className="w-3 h-3 mr-1" /> {vehicleCounts.caminhao}
+                                                                </div>
+                                                            )}
+                                                            {client.vehicles?.length === 0 && <span className="text-muted-foreground">-</span>}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -442,6 +487,7 @@ export const Clients = () => {
                                                 <Checkbox
                                                     checked={selectedClients.length === filteredClients.length && filteredClients.length > 0}
                                                     onCheckedChange={toggleSelectAll}
+                                                    className="h-5 w-5"
                                                 />
                                             </TableHead>
                                             <TableHead>Nome</TableHead>
@@ -463,6 +509,7 @@ export const Clients = () => {
                                                     <Checkbox
                                                         checked={selectedClients.includes(client.id)}
                                                         onCheckedChange={() => toggleSelect(client.id)}
+                                                        className="h-5 w-5"
                                                     />
                                                 </TableCell>
                                                 <TableCell className="font-medium">
@@ -572,6 +619,6 @@ export const Clients = () => {
             </AlertDialog>
 
 
-        </div>
+        </div >
     );
 };

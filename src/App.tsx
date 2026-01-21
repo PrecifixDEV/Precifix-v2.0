@@ -23,6 +23,7 @@ import { ProductCostCalculator } from './pages/tools/ProductCostCalculator'
 import FinancialCategories from './pages/settings/FinancialCategories';
 import { MyFiles } from './pages/settings/MyFiles';
 import Settings from './pages/settings/Settings';
+import { VisualTest } from './pages/tests/VisualTest';
 
 
 import { ProfileMenu } from './pages/ProfileMenu'
@@ -73,6 +74,7 @@ function App() {
             {/* Tools Routes */}
             <Route path="/tools/dilution-calculator" element={<DilutionCalculator />} />
             <Route path="/tools/product-cost" element={<ProductCostCalculator />} />
+            <Route path="/visual-test" element={<VisualTest />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

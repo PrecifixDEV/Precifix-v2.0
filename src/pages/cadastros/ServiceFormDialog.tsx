@@ -2,18 +2,19 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ServiceIconSelector } from "@/components/services/ServiceIconSelector";
 import { servicesService, type Service } from "@/services/servicesService";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, RefreshCw, DollarSign, Percent, Clock, Tag, Users } from "lucide-react";
-import { cn, minutesToHHMM, hhmmToMinutes } from "@/lib/utils";
+import { RefreshCw, DollarSign, Percent, Clock, Tag, Users, FileText, Coins } from "lucide-react";
+import { minutesToHHMM, hhmmToMinutes } from "@/lib/utils";
+import { suggestIcon } from "@/components/services/ServiceIconSelector";
+import { StandardSheet, StandardSheetToggle } from "@/components/ui/StandardSheet";
 import { useQuery } from '@tanstack/react-query';
 
 const serviceSchema = z.object({
@@ -48,16 +49,7 @@ interface ServiceFormDialogProps {
     onSuccess: () => void;
 }
 
-// Simple heuristic to suggest icons based on service name
-const suggestIcon = (name: string): string => {
-    const lower = name.toLowerCase();
-    if (lower.includes("lavagem") || lower.includes("completa")) return "CarFront";
-    if (lower.includes("polimento") || lower.includes("cristaliza")) return "Sparkles";
-    if (lower.includes("higieniza") || lower.includes("interno")) return "SprayCan";
-    if (lower.includes("motor")) return "Cog";
-    if (lower.includes("enceramento") || lower.includes("cera")) return "Droplets";
-    return "CarFront"; // Default
-};
+// suggestIcon is now imported from ServiceIconSelector
 
 export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     open,
@@ -67,6 +59,11 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
 }) => {
     const [loading, setLoading] = useState(false);
     const [durationInput, setDurationInput] = useState("");
+
+    // Toggle States for Optional Fields
+    const [showDescription, setShowDescription] = useState(false);
+    const [showCommission, setShowCommission] = useState(false);
+    // Costs are now mandatory
 
     const form = useForm<ServiceFormValues>({
         resolver: zodResolver(serviceSchema) as any,
@@ -176,6 +173,10 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
                     labor_cost_per_hour: serviceToEdit.labor_cost_per_hour || 0,
                 });
                 setDurationInput(minutesToHHMM(serviceToEdit.duration_minutes || 60));
+
+                // Set toggles based on existing data
+                setShowDescription(!!serviceToEdit.description);
+                setShowCommission(!!serviceToEdit.commission_percent);
             } else {
                 form.reset({
                     name: "",
@@ -195,8 +196,13 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
         form.setValue("name", name, { shouldValidate: true });
-        const suggested = suggestIcon(name);
-        form.setValue("icon", suggested);
+
+        // Only suggest icon if the current one is the default
+        const currentIcon = form.getValues("icon");
+        if (!currentIcon || currentIcon === "CarFront") {
+            const suggested = suggestIcon(name);
+            form.setValue("icon", suggested);
+        }
     };
 
     const onSubmit = async (values: ServiceFormValues) => {
@@ -232,223 +238,224 @@ export const ServiceFormDialog: React.FC<ServiceFormDialogProps> = ({
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
-                <DialogHeader>
-                    <DialogTitle className="text-zinc-900 dark:text-white">{serviceToEdit ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
-                </DialogHeader>
-
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="flex gap-4 items-start">
+        <StandardSheet
+            open={open}
+            onOpenChange={onOpenChange}
+            title={serviceToEdit ? "EDITAR SERVIÇO" : "NOVO SERVIÇO"}
+            onSave={form.handleSubmit(onSubmit)}
+            isLoading={loading}
+            isSaveDisabled={!isValid}
+            saveLabel={serviceToEdit ? 'SALVAR ALTERAÇÕES' : 'CRIAR SERVIÇO'}
+            optionalFieldsToggles={
+                <>
+                    <StandardSheetToggle
+                        label="Descrição"
+                        active={showDescription}
+                        onClick={() => setShowDescription(!showDescription)}
+                        icon={<FileText className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Comissão"
+                        active={showCommission}
+                        onClick={() => setShowCommission(!showCommission)}
+                        icon={<Percent className="h-4 w-4" />}
+                    />
+                </>
+            }
+        >
+            <Form {...form}>
+                <form id="service-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="flex gap-4 items-start pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                        <FormField
+                            control={form.control}
+                            name="icon"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Ícone</FormLabel>
+                                    <div className="flex justify-center">
+                                        <FormControl>
+                                            <ServiceIconSelector
+                                                value={field.value || "CarFront"}
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex-1">
                             <FormField
                                 control={form.control}
-                                name="icon"
+                                name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Ícone</FormLabel>
-                                        <div className="flex justify-center">
-                                            <FormControl>
-                                                <ServiceIconSelector
-                                                    value={field.value || "CarFront"}
-                                                    onChange={field.onChange}
-                                                />
-                                            </FormControl>
-                                        </div>
+                                        <FormLabel className="!text-foreground">Nome do Serviço <span className="text-red-500">*</span></FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Ex: Lavagem Simples"
+                                                {...field}
+                                                className="bg-white dark:bg-zinc-950 border-input"
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    handleNameChange(e);
+                                                }}
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <div className="flex-1 space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field, fieldState }) => (
-                                        <FormItem>
-                                            <FormLabel className="!text-foreground">Nome do Serviço *</FormLabel>
-                                            <TooltipProvider>
-                                                <Tooltip open={!!fieldState.error}>
-                                                    <TooltipTrigger asChild>
-                                                        <FormControl>
-                                                            <Input
-                                                                placeholder="Ex: Lavagem Simples"
-                                                                {...field}
-                                                                className="bg-white dark:bg-zinc-800"
-                                                                onChange={(e) => {
-                                                                    field.onChange(e);
-                                                                    handleNameChange(e);
-                                                                }}
-                                                            />
-                                                        </FormControl>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                        <p>{fieldState.error?.message || "Nome é obrigatório"}</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Descrição</FormLabel>
-                                            <FormControl>
-                                                <Textarea placeholder="Detalhes do serviço..." {...field} className="bg-white dark:bg-zinc-800" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                            <FormField
-                                control={form.control}
-                                name="price"
-                                render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <FormLabel className="!text-foreground">Valor Cobrado (R$)</FormLabel>
-                                        <TooltipProvider>
-                                            <Tooltip open={!!fieldState.error}>
-                                                <TooltipTrigger asChild>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                            <Input type="number" step="0.01" placeholder="0.00" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
-                                                        </div>
-                                                    </FormControl>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                    <p>{fieldState.error?.message || "Valor obrigatório"}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="duration_minutes"
-                                render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <FormLabel className="!text-foreground">Tempo de Execução</FormLabel>
-                                        <TooltipProvider>
-                                            <Tooltip open={!!fieldState.error}>
-                                                <TooltipTrigger asChild>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="HH:MM"
-                                                                className="pl-8 bg-white dark:bg-zinc-800"
-                                                                value={durationInput}
-                                                                onChange={(e) => {
-                                                                    let val = e.target.value.replace(/[^0-9:]/g, "");
-                                                                    if (val.length === 2 && !val.includes(":")) val += ":";
-                                                                    if (val.length > 5) val = val.slice(0, 5);
-                                                                    setDurationInput(val);
-                                                                    const minutes = hhmmToMinutes(val);
-                                                                    field.onChange(minutes);
-                                                                }}
-                                                                onBlur={() => {
-                                                                    const minutes = hhmmToMinutes(durationInput);
-                                                                    if (minutes > 0) {
-                                                                        setDurationInput(minutesToHHMM(minutes));
-                                                                        field.onChange(minutes);
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </FormControl>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="bottom" align="start" className="bg-destructive text-destructive-foreground border-destructive">
-                                                    <p>{fieldState.error?.message || "Tempo obrigatório"}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
-                            <FormField
-                                control={form.control}
-                                name="labor_cost_per_hour"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <div className="flex items-center justify-between">
-                                            <FormLabel>Custo Hora (R$)</FormLabel>
-                                            <Button type="button" variant="ghost" size="sm" onClick={handleLoadSystemHourlyRate} className="h-5 text-xs text-muted-foreground hover:text-primary px-2 py-0">
-                                                <RefreshCw className="w-3 h-3 mr-1" />
-                                                Do Sistema
-                                            </Button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="!text-foreground">Valor Cobrado (R$)</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Input type="number" step="0.01" placeholder="0.00" {...field} className="pl-9 bg-white dark:bg-zinc-950 border-input" />
                                         </div>
-                                        <FormControl>
-                                            <div className="relative">
-                                                <Users className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
-                                            </div>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="commission_percent"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Comissão (%)</FormLabel>
-                                        <FormControl>
-                                            <div className="relative">
-                                                <Percent className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input type="number" step="0.1" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
-                                            </div>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="other_costs"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Outros Custos (R$)</FormLabel>
-                                        <FormControl>
-                                            <div className="relative">
-                                                <Tag className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                <Input type="number" step="0.01" {...field} className="pl-8 bg-white dark:bg-zinc-800" />
-                                            </div>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="duration_minutes"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="!text-foreground">Tempo Estimado</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Input
+                                                type="text"
+                                                placeholder="HH:MM"
+                                                className="pl-9 bg-white dark:bg-zinc-950 border-input font-mono"
+                                                value={durationInput}
+                                                onChange={(e) => {
+                                                    let val = e.target.value.replace(/[^0-9:]/g, "");
+                                                    if (val.length === 2 && !val.includes(":")) val += ":";
+                                                    if (val.length > 5) val = val.slice(0, 5);
+                                                    setDurationInput(val);
+                                                    const minutes = hhmmToMinutes(val);
+                                                    field.onChange(minutes);
+                                                }}
+                                                onBlur={() => {
+                                                    const minutes = hhmmToMinutes(durationInput);
+                                                    if (minutes > 0) {
+                                                        setDurationInput(minutesToHHMM(minutes));
+                                                        field.onChange(minutes);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    {/* Optional Fields Content (MOVED TO TOP) */}
+                    {showDescription && (
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem className="animate-in fade-in slide-in-from-top-2 pt-2">
+                                    <FormLabel>Descrição</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Detalhes do serviço..."
+                                            {...field}
+                                            className="bg-white dark:bg-zinc-950 min-h-[80px]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
+                    {showCommission && (
+                        <FormField
+                            control={form.control}
+                            name="commission_percent"
+                            render={({ field }) => (
+                                <FormItem className="animate-in fade-in slide-in-from-top-2 p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <Label className="text-base">Comissão por Execução</Label>
+                                        <Percent className="h-4 w-4 text-zinc-400" />
+                                    </div>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500" />
+                                            <Input type="number" step="0.1" {...field} className="pl-8 bg-white dark:bg-zinc-950 border-input" placeholder="0.0" />
+                                        </div>
+                                    </FormControl>
+                                    <p className="text-[10px] text-zinc-500 mt-2 italic">Valor em porcentagem pago ao funcionário por serviço.</p>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
+                    <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-base font-semibold">Cálculo de Custos</Label>
+                            <Coins className="h-4 w-4 text-yellow-500" />
                         </div>
 
-                        <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={loading || !isValid}
-                                className={cn(
-                                    "border-none",
-                                    !isValid ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600 text-zinc-900"
-                                )}
-                            >
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {serviceToEdit ? 'Salvar Alterações' : 'Criar Serviço'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                        <FormField
+                            control={form.control}
+                            name="labor_cost_per_hour"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex items-center justify-between">
+                                        <Label>Custo de Hora (R$)</Label>
+                                        <Button type="button" variant="ghost" size="sm" onClick={handleLoadSystemHourlyRate} className="h-5 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-zinc-800 px-2 py-0">
+                                            <RefreshCw className="w-3 h-3 mr-1" />
+                                            Usar média do sistema
+                                        </Button>
+                                    </div>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Input type="number" step="0.01" {...field} className="pl-9 bg-white dark:bg-zinc-950 border-input" />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="other_costs"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <Label>Custos de Produtos / Outros (R$)</Label>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Input type="number" step="0.01" {...field} className="pl-9 bg-white dark:bg-zinc-950 border-input" />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </form>
+            </Form>
+        </StandardSheet>
     );
 };

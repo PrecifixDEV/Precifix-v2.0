@@ -255,6 +255,23 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
         }
     };
 
+    const handleDeleteClient = async () => {
+        if (!clientToEdit?.id) return;
+
+        try {
+            setIsLoading(true);
+            await clientsService.deleteClient(clientToEdit.id);
+            toast.success("Cliente excluído com sucesso!");
+            onSuccess();
+            handleClose();
+        } catch (error) {
+            console.error("Erro ao excluir cliente:", error);
+            toast.error("Erro ao excluir cliente");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleClose = () => {
         setTempClientId("");
         onOpenChange(false);
@@ -291,10 +308,47 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
         <StandardSheet
             open={open}
             onOpenChange={handleClose}
-            title={clientToEdit ? "Editar Cliente" : "Novo Cliente"}
+            title={clientToEdit ? "EDITAR CLIENTE" : "NOVO CLIENTE"}
             onSave={handleSave}
             isLoading={isLoading}
-            saveLabel={clientToEdit ? "Salvar Alterações" : "Cadastrar Cliente"}
+            saveLabel={clientToEdit ? "SALVAR ALTERAÇÕES" : "CADASTRAR CLIENTE"}
+            onDelete={clientToEdit ? handleDeleteClient : undefined}
+            deleteConfirmTitle="EXCLUIR CLIENTE"
+            deleteConfirmDescription={`Deseja realmente excluir o cliente ${name}? Esta ação não pode ser desfeita.`}
+            optionalFieldsToggles={
+                <>
+                    <StandardSheetToggle
+                        label="Documento"
+                        active={showDocument}
+                        onClick={() => setShowDocument(!showDocument)}
+                        icon={<FileText className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Email"
+                        active={showEmail}
+                        onClick={() => setShowEmail(!showEmail)}
+                        icon={<Mail className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Endereço"
+                        active={showAddress}
+                        onClick={() => setShowAddress(!showAddress)}
+                        icon={<MapPin className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Nascimento"
+                        active={showBirthDate}
+                        onClick={() => setShowBirthDate(!showBirthDate)}
+                        icon={<Calendar className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Observações"
+                        active={showNotes}
+                        onClick={() => setShowNotes(!showNotes)}
+                        icon={<Edit className="h-4 w-4" />}
+                    />
+                </>
+            }
         >
             <div className="space-y-6">
                 {/* Mandatory Fields Section */}
@@ -329,129 +383,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                     </div>
                 </div>
 
-                {/* Inline Vehicle List (Always Visible) */}
-                <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                        <Label className="text-base font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                            <Car className="w-4 h-4 text-yellow-500" />
-                            Veículos
-                        </Label>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                                // Always allow opening logic - removed the requirement to save first
-                                setShowVehicleSheet(true);
-                            }}
-                            className="bg-white dark:bg-zinc-900 border-green-600/30 hover:border-green-500 text-green-600 dark:text-green-500 hover:text-green-500 dark:hover:text-green-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs h-8"
-                        >
-                            <Plus className="w-3 h-3 mr-1.5" />
-                            Novo Veículo
-                        </Button>
-                    </div>
-
-                    {allVehicles.length === 0 ? (
-                        <div className="text-center p-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
-                            <Car className="w-8 h-8 text-zinc-300 dark:text-zinc-700 mx-auto mb-2" />
-                            <p className="text-sm text-zinc-500">Nenhum veículo cadastrado</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {allVehicles.map((vehicle) => {
-                                // Safe check for vehicle_photos
-                                const hasPhoto = vehicle.vehicle_photos && vehicle.vehicle_photos.length > 0;
-                                const photoUrl = hasPhoto ? vehicle.vehicle_photos[0].url : null;
-                                const isTemp = vehicle.id.startsWith('temp-');
-
-                                return (
-                                    <div
-                                        key={vehicle.id}
-                                        onClick={() => {
-                                            setEditingVehicle(vehicle);
-                                            setShowVehicleSheet(true);
-                                        }}
-                                        className="relative overflow-hidden flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg group min-h-[72px] cursor-pointer hover:border-yellow-500/50 transition-colors"
-                                    >
-                                        {/* Background Image & Gradient */}
-                                        {photoUrl && (
-                                            <>
-                                                <img
-                                                    src={photoUrl}
-                                                    className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-80"
-                                                    alt="Vehicle"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-r from-zinc-50 via-zinc-50 to-transparent dark:from-zinc-900 dark:via-zinc-900 dark:to-transparent" />
-                                            </>
-                                        )}
-
-                                        <div className="relative z-10 flex-1 pr-4">
-                                            <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100 flex items-center">
-                                                {vehicle.model}
-                                                {isTemp && <span className="text-[10px] text-yellow-600 dark:text-yellow-500 font-bold bg-yellow-100 dark:bg-yellow-500/10 px-1.5 py-0.5 rounded ml-2 border border-yellow-200 dark:border-transparent">NOVO</span>}
-                                            </p>
-                                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{vehicle.brand} • {vehicle.plate || 'S/ Placa'}</p>
-                                        </div>
-
-                                        <div className="relative z-10">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteVehicle(vehicle.id, isTemp);
-                                                }}
-                                                className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all bg-white/80 dark:bg-zinc-900/50 backdrop-blur-sm"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                <div className="border-t border-zinc-200 dark:border-zinc-800 my-4" />
-
-                {/* Optional Fields Toggles */}
-                <div className="space-y-4">
-                    <Label className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Informações Adicionais</Label>
-                    <div className="flex flex-wrap gap-2">
-                        <StandardSheetToggle
-                            label="Documento"
-                            active={showDocument}
-                            onClick={() => setShowDocument(!showDocument)}
-                            icon={<FileText className="h-4 w-4" />}
-                        />
-                        <StandardSheetToggle
-                            label="Email"
-                            active={showEmail}
-                            onClick={() => setShowEmail(!showEmail)}
-                            icon={<Mail className="h-4 w-4" />}
-                        />
-                        <StandardSheetToggle
-                            label="Endereço"
-                            active={showAddress}
-                            onClick={() => setShowAddress(!showAddress)}
-                            icon={<MapPin className="h-4 w-4" />}
-                        />
-                        <StandardSheetToggle
-                            label="Nascimento"
-                            active={showBirthDate}
-                            onClick={() => setShowBirthDate(!showBirthDate)}
-                            icon={<Calendar className="h-4 w-4" />}
-                        />
-                        <StandardSheetToggle
-                            label="Observações"
-                            active={showNotes}
-                            onClick={() => setShowNotes(!showNotes)}
-                            icon={<Edit className="h-4 w-4" />}
-                        />
-                    </div>
-                </div>
-
-                {/* Optional Fields Content */}
+                {/* Optional Fields Content (MOVED TO TOP) */}
                 <div className="space-y-4">
                     {showDocument && (
                         <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
@@ -567,6 +499,89 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                                 className="bg-white dark:bg-zinc-950 border-input min-h-[80px]"
                                 placeholder="Informações adicionais..."
                             />
+                        </div>
+                    )}
+                </div>
+
+                {/* Inline Vehicle List (Always Visible) */}
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                        <Label className="text-base font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                            <Car className="w-4 h-4 text-yellow-500" />
+                            Veículos
+                        </Label>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                // Always allow opening logic - removed the requirement to save first
+                                setShowVehicleSheet(true);
+                            }}
+                            className="bg-white dark:bg-zinc-900 border-green-600/30 hover:border-green-500 text-green-600 dark:text-green-500 hover:text-green-500 dark:hover:text-green-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs h-8"
+                        >
+                            <Plus className="w-3 h-3 mr-1.5" />
+                            Novo Veículo
+                        </Button>
+                    </div>
+
+                    {allVehicles.length === 0 ? (
+                        <div className="text-center p-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
+                            <Car className="w-8 h-8 text-zinc-300 dark:text-zinc-700 mx-auto mb-2" />
+                            <p className="text-sm text-zinc-500">Nenhum veículo cadastrado</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {allVehicles.map((vehicle) => {
+                                // Safe check for vehicle_photos
+                                const hasPhoto = vehicle.vehicle_photos && vehicle.vehicle_photos.length > 0;
+                                const photoUrl = hasPhoto ? vehicle.vehicle_photos[0].url : null;
+                                const isTemp = vehicle.id.startsWith('temp-');
+
+                                return (
+                                    <div
+                                        key={vehicle.id}
+                                        onClick={() => {
+                                            setEditingVehicle(vehicle);
+                                            setShowVehicleSheet(true);
+                                        }}
+                                        className="relative overflow-hidden flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg group min-h-[72px] cursor-pointer hover:border-yellow-500/50 transition-colors"
+                                    >
+                                        {/* Background Image & Gradient */}
+                                        {photoUrl && (
+                                            <>
+                                                <img
+                                                    src={photoUrl}
+                                                    className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-80"
+                                                    alt="Vehicle"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-r from-zinc-50 via-zinc-50 to-transparent dark:from-zinc-900 dark:via-zinc-900 dark:to-transparent" />
+                                            </>
+                                        )}
+
+                                        <div className="relative z-10 flex-1 pr-4">
+                                            <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100 flex items-center">
+                                                {vehicle.model}
+                                                {isTemp && <span className="text-[10px] text-yellow-600 dark:text-yellow-500 font-bold bg-yellow-100 dark:bg-yellow-500/10 px-1.5 py-0.5 rounded ml-2 border border-yellow-200 dark:border-transparent">NOVO</span>}
+                                            </p>
+                                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{vehicle.brand} • {vehicle.plate || 'S/ Placa'}</p>
+                                        </div>
+
+                                        <div className="relative z-10">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteVehicle(vehicle.id, isTemp);
+                                                }}
+                                                className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all bg-white/80 dark:bg-zinc-900/50 backdrop-blur-sm"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

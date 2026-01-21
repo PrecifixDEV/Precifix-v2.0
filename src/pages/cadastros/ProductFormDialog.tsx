@@ -212,6 +212,22 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
         handleSubmit(onSubmit)();
     };
 
+    const handleDeleteProduct = async () => {
+        if (!productToEdit?.id) return;
+        try {
+            setIsLoading(true);
+            await productService.deleteProduct(productToEdit.id);
+            toast.success("Produto excluído com sucesso!");
+            onSuccess();
+            onOpenChange(false);
+        } catch (error) {
+            console.error("Erro ao excluir produto:", error);
+            toast.error("Erro ao excluir produto.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const onSubmit = async (data: ProductFormValues) => {
         try {
             setIsLoading(true);
@@ -290,10 +306,35 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
         <StandardSheet
             open={open}
             onOpenChange={onOpenChange}
-            title={productToEdit?.id ? 'Editar Produto' : 'Novo Produto'}
+            title={productToEdit?.id ? 'EDITAR PRODUTO' : 'NOVO PRODUTO'}
             onSave={handleSaveClick}
             isLoading={isLoading}
-            saveLabel={productToEdit && productToEdit.id ? 'Salvar Alterações' : 'Criar Produto'}
+            saveLabel={productToEdit && productToEdit.id ? 'SALVAR ALTERAÇÕES' : 'CRIAR PRODUTO'}
+            onDelete={productToEdit?.id ? handleDeleteProduct : undefined}
+            deleteConfirmTitle="EXCLUIR PRODUTO"
+            deleteConfirmDescription={`Deseja realmente excluir o produto "${productToEdit?.name}"? Esta ação é irreversível.`}
+            optionalFieldsToggles={
+                <>
+                    <StandardSheetToggle
+                        label="Descrição"
+                        active={showDescription}
+                        onClick={() => setShowDescription(!showDescription)}
+                        icon={<FileText className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Revenda"
+                        active={showResale}
+                        onClick={() => setShowResale(!showResale)}
+                        icon={<Tag className="h-4 w-4" />}
+                    />
+                    <StandardSheetToggle
+                        label="Foto"
+                        active={showPhoto}
+                        onClick={() => setShowPhoto(!showPhoto)}
+                        icon={<Image className="h-4 w-4" />}
+                    />
+                </>
+            }
         >
             <div className="space-y-6">
                 <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -442,38 +483,9 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                         </div>
                     )}
 
-                    <div className="border-t border-zinc-200 dark:border-zinc-800 my-4" />
-
-
-
-                    {/* 4. OPTIONAL FIELDS TOGGLES */}
-                    <div className="space-y-4 pt-4">
-                        <Label className="text-base text-muted-foreground">Campos opcionais</Label>
-                        <div className="flex flex-wrap gap-2">
-                            <StandardSheetToggle
-                                label="Descrição"
-                                active={showDescription}
-                                onClick={() => setShowDescription(!showDescription)}
-                                icon={<FileText className="h-4 w-4" />}
-                            />
-                            <StandardSheetToggle
-                                label="Revenda"
-                                active={showResale}
-                                onClick={() => setShowResale(!showResale)}
-                                icon={<Tag className="h-4 w-4" />}
-                            />
-                            <StandardSheetToggle
-                                label="Foto"
-                                active={showPhoto}
-                                onClick={() => setShowPhoto(!showPhoto)}
-                                icon={<Image className="h-4 w-4" />}
-                            />
-                        </div>
-                    </div>
-
-                    {/* 5. OPTIONAL SECTIONS RENDER */}
+                    {/* 4. OPTIONAL SECTIONS RENDER (MOVED TO TOP) */}
                     {showDescription && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 pt-2">
                             <Label htmlFor="description">Descrição do Produto</Label>
                             <Textarea
                                 id="description"

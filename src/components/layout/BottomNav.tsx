@@ -2,6 +2,7 @@ import { Home, LayoutGrid, ClipboardList, User, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { SpeedDialMenu } from "./SpeedDialMenu";
+import { motion } from "framer-motion";
 
 export function BottomNav() {
     const navigate = useNavigate();
@@ -14,6 +15,14 @@ export function BottomNav() {
     }, [location.pathname]);
 
     const isActive = (path: string) => location.pathname === path;
+
+    const navItems = [
+        { path: "/", label: "Início", icon: Home },
+        { path: "/menu", label: "Menu", icon: LayoutGrid },
+        { path: null, label: "", icon: null }, // Spacer
+        { path: "/sales", label: "Vendas", icon: ClipboardList },
+        { path: "/profile-menu", label: "Perfil", icon: User },
+    ];
 
     return (
         <>
@@ -45,74 +54,61 @@ export function BottomNav() {
 
                     {/* Botão Central Flutuante (Speed Dial) */}
                     <div className="absolute -top-[15px] left-1/2 -translate-x-1/2 z-50">
-                        <button
+                        <motion.button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsSpeedDialOpen(!isSpeedDialOpen);
                             }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            animate={{
+                                rotate: isSpeedDialOpen ? 45 : 0,
+                                backgroundColor: isSpeedDialOpen ? "#71717a" : "#EAB308", // zinc-500 approx : yellow-500
+                                color: isSpeedDialOpen ? "#ffffff" : "#000000"
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             className={`
                                 flex h-16 w-16 items-center justify-center rounded-full 
-                                bg-yellow-500 text-black shadow-xl ring-4 ring-black 
-                                transition-transform active:scale-95
-                                ${isSpeedDialOpen ? "rotate-45" : ""}
+                                shadow-xl ring-4 ring-black 
                             `}
                         >
                             <Plus className="h-8 w-8" strokeWidth={2.5} />
-                        </button>
+                        </motion.button>
                     </div>
 
                     {/* Ícones do Menu */}
                     <div className="relative z-10 grid w-full grid-cols-5 items-end pb-4 px-2">
-                        {/* Início */}
-                        <button
-                            onClick={() => navigate("/")}
-                            className={`flex flex-col items-center gap-1 transition-colors ${isActive("/")
-                                ? "text-yellow-500"
-                                : "text-zinc-400 hover:text-yellow-500"
-                                }`}
-                        >
-                            <Home className="h-6 w-6" />
-                            <span className="text-[10px] font-medium">Início</span>
-                        </button>
+                        {navItems.map((item, index) => {
+                            if (!item.path) return <div key={index} className="pointer-events-none" />;
 
-                        {/* Menu */}
-                        <button
-                            onClick={() => navigate("/menu")}
-                            className={`flex flex-col items-center gap-1 transition-colors ${isActive("/menu")
-                                ? "text-yellow-500"
-                                : "text-zinc-400 hover:text-yellow-500"
-                                }`}
-                        >
-                            <LayoutGrid className="h-6 w-6" />
-                            <span className="text-[10px] font-medium">Menu</span>
-                        </button>
+                            const Icon = item.icon!;
+                            const active = isActive(item.path);
 
-                        {/* Espaçador Central */}
-                        <div className="pointer-events-none" />
-
-                        {/* Vendas */}
-                        <button
-                            onClick={() => navigate("/sales")}
-                            className={`flex flex-col items-center gap-1 transition-colors ${isActive("/sales")
-                                ? "text-yellow-500"
-                                : "text-zinc-400 hover:text-yellow-500"
-                                }`}
-                        >
-                            <ClipboardList className="h-6 w-6" />
-                            <span className="text-[10px] font-medium">Vendas</span>
-                        </button>
-
-                        {/* Perfil (Updated to Profile Menu) */}
-                        <button
-                            onClick={() => navigate("/profile-menu")}
-                            className={`flex flex-col items-center gap-1 transition-colors ${isActive("/profile-menu")
-                                ? "text-yellow-500"
-                                : "text-zinc-400 hover:text-yellow-500"
-                                }`}
-                        >
-                            <User className="h-6 w-6" />
-                            <span className="text-[10px] font-medium">Perfil</span>
-                        </button>
+                            return (
+                                <motion.button
+                                    key={item.path}
+                                    onClick={() => navigate(item.path!)}
+                                    whileTap={{ scale: 0.9 }}
+                                    className={`relative flex flex-col items-center gap-1 transition-colors ${active ? "text-yellow-500" : "text-zinc-400 hover:text-yellow-500"
+                                        }`}
+                                >
+                                    <motion.div
+                                        animate={{ scale: active ? 1.2 : 1 }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    >
+                                        <Icon
+                                            className={`h-6 w-6 transition-all duration-300 ${active ? "opacity-100" : "opacity-70"}`}
+                                            fill={active ? "#EAB308" : "transparent"}
+                                            stroke={active ? "#000000" : "currentColor"}
+                                            strokeWidth={active ? 1.2 : 1.2}
+                                        />
+                                    </motion.div>
+                                    <span className={`text-[10px] font-bold transition-colors ${active ? "text-yellow-500" : "text-zinc-400"}`}>
+                                        {item.label}
+                                    </span>
+                                </motion.button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

@@ -12,6 +12,8 @@ interface StandardSheetProps {
     onOpenChange: (open: boolean) => void;
     title: string;
     children: ReactNode;
+    // Optional fields toggles (buttons) to appear at the bottom
+    optionalFieldsToggles?: ReactNode;
     // Footer / Action Props
     saveButton?: ReactNode; // Pass a custom button completely
     onSave?: () => void; // Or pass a handler to use default button
@@ -32,6 +34,7 @@ export function StandardSheet({
     onOpenChange,
     title,
     children,
+    optionalFieldsToggles,
     saveButton,
     onSave,
     saveLabel = "Salvar",
@@ -65,14 +68,33 @@ export function StandardSheet({
             >
                 {/* Standardized Header */}
                 <SheetHeader className="h-16 px-6 shadow-md flex justify-center shrink-0 bg-yellow-500">
-                    <SheetTitle className="text-zinc-900 text-center font-bold text-lg">
+                    <SheetTitle className="text-zinc-900 text-center font-bold text-lg uppercase tracking-tighter">
                         {title}
                     </SheetTitle>
                 </SheetHeader>
 
                 {/* Content Area */}
                 <div className="overflow-y-auto px-6 py-6 flex-1 bg-white dark:bg-zinc-900">
-                    {children}
+                    <div className="flex flex-col h-full">
+                        <div className="flex-1">
+                            {children}
+                        </div>
+
+                        {optionalFieldsToggles && (
+                            <div className="mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="h-[1px] flex-1 bg-zinc-100 dark:bg-zinc-800/50" />
+                                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] whitespace-nowrap">
+                                        Informações Adicionais
+                                    </span>
+                                    <div className="h-[1px] flex-1 bg-zinc-100 dark:bg-zinc-800/50" />
+                                </div>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {optionalFieldsToggles}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Standardized Sticky Footer */}
@@ -84,13 +106,13 @@ export function StandardSheet({
                             <Button
                                 onClick={onSave}
                                 disabled={isLoading || isSaveDisabled}
-                                className="flex-1 border-none bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition-all hover:scale-[1.02] flex items-center justify-between"
+                                className="flex-1 h-10 border-none bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02] flex items-center justify-between"
                             >
                                 <span className="flex items-center">
                                     {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                                     {saveLabel}
                                 </span>
-                                <Check className="h-7 w-7 shrink-0" style={{ minWidth: '28px', minHeight: '28px' }} />
+                                <Check className="h-6 w-6 shrink-0" />
                             </Button>
 
                             {onDelete && (
@@ -100,9 +122,9 @@ export function StandardSheet({
                                         disabled={isLoading}
                                         variant="destructive"
                                         size="icon"
-                                        className="rounded-full w-10 h-10 shrink-0 bg-red-600 hover:bg-red-700 shadow-md"
+                                        className="rounded-lg w-10 h-10 shrink-0 bg-red-600 hover:bg-red-700 shadow-md"
                                     >
-                                        <Trash2 className="h-5 w-5" />
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
 
                                     <ConfirmDrawer

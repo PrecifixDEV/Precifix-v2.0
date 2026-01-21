@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, ArrowRightLeft, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Plus, ArrowRightLeft, ArrowUpRight, ArrowDownRight, Calendar as CalendarIcon } from "lucide-react";
 
 import { financialService } from "@/services/financialService";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import { AddValueDialog } from "@/components/financial/AddValueDialog";
 
 import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
 import { ConsolidatedBalanceCard } from "@/components/dashboard/ConsolidatedBalanceCard";
+import { DateFilterDrawer } from "@/components/ui/DateFilterDrawer";
+import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -32,6 +34,8 @@ export default function AccountsPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isAddValueOpen, setIsAddValueOpen] = useState(false);
+    const [isDateDrawerOpen, setIsDateDrawerOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<DateRange | undefined>(undefined);
     const [transactionType, setTransactionType] = useState<'credit' | 'debit'>('credit');
 
     // Edit State
@@ -106,12 +110,30 @@ export default function AccountsPage() {
                     </p>
                 </div>
 
-                <ResponsiveAddButton
-                    onClick={handleCreateAccount}
-                    label="Nova Conta"
-                    className="shrink-0"
-                />
+                <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsDateDrawerOpen(true)}
+                        className="bg-zinc-100 dark:bg-zinc-800 rounded-full w-10 h-10 hover:bg-yellow-400 hover:text-yellow-950 transition-all shadow-sm"
+                        title="Filtrar por Data"
+                    >
+                        <CalendarIcon className="h-5 w-5" />
+                    </Button>
+                    <ResponsiveAddButton
+                        onClick={handleCreateAccount}
+                        label="Nova Conta"
+                        className="shrink-0"
+                    />
+                </div>
             </div>
+
+            <DateFilterDrawer
+                open={isDateDrawerOpen}
+                onOpenChange={setIsDateDrawerOpen}
+                date={selectedDate}
+                onSelect={setSelectedDate}
+            />
 
             <AccountFormDialog
                 open={isCreateOpen}

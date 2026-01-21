@@ -44,7 +44,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/lib/supabase";
-import { Printer, Filter } from "lucide-react";
+import { Printer, SlidersHorizontal, Plus } from "lucide-react";
 
 import { ServiceFormDialog } from "./ServiceFormDialog";
 import { ServiceAnalysisSheet } from "./ServiceAnalysisSheet";
@@ -269,79 +269,119 @@ export const Services = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Serviços</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 hidden md:block">Gerencie os serviços oferecidos</p>
+                <div className="hidden md:block">
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white uppercase tracking-tight">Serviços</h1>
+                    <p className="text-zinc-500 dark:text-zinc-400">Gerencie os serviços oferecidos</p>
                 </div>
-                <Button onClick={handleCreate} className="w-full md:w-auto">
-                    Adicionar Novo Serviço
+                <Button
+                    onClick={handleCreate}
+                    className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-tight gap-2"
+                >
+                    <Plus className="h-5 w-5" />
+                    NOVO SERVIÇO
                 </Button>
             </div>
 
-            {/* Search and Filters - Moved outside Card */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2 w-full md:w-auto md:flex-1 md:max-w-sm">
-                    {/* Mobile Select All */}
-                    <div className="md:hidden flex items-center justify-center mr-1">
-                        <Checkbox
-                            checked={filteredServices.length > 0 && selectedServices.length === filteredServices.length}
-                            onCheckedChange={toggleSelectAll}
+            {/* Search and Filters */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 w-full">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
+                        <Input
+                            placeholder="Buscar serviços..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="h-10 pl-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-sm placeholder:text-zinc-400 w-full"
                         />
                     </div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-zinc-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : ''}`}>
-                                <Filter className="h-4 w-4" />
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                title="Filtrar"
+                                className={`h-10 w-10 shrink-0 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+                            >
+                                <SlidersHorizontal className="h-5 w-5" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56">
-                            <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel className="uppercase tracking-tighter font-bold">Filtrar por:</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => setFilterType('all')} className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}>
-                                Todos
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('all')}
+                                className={filterType === 'all' ? 'bg-yellow-500 dark:bg-yellow-500 text-zinc-900 dark:text-zinc-900 font-bold' : ''}
+                            >
+                                TODOS
                             </DropdownMenuItem>
-                            {/* Future filters */}
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <div className="relative flex-1 w-full">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10" />
-                        <Input
-                            placeholder="Buscar serviços..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-white dark:bg-zinc-900 w-full"
-                        />
-                    </div>
-
-                    {/* Mobile Bulk Actions */}
-                    <div className="md:hidden flex items-center gap-2">
+                    {/* Desktop Bulk Actions */}
+                    <div className="hidden md:flex items-center gap-2">
                         {selectedServices.length > 0 && (
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                                <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
-                                    <Printer className="h-4 w-4" />
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleBulkPrint}
+                                    title="Imprimir Selecionados"
+                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                >
+                                    <Printer className="h-5 w-5" />
                                 </Button>
-                                <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
-                                    <Trash2 className="h-4 w-4" />
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setServiceToDelete({ id: 'bulk' } as any)}
+                                    title="Excluir Selecionados"
+                                    className="h-10 w-10"
+                                >
+                                    <Trash2 className="h-5 w-5" />
                                 </Button>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Desktop Bulk Actions */}
-                <div className="hidden md:flex items-center gap-2">
-                    {selectedServices.length > 0 && (
-                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                            <Button variant="outline" size="icon" onClick={handleBulkPrint} title="Imprimir Selecionados" className="bg-white dark:bg-zinc-900">
-                                <Printer className="h-4 w-4" />
-                            </Button>
-                            <Button variant="destructive" size="icon" onClick={() => setServiceToDelete({ id: 'bulk' } as any)} title="Excluir Selecionados">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
+                <div className="flex items-center justify-between w-full h-10">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={toggleSelectAll}>
+                        <Checkbox
+                            checked={filteredServices.length > 0 && selectedServices.length === filteredServices.length}
+                            onCheckedChange={toggleSelectAll}
+                            className="h-5 w-5"
+                        />
+                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                            Selecionar Todos
+                        </span>
+                    </div>
+
+                    {/* Mobile Bulk Actions */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {selectedServices.length > 0 && (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleBulkPrint}
+                                    title="Imprimir Selecionados"
+                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                >
+                                    <Printer className="h-5 w-5" />
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setServiceToDelete({ id: 'bulk' } as any)}
+                                    title="Excluir Selecionados"
+                                    className="h-10 w-10"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -364,6 +404,7 @@ export const Services = () => {
                                                     <Checkbox
                                                         checked={selectedServices.includes(service.id)}
                                                         onCheckedChange={() => toggleSelect(service.id)}
+                                                        className="h-5 w-5"
                                                     />
 
                                                     <div className="relative w-10 h-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -445,6 +486,7 @@ export const Services = () => {
                                                 <Checkbox
                                                     checked={selectedServices.length === filteredServices.length && filteredServices.length > 0}
                                                     onCheckedChange={toggleSelectAll}
+                                                    className="h-5 w-5"
                                                 />
                                             </TableHead>
                                             <TableHead className="w-[80px] text-center">Ícone</TableHead>
@@ -467,6 +509,7 @@ export const Services = () => {
                                                         <Checkbox
                                                             checked={selectedServices.includes(service.id)}
                                                             onCheckedChange={() => toggleSelect(service.id)}
+                                                            className="h-5 w-5"
                                                         />
                                                     </TableCell>
                                                     <TableCell className="text-center">

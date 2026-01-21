@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, Filter, ShoppingBag } from 'lucide-react';
+import { Search, Edit2, Trash2, Package, MoreHorizontal, Copy, DollarSign, Store, Printer, SlidersHorizontal, ShoppingBag, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import { Input } from '@/components/ui/input';
@@ -272,69 +272,110 @@ export const Products = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Produtos</h1>
-                <Button onClick={handleCreateNew} className="w-full md:w-auto">
-                    Adicionar Novo Produto
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">PRODUTOS</h1>
+                <Button
+                    onClick={handleCreateNew}
+                    className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02]"
+                >
+                    <Plus className="mr-2 h-5 w-5" />
+                    NOVO PRODUTO
                 </Button>
             </div>
 
-            {/* Search and Filters - Moved outside Card */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2 w-full md:w-auto md:flex-1 md:max-w-sm">
-                    {/* Mobile Select All */}
-                    <div className="md:hidden flex items-center justify-center mr-1">
-                        <Checkbox
-                            checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
-                            onCheckedChange={toggleSelectAll}
-                        />
-                    </div>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" title="Filtrar" className={`bg-white dark:bg-zinc-900 ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : ''}`}>
-                                <Filter className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56">
-                            <DropdownMenuLabel>Filtrar:</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => setFilterType('all')}
-                                className={filterType === 'all' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                            >
-                                Todos
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setFilterType('for_sale')}
-                                className={filterType === 'for_sale' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                            >
-                                Produtos para Venda
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setFilterType('zero_stock')}
-                                className={filterType === 'zero_stock' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                            >
-                                Produtos com Estoque Zerado
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setFilterType('incomplete')}
-                                className={filterType === 'incomplete' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100 font-medium' : ''}
-                            >
-                                Produtos Cadastro Incompleto
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <div className="relative flex-1 w-full">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
+            {/* Search and Filters */}
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 w-full">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
                         <Input
                             placeholder="Buscar produto..."
-                            className="pl-9 bg-white dark:bg-zinc-900 w-full"
+                            className="pl-10 h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white w-full"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                title="Filtrar"
+                                className={`h-10 w-10 shrink-0 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+                            >
+                                <SlidersHorizontal className="h-5 w-5" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel className="uppercase tracking-tighter font-bold">Filtrar por:</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('all')}
+                                className={filterType === 'all' ? 'bg-yellow-500 dark:bg-yellow-500 text-zinc-900 dark:text-zinc-900 font-bold' : ''}
+                            >
+                                TODOS
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('for_sale')}
+                                className={filterType === 'for_sale' ? 'bg-yellow-500 dark:bg-yellow-500 text-zinc-900 dark:text-zinc-900 font-bold' : ''}
+                            >
+                                PRODUTOS PARA VENDA
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('zero_stock')}
+                                className={filterType === 'zero_stock' ? 'bg-yellow-500 dark:bg-yellow-500 text-zinc-900 dark:text-zinc-900 font-bold' : ''}
+                            >
+                                ESTOQUE ZERADO
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setFilterType('incomplete')}
+                                className={filterType === 'incomplete' ? 'bg-yellow-500 dark:bg-yellow-500 text-zinc-900 dark:text-zinc-900 font-bold' : ''}
+                            >
+                                CADASTRO INCOMPLETO
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Desktop Bulk Actions */}
+                    <div className="hidden md:flex items-center gap-2">
+                        {selectedProducts.length > 0 && (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleBulkPrint}
+                                    title="Imprimir Selecionados"
+                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                >
+                                    <Printer className="h-5 w-5" />
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => setIsDeleteAlertOpen(true)}
+                                    title="Excluir Selecionados"
+                                    className="h-10 w-10"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between w-full h-10">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={toggleSelectAll}>
+                        <Checkbox
+                            checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
+                            onCheckedChange={toggleSelectAll}
+                            className="h-5 w-5"
+                        />
+                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                            Selecionar Todos
+                        </span>
+                    </div>
+
+                    {/* Mobile Bulk Actions */}
                     {/* Mobile Bulk Actions */}
                     <div className="md:hidden flex items-center gap-2">
                         {selectedProducts.length > 0 && (
@@ -344,46 +385,22 @@ export const Products = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="bg-white dark:bg-zinc-900"
+                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
                                 >
-                                    <Printer className="h-4 w-4" />
+                                    <Printer className="h-5 w-5" />
                                 </Button>
                                 <Button
                                     variant="destructive"
                                     size="icon"
                                     onClick={() => setIsDeleteAlertOpen(true)}
                                     title="Excluir Selecionados"
+                                    className="h-10 w-10"
                                 >
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="h-5 w-5" />
                                 </Button>
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Desktop Bulk Actions */}
-                <div className="hidden md:flex items-center gap-2">
-                    {selectedProducts.length > 0 && (
-                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={handleBulkPrint}
-                                title="Imprimir Selecionados"
-                                className="bg-white dark:bg-zinc-900"
-                            >
-                                <Printer className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="icon"
-                                onClick={() => setIsDeleteAlertOpen(true)}
-                                title="Excluir Selecionados"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -413,6 +430,7 @@ export const Products = () => {
                                         <Checkbox
                                             checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
                                             onCheckedChange={toggleSelectAll}
+                                            className="h-5 w-5"
                                         />
                                     </TableHead>
                                     <TableHead className="w-[80px]">Foto</TableHead>
@@ -445,6 +463,7 @@ export const Products = () => {
                                                 <Checkbox
                                                     checked={selectedProducts.includes(product.id)}
                                                     onCheckedChange={() => toggleSelect(product.id)}
+                                                    className="h-5 w-5"
                                                 />
                                             </TableCell>
                                             <TableCell>
@@ -587,6 +606,7 @@ export const Products = () => {
                                             <Checkbox
                                                 checked={selectedProducts.includes(product.id)}
                                                 onCheckedChange={() => toggleSelect(product.id)}
+                                                className="h-5 w-5"
                                             />
 
                                             <div className="relative w-12 h-12 flex-shrink-0">
