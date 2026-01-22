@@ -1,8 +1,9 @@
-import { Home, LayoutGrid, ClipboardList, User, Plus } from "lucide-react";
+import { LayoutGrid, ClipboardList, User, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { SpeedDialMenu } from "./SpeedDialMenu";
 import { motion } from "framer-motion";
+import { HomeIcon } from "./HomeIcon";
 
 export function BottomNav() {
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ export function BottomNav() {
     const isActive = (path: string) => location.pathname === path;
 
     const navItems = [
-        { path: "/", label: "Início", icon: Home },
+        { path: "/", label: "Início", icon: HomeIcon },
         { path: "/menu", label: "Menu", icon: LayoutGrid },
         { path: null, label: "", icon: null }, // Spacer
         { path: "/sales", label: "Vendas", icon: ClipboardList },
@@ -81,7 +82,7 @@ export function BottomNav() {
                         {navItems.map((item, index) => {
                             if (!item.path) return <div key={index} className="pointer-events-none" />;
 
-                            const Icon = item.icon!;
+                            const Icon = item.icon! as any;
                             const active = isActive(item.path);
 
                             return (
@@ -98,9 +99,11 @@ export function BottomNav() {
                                     >
                                         <Icon
                                             className={`h-6 w-6 transition-all duration-300 ${active ? "opacity-100" : "opacity-70"}`}
+                                            active={active}
                                             fill={active ? "#EAB308" : "transparent"}
                                             stroke={active ? "#000000" : "currentColor"}
                                             strokeWidth={active ? 1.2 : 1.2}
+                                            size={24}
                                         />
                                     </motion.div>
                                     <span className={`text-[10px] font-bold transition-colors ${active ? "text-yellow-500" : "text-zinc-400"}`}>

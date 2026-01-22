@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { TopHeader } from "./TopHeader";
-import { BottomNav } from "./BottomNav";
+import { BottomNav2 as BottomNav } from "./BottomNav2";
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -19,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
             {/* Padding Top = Altura do Header (16 = 4rem = 64px) */}
             {/* Padding Bottom dinamico dependendo se a nav está visivel ou nao */}
-            <main className={`pt-20 px-4 max-w-md mx-auto w-full transition-all duration-300 ${showBottomNav ? 'pb-28' : 'pb-8'}`}>
+            <main className={`pt-20 px-4 max-w-md mx-auto w-full transition-all duration-300 ${showBottomNav ? 'pb-24' : 'pb-8'}`}>
                 {children}
             </main>
 
