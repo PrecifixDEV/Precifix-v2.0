@@ -237,13 +237,13 @@ export default function FinancialCategories() {
 
                     <TabsContent value={activeTab} className="mt-0 space-y-4">
                         {currentList.length === 0 ? (
-                            <div className="text-center py-10 text-muted-foreground bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-dashed">
+                            <div className="text-center py-10 text-muted-foreground bg-zinc-900 rounded-lg border border-dashed border-zinc-800">
                                 Nenhuma categoria cadastrada neste grupo.
                             </div>
                         ) : (
                             currentList.map((root) => (
-                                <Card key={root.id} className="overflow-hidden">
-                                    <div className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-zinc-900/50">
+                                <Card key={root.id} className="overflow-hidden border-zinc-800">
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/50">
                                         <div className="flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleExpand(root.id)}>
                                             <Button
                                                 variant="ghost"
@@ -266,7 +266,7 @@ export default function FinancialCategories() {
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     )}
-                                                    <span className="text-xs font-normal text-muted-foreground bg-zinc-200 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+                                                    <span className="text-xs font-normal text-muted-foreground bg-zinc-800 px-2 py-0.5 rounded-full">
                                                         {root.children?.length || 0}
                                                     </span>
                                                 </h3>
@@ -292,11 +292,11 @@ export default function FinancialCategories() {
                                     </div>
 
                                     {expandedCategories[root.id] && (
-                                        <div className="border-t bg-white dark:bg-card">
+                                        <div className="border-t border-zinc-800 bg-zinc-950/20">
                                             {root.children && root.children.length > 0 ? (
-                                                <div className="divide-y">
+                                                <div className="divide-y divide-zinc-800">
                                                     {root.children.map((child) => (
-                                                        <div key={child.id} className="flex items-center justify-between p-3 pl-12 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                                        <div key={child.id} className="flex items-center justify-between p-3 pl-12 hover:bg-zinc-800/50 transition-colors">
                                                             <div>
                                                                 <p className="font-medium flex items-center gap-2">
                                                                     {child.name}
@@ -419,7 +419,7 @@ export default function FinancialCategories() {
                                             <FormItem>
                                                 <FormLabel>Tipo</FormLabel>
                                                 <FormControl>
-                                                    <div className="flex gap-2 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                                                    <div className="flex gap-2 p-1 bg-zinc-800 rounded-lg">
                                                         <Button
                                                             type="button"
                                                             variant={field.value === 'INCOME' ? 'default' : 'ghost'}

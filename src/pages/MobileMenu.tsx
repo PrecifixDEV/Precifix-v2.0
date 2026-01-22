@@ -70,7 +70,7 @@ export const MobileMenu = () => {
     })).filter(section => section.items.length > 0)
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pb-24">
+        <div className="min-h-screen bg-zinc-950 pb-24">
             <div className="p-4 space-y-6">
                 {/* Header / Search */}
                 <div className="space-y-2">
@@ -80,7 +80,7 @@ export const MobileMenu = () => {
                             placeholder="Buscar funcionalidade..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-white dark:bg-zinc-900"
+                            className="pl-9 bg-zinc-900"
                         />
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 z-10 pointer-events-none" />
                     </div>
@@ -98,12 +98,12 @@ export const MobileMenu = () => {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className="flex flex-col items-start p-4 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm active:scale-95 transition-transform"
+                                        className="flex flex-col items-start p-4 bg-zinc-900 rounded-xl border border-zinc-800 shadow-sm active:scale-95 transition-transform"
                                     >
-                                        <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg mb-3">
-                                            <item.icon className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
+                                        <div className="p-2 bg-zinc-800 rounded-lg mb-3">
+                                            <item.icon className="w-5 h-5 text-zinc-300" />
                                         </div>
-                                        <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                        <span className="font-medium text-white text-sm">
                                             {item.name}
                                         </span>
                                     </Link>

@@ -10,7 +10,6 @@ import SprayBottle from "@/components/SprayBottle";
 
 export const DilutionCalculator = () => {
     // Inputs State
-    const [productPart, setProductPart] = useState<number>(1);
     const [waterPart, setWaterPart] = useState<number>(1);
     const [containerSize, setContainerSize] = useState<number>(500);
     const [showResult, setShowResult] = useState<boolean>(false);
@@ -19,26 +18,26 @@ export const DilutionCalculator = () => {
     const [resultProductAmount, setResultProductAmount] = useState<number>(0);
     const [resultWaterAmount, setResultWaterAmount] = useState<number>(0);
     const [resultContainerSize, setResultContainerSize] = useState<number>(0);
-    const [resultProductPart, setResultProductPart] = useState<number>(1);
     const [resultWaterPart, setResultWaterPart] = useState<number>(1);
 
     const calculate = () => {
         // Validation
-        if (productPart <= 0 || waterPart <= 0 || containerSize <= 0) {
+        if (waterPart < 1 || containerSize <= 0) {
             setResultProductAmount(0);
             setResultWaterAmount(0);
             setShowResult(false);
             return;
         }
 
-        const totalParts = productPart + waterPart;
-        const onePartVolume = containerSize / totalParts;
+        // Logic: 1:N means the product is 1/N of the total volume
+        // So 1:1 = 100%, 1:2 = 50%, 1:10 = 10%
+        const productVolume = containerSize / waterPart;
+        const waterVolume = containerSize - productVolume;
 
         // Update results
-        setResultProductAmount(onePartVolume * productPart);
-        setResultWaterAmount(onePartVolume * waterPart);
+        setResultProductAmount(productVolume);
+        setResultWaterAmount(waterVolume);
         setResultContainerSize(containerSize);
-        setResultProductPart(productPart);
         setResultWaterPart(waterPart);
         setShowResult(true);
     };
@@ -48,11 +47,11 @@ export const DilutionCalculator = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 pb-20">
             <div>
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                    <Calculator className="h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+                    <Droplets className="h-8 w-8 text-yellow-500" />
                     Calculadora de Diluição
                 </h1>
-                <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+                <p className="text-zinc-400 mt-2">
                     Calcule a quantidade exata de produto e água necessária para realizar a diluição correta.
                 </p>
             </div>
@@ -71,30 +70,29 @@ export const DilutionCalculator = () => {
                                 Proporção da Diluição
                             </Label>
                             <div className="flex items-center justify-start gap-2">
-                                <div className="w-24">
+                                <div className="w-20">
                                     <Label htmlFor="product-part" className="sr-only">Parte Produto</Label>
-                                    <Input
-                                        id="product-part"
-                                        type="number"
-                                        min="1"
-                                        value={productPart}
-                                        onChange={(e) => setProductPart(Number(e.target.value))}
-                                        className="text-right text-lg font-semibold h-12"
-                                    />
-                                    <span className="text-xs text-muted-foreground mt-1 block text-right">Produto</span>
+                                    <div className="flex items-center justify-center bg-zinc-800 border border-zinc-700 rounded-md h-12 text-lg font-bold text-zinc-400 select-none">
+                                        1
+                                    </div>
+                                    <span className="text-[10px] text-muted-foreground mt-1 block text-center uppercase font-bold">Produto</span>
                                 </div>
-                                <span className="text-2xl font-light text-muted-foreground pb-5">/</span>
+                                <span className="text-2xl font-bold text-primary mb-5">:</span>
                                 <div className="w-24">
                                     <Label htmlFor="water-part" className="sr-only">Parte Água</Label>
                                     <Input
                                         id="water-part"
                                         type="number"
                                         min="1"
-                                        value={waterPart}
-                                        onChange={(e) => setWaterPart(Number(e.target.value))}
-                                        className="text-left text-lg font-semibold h-12"
+                                        value={waterPart || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value === '' ? 1 : Number(e.target.value);
+                                            setWaterPart(val < 1 ? 1 : val);
+                                        }}
+                                        onFocus={(e) => e.target.select()}
+                                        className="text-center text-lg font-bold h-12 border-primary/20 focus:border-primary"
                                     />
-                                    <span className="text-xs text-muted-foreground mt-1 block">Água</span>
+                                    <span className="text-[10px] text-muted-foreground mt-1 block text-center uppercase font-bold">Diluição</span>
                                 </div>
                             </div>
                         </div>
@@ -136,13 +134,13 @@ export const DilutionCalculator = () => {
 
                 {/* Results - Only visible after calculation */}
                 {showResult && (
-                    <Card className="bg-zinc-50 dark:bg-zinc-900 border-dashed border-2 flex flex-col justify-center animate-in fade-in slide-in-from-left-4 duration-500">
+                    <Card className="bg-zinc-900 border-dashed border-2 flex flex-col justify-center animate-in fade-in slide-in-from-left-4 duration-500">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 Resultado Final
                                 {resultProductAmount > 0 && (
-                                    <span className="ml-auto text-sm font-normal text-muted-foreground bg-white dark:bg-zinc-800 px-3 py-1 rounded-full border">
-                                        Proporção 1:{resultWaterPart / resultProductPart}
+                                    <span className="ml-auto text-sm font-normal text-muted-foreground bg-zinc-800 px-3 py-1 rounded-full border">
+                                        Proporção 1:{resultWaterPart}
                                     </span>
                                 )}
                             </CardTitle>
@@ -178,7 +176,7 @@ export const DilutionCalculator = () => {
                                 </div>
                             </div>
 
-                            <div className="bg-white dark:bg-zinc-800 p-4 rounded-lg border text-sm text-center">
+                            <div className="bg-zinc-800 p-4 rounded-lg border text-sm text-center">
                                 Para um recipiente de <strong>{resultContainerSize}ml</strong>, misture <strong>{resultProductAmount.toFixed(0)}ml</strong> de produto com <strong>{resultWaterAmount.toFixed(0)}ml</strong> de água.
                             </div>
                         </CardContent>

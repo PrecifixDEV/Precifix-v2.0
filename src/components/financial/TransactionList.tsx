@@ -244,17 +244,17 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
     if (isLoading) {
         return (
-            <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm">
+            <Card className="border-zinc-800 shadow-sm">
                 <CardHeader>
                     <CardTitle className="text-lg font-medium">Extrato de Movimentações</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="flex items-center justify-between animate-pulse">
-                            <div className="h-10 w-10 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+                            <div className="h-10 w-10 bg-zinc-800 rounded-full" />
                             <div className="flex-1 ml-4 space-y-2">
-                                <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3" />
-                                <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4" />
+                                <div className="h-4 bg-zinc-800 rounded w-1/3" />
+                                <div className="h-3 bg-zinc-800 rounded w-1/4" />
                             </div>
                         </div>
                     ))}
@@ -264,16 +264,16 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
     }
 
     return (
-        <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm print:border-none print:shadow-none">
+        <Card className="border-zinc-800 shadow-sm print:border-none print:shadow-none">
             <div className="hidden print:block mb-8 space-y-4">
                 {consolidatedBalance !== undefined && (
-                    <div className="text-left border-b pb-4 border-zinc-200">
-                        <p className="text-sm text-zinc-500 uppercase tracking-wider font-medium">{balanceLabel}</p>
-                        <h1 className="text-3xl font-bold text-zinc-900">{formatMoney(consolidatedBalance)}</h1>
+                    <div className="text-left border-b pb-4 border-zinc-800">
+                        <p className="text-sm text-zinc-500 uppercase tracking-wider font-medium font-sans">{balanceLabel}</p>
+                        <h1 className="text-3xl font-medium text-white font-mono">{formatMoney(consolidatedBalance)}</h1>
                     </div>
                 )}
                 <div>
-                    <h2 className="text-xl font-bold text-zinc-900">Extrato de Movimentações</h2>
+                    <h2 className="text-xl font-bold text-white">Extrato de Movimentações</h2>
                     <div className="text-sm text-zinc-500 mt-1 flex gap-4">
                         {dateRange?.from ? (
                             <span>Período: {format(dateRange.from, "dd/MM/yyyy")} - {dateRange.to ? format(dateRange.to, "dd/MM/yyyy") : format(dateRange.from, "dd/MM/yyyy")}</span>
@@ -297,7 +297,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         <DateRangePicker
                             date={dateRange}
                             setDate={setDateRange}
-                            className="bg-zinc-50 dark:bg-zinc-900/50 border-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            className="bg-zinc-900/50 border-none hover:bg-zinc-800 transition-colors"
                         />
                     </div>
                     <div className="sm:hidden w-[36px] overflow-hidden">
@@ -321,7 +321,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                     "shrink-0 transition-all relative",
                                     hasActiveFilters
                                         ? "bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border-yellow-400"
-                                        : "bg-zinc-50 dark:bg-zinc-900/50 border-none"
+                                        : "bg-zinc-900/50 border-none"
                                 )}
                                 title="Filtrar Extrato"
                             >
@@ -340,13 +340,13 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                     {/* 1. Status Filter (Active/Deleted) */}
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Status do Registro</label>
-                                        <div className="flex gap-2 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                                        <div className="flex gap-2 p-1 bg-zinc-800 rounded-lg">
                                             <button
                                                 className={cn(
                                                     "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                     !draftShowDeletedOnly
-                                                        ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100"
-                                                        : "text-zinc-500 hover:text-zinc-700"
+                                                        ? "bg-zinc-700 shadow-sm text-zinc-100"
+                                                        : "text-zinc-500 hover:text-zinc-400"
                                                 )}
                                                 onClick={() => setDraftShowDeletedOnly(false)}
                                             >
@@ -356,8 +356,8 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                                 className={cn(
                                                     "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                     draftShowDeletedOnly
-                                                        ? "bg-white dark:bg-zinc-700 shadow-sm text-red-600"
-                                                        : "text-zinc-500 hover:text-zinc-700"
+                                                        ? "bg-zinc-700 shadow-sm text-red-600"
+                                                        : "text-zinc-500 hover:text-zinc-400"
                                                 )}
                                                 onClick={() => setDraftShowDeletedOnly(true)}
                                             >
@@ -450,7 +450,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         size="icon"
                         className={cn(
                             "shrink-0 transition-all",
-                            !isDeleteMode && (showDeletedOnly ? "bg-zinc-50 border-none text-zinc-500 hover:text-emerald-600" : "bg-zinc-50 dark:bg-zinc-900/50 border-none text-zinc-500 hover:text-red-600"),
+                            !isDeleteMode && (showDeletedOnly ? "bg-zinc-950/20 border-none text-zinc-500 hover:text-emerald-600" : "bg-zinc-900/50 border-none text-zinc-500 hover:text-red-600"),
                             isDeleteMode && showDeletedOnly && "bg-emerald-600 hover:bg-emerald-700 text-white"
                         )}
                         onClick={() => setIsDeleteMode(!isDeleteMode)}
@@ -496,26 +496,26 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                     <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                         {sortedDates.map((date) => (
                             <div key={date}>
-                                <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-6 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky top-0 backdrop-blur-sm">
+                                <div className="bg-zinc-900/30 px-6 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky top-0 backdrop-blur-sm">
                                     {format(new Date(date + 'T00:00:00'), "EEEE, d 'de' MMMM", { locale: ptBR })}
                                 </div>
-                                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                                <div className="divide-y divide-zinc-800">
                                     {groupedTransactions[date].map((transaction) => (
                                         <div
                                             key={transaction.id}
                                             className={cn(
                                                 "flex items-center justify-between px-6 py-4 print:py-1 transition-colors group relative border-b last:border-0",
                                                 transaction.is_deleted
-                                                    ? "bg-zinc-100 dark:bg-zinc-900/20 opacity-80"
-                                                    : "hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+                                                    ? "bg-zinc-900/20 opacity-80"
+                                                    : "hover:bg-zinc-900/50"
                                             )}
                                         >
                                             <div className="flex items-center gap-4 flex-1 min-w-0 mr-4 print:gap-2">
                                                 <div className={cn(
                                                     "h-10 w-10 print:h-6 print:w-6 print:text-[10px] rounded-full flex items-center justify-center border shrink-0 relative overflow-hidden",
                                                     transaction.type === 'credit'
-                                                        ? "bg-emerald-100 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/50"
-                                                        : "bg-red-100 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/50"
+                                                        ? "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
+                                                        : "bg-red-900/20 text-red-400 border-red-900/50"
                                                 )}>
 
                                                     {/* Default Icon */}
@@ -547,7 +547,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className={cn("font-medium text-zinc-900 dark:text-zinc-100 truncate pr-2", transaction.is_deleted && "line-through text-zinc-500")}>{transaction.description}</p>
+                                                    <p className={cn("font-medium text-zinc-100 truncate pr-2", transaction.is_deleted && "line-through text-zinc-500")}>{transaction.description}</p>
                                                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-500 print:text-xs">
                                                         <span className="text-xs whitespace-nowrap">{transaction.category || 'Geral'}</span>
                                                         {transaction.commercial_accounts?.name && (
@@ -567,10 +567,10 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                                             </div>
                                             <div className="text-right shrink-0">
                                                 <span className={cn(
-                                                    "font-bold block whitespace-nowrap",
+                                                    "font-medium block whitespace-nowrap font-mono",
                                                     transaction.is_deleted
-                                                        ? "text-zinc-400 dark:text-zinc-600"
-                                                        : (transaction.type === 'credit' ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")
+                                                        ? "text-zinc-600"
+                                                        : (transaction.type === 'credit' ? "text-emerald-400" : "text-red-400")
                                                 )}>
                                                     {transaction.type === 'credit' ? '+' : '-'} {formatMoney(Number(transaction.amount))}
                                                 </span>
@@ -591,7 +591,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
             {/* Pagination */}
             {filteredTransactions.length > 0 && (
-                <div className="border-t border-zinc-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between print:hidden">
+                <div className="border-t border-zinc-800 px-6 py-4 flex items-center justify-between print:hidden">
                     {/* Left: Nav Buttons */}
                     <div className="flex items-center gap-4 text-sm text-zinc-500 font-medium">
                         <button
@@ -616,7 +616,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         <select
                             value={currentPage}
                             onChange={(e) => setCurrentPage(Number(e.target.value))}
-                            className="h-8 w-16 rounded-md border border-zinc-200 bg-zinc-50 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-zinc-800 dark:bg-zinc-900"
+                            className="h-8 w-16 rounded-md border border-zinc-800 bg-zinc-900 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         >
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                 <option key={page} value={page}>{page}</option>

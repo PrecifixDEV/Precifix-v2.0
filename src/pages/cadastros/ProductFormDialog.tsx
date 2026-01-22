@@ -471,12 +471,20 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                             {watch("is_dilutable") && (
                                 <div ref={dilutionFieldRef} className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                     <Label htmlFor="dilution_ratio">Proporção (1:X) <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="dilution_ratio"
-                                        placeholder="Ex: 1:10"
-                                        {...register("dilution_ratio")}
-                                        className="bg-white dark:bg-zinc-950 border-input"
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <div className="bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 border rounded px-3 py-2 text-sm font-bold text-zinc-500 select-none">1</div>
+                                        <span className="text-sm font-bold">:</span>
+                                        <Input
+                                            id="dilution_ratio"
+                                            placeholder="10"
+                                            className="bg-white dark:bg-zinc-950 border-input"
+                                            value={watch("dilution_ratio")?.replace("1:", "") || ""}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setValue("dilution_ratio", `1:${val}`, { shouldValidate: true });
+                                            }}
+                                        />
+                                    </div>
                                     {errors.dilution_ratio && <p className="text-sm text-destructive">{errors.dilution_ratio.message}</p>}
                                 </div>
                             )}

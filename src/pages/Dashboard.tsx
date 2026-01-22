@@ -133,17 +133,17 @@ export const Dashboard = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Warning Alert if Profile incomplete */}
             {showProfileAlert && (
-                <div className="mt-4 p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-yellow-500/50 border-l-4 border-l-yellow-500 shadow-sm">
+                <div className="mt-4 p-4 rounded-lg bg-zinc-800 border border-yellow-500/50 border-l-4 border-l-yellow-500 shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-yellow-500/10 rounded-full">
                                 <AlertTriangle className="w-6 h-6 text-yellow-500" />
                             </div>
                             <div>
-                                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+                                <h3 className="text-sm font-semibold text-white">
                                     Perfil Incompleto
                                 </h3>
-                                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">
+                                <p className="text-sm text-zinc-400 mt-0.5">
                                     Complete seu cadastro (CNPJ/CPF, Endereço, Empresa) para liberar todos os recursos.
                                 </p>
                             </div>
@@ -161,8 +161,8 @@ export const Dashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-zinc-900 dark:text-white text-2xl font-bold hidden md:block">Painel Principal</h1>
-                    <p className="text-zinc-400 capitalize">
+                    <h1 className="text-white text-2xl font-bold hidden md:block">Painel Principal</h1>
+                    <p className="text-zinc-400 capitalize font-sans">
                         {currentMonth} {currentYear}
                     </p>
                 </div>
@@ -184,42 +184,42 @@ export const Dashboard = () => {
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="shadow-sm dark:shadow-none">
+                <Card>
                     <CardContent className="p-6">
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">Faturamento do Mês</p>
-                        <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{valueFormatter(stats.revenue)}</div>
+                        <p className="text-zinc-400 text-sm font-sans">Faturamento do Mês</p>
+                        <div className="text-2xl font-medium text-white mt-2 font-mono">{valueFormatter(stats.revenue)}</div>
                         <div className="h-1 w-12 bg-green-500 rounded mt-4"></div>
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm dark:shadow-none">
+                <Card>
                     <CardContent className="p-6">
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">Receita Líquida</p>
-                        <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{valueFormatter(stats.netRevenue)}</div>
+                        <p className="text-zinc-400 text-sm font-sans">Receita Líquida</p>
+                        <div className="text-2xl font-medium text-white mt-2 font-mono">{valueFormatter(stats.netRevenue)}</div>
                         <div className="h-1 w-12 bg-zinc-500 rounded mt-4"></div>
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm dark:shadow-none">
+                <Card>
                     <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-sm">Serviços Concluídos</p>
-                                <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{stats.completedServices}</div>
+                                <p className="text-zinc-400 text-sm font-sans">Serviços Concluídos</p>
+                                <div className="text-2xl font-medium text-white mt-2 font-mono">{stats.completedServices}</div>
                             </div>
-                            <CheckCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-700" />
+                            <CheckCircle className="w-8 h-8 text-zinc-700" />
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm dark:shadow-none">
+                <Card>
                     <CardContent className="p-6">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-sm">Carros Atendidos</p>
-                                <div className="text-2xl font-bold text-zinc-900 dark:text-white mt-2">{stats.carsServiced}</div>
+                                <p className="text-zinc-400 text-sm font-sans">Carros Atendidos</p>
+                                <div className="text-2xl font-medium text-white mt-2 font-mono">{stats.carsServiced}</div>
                             </div>
-                            <Car className="w-8 h-8 text-zinc-400 dark:text-zinc-700" />
+                            <Car className="w-8 h-8 text-zinc-700" />
                         </div>
                     </CardContent>
                 </Card>
@@ -228,9 +228,9 @@ export const Dashboard = () => {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Daily Revenue Chart */}
-                <Card className="lg:col-span-2 shadow-sm dark:shadow-none">
+                <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle className="text-zinc-900 dark:text-white">Faturamento Diário</CardTitle>
+                        <CardTitle className="text-white">Faturamento Diário</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={chartConfig} className="min-h-[200px] w-full h-72">
@@ -256,9 +256,9 @@ export const Dashboard = () => {
                 </Card>
 
                 {/* Popular Services Donut */}
-                <Card className="shadow-sm dark:shadow-none flex flex-col">
+                <Card className="flex flex-col">
                     <CardHeader>
-                        <CardTitle className="text-zinc-900 dark:text-white">Serviços Mais Populares</CardTitle>
+                        <CardTitle className="text-white">Serviços Mais Populares</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 pb-0">
                         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
@@ -282,11 +282,11 @@ export const Dashboard = () => {
 
             {/* Bottom Row - Lists */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="shadow-sm dark:shadow-none">
+                <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                            <h3 className="font-semibold text-zinc-900 dark:text-white">Próximos Agendamentos</h3>
+                            <Calendar className="w-5 h-5 text-yellow-500" />
+                            <h3 className="font-semibold text-white">Próximos Agendamentos</h3>
                         </div>
                         <div className="text-center py-12 text-zinc-500 text-sm">
                             Nenhum agendamento para hoje.
@@ -294,11 +294,11 @@ export const Dashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm dark:shadow-none">
+                <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                            <h3 className="font-semibold text-zinc-900 dark:text-white">Resumo de Agendamentos</h3>
+                            <Calendar className="w-5 h-5 text-yellow-500" />
+                            <h3 className="font-semibold text-white">Resumo de Agendamentos</h3>
                         </div>
                         <div className="text-center py-12 text-zinc-500 text-sm">
                             Nenhum dado disponível.

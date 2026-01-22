@@ -14,7 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     const showBottomNav = ROOT_PATHS.includes(location.pathname);
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+        <div className="min-h-screen bg-zinc-950">
             <TopHeader />
 
             {/* Padding Top = Altura do Header (16 = 4rem = 64px) */}

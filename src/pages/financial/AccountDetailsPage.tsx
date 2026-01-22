@@ -91,8 +91,8 @@ export default function AccountDetailsPage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 hidden md:block">{account.name}</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400">Detalhes e movimentações da conta</p>
+                    <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 hidden md:block font-display">{account.name}</h1>
+                    <p className="text-zinc-400 font-sans">Detalhes e movimentações da conta</p>
                 </div>
             </div>
 
@@ -107,12 +107,12 @@ export default function AccountDetailsPage() {
                 </div>
 
                 {/* Chart Card (2/3) */}
-                <Card className="lg:col-span-2 border-zinc-200 dark:border-zinc-800 h-[220px] relative overflow-hidden">
+                <Card className="lg:col-span-2 border-zinc-800 h-[220px] relative overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between py-4 pb-2 space-y-0 relative z-10">
                         <CardTitle className="text-base font-medium">Resumo do Período</CardTitle>
                         <div className="flex items-center gap-2">
                             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="w-[120px] h-8 text-xs bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+                                <SelectTrigger className="w-[120px] h-8 text-xs bg-zinc-900/50 backdrop-blur-sm">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -122,7 +122,7 @@ export default function AccountDetailsPage() {
                                 </SelectContent>
                             </Select>
                             <Select value={selectedYear} onValueChange={setSelectedYear}>
-                                <SelectTrigger className="w-[80px] h-8 text-xs bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+                                <SelectTrigger className="w-[80px] h-8 text-xs bg-zinc-900/50 backdrop-blur-sm">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -170,23 +170,23 @@ export default function AccountDetailsPage() {
 
                     <CardContent className="h-[150px] flex items-center justify-center gap-3 sm:gap-8 md:gap-16 relative z-10">
                         {/* Simple Balance View */}
-                        <div className="flex flex-col items-center gap-1 p-3 sm:p-4 rounded-xl bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border border-zinc-100/50 dark:border-zinc-800/50 min-w-[100px]">
-                            <span className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider">Entradas</span>
-                            <span className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        <div className="flex flex-col items-center gap-1 p-3 sm:p-4 rounded-xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800/50 min-w-[100px]">
+                            <span className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider font-sans">Entradas</span>
+                            <span className="text-lg sm:text-2xl font-medium text-emerald-400 font-mono">
                                 + {formatMoney(chartData.income)}
                             </span>
                         </div>
 
-                        <div className="flex flex-col items-center gap-1 p-3 sm:p-4 rounded-xl bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border border-zinc-100/50 dark:border-zinc-800/50 min-w-[100px]">
-                            <span className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider">Saídas</span>
-                            <span className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400">
+                        <div className="flex flex-col items-center gap-1 p-3 sm:p-4 rounded-xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800/50 min-w-[100px]">
+                            <span className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider font-sans">Saídas</span>
+                            <span className="text-lg sm:text-2xl font-medium text-red-400 font-mono">
                                 - {formatMoney(chartData.expense)}
                             </span>
                         </div>
 
-                        <div className="flex flex-col items-center gap-1 p-3 sm:p-4 rounded-xl bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border border-zinc-100/50 dark:border-zinc-800/50 min-w-[100px]">
-                            <span className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider">Resultado</span>
-                            <span className={`text-lg sm:text-xl font-bold ${chartData.income - chartData.expense >= 0 ? 'text-zinc-700 dark:text-zinc-200' : 'text-red-600'}`}>
+                        <div className="flex flex-col items-center gap-1 p-3 sm:p-4 rounded-xl bg-zinc-950/50 backdrop-blur-sm border border-zinc-800/50 min-w-[100px]">
+                            <span className="text-xs sm:text-sm text-zinc-500 font-medium uppercase tracking-wider font-sans">Resultado</span>
+                            <span className={`text-lg sm:text-xl font-medium font-mono ${chartData.income - chartData.expense >= 0 ? 'text-zinc-200' : 'text-red-400'}`}>
                                 {formatMoney(chartData.income - chartData.expense)}
                             </span>
                         </div>

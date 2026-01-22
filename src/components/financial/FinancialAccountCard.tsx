@@ -16,7 +16,7 @@ interface FinancialAccountCardProps {
 
 export function FinancialAccountCard({ account, onDelete, onDetail, onEdit, hideActions = false }: FinancialAccountCardProps) {
     return (
-        <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-primary/50 transition-colors group relative overflow-hidden flex flex-col justify-between">
+        <Card className="h-full border-zinc-800 hover:border-primary/50 transition-colors group relative overflow-hidden flex flex-col justify-between">
             {/* Colored Stripe */}
             <div
                 className="absolute left-0 top-0 bottom-0 w-1"
@@ -33,7 +33,7 @@ export function FinancialAccountCard({ account, onDelete, onDetail, onEdit, hide
                             </div>
                         )}
                         <div>
-                            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate w-[120px] sm:w-auto" title={account.name}>{account.name}</h3>
+                            <h3 className="font-semibold text-zinc-100 truncate w-[120px] sm:w-auto" title={account.name}>{account.name}</h3>
                             <p className="text-xs text-zinc-500 capitalize">{account.type === 'bank' ? 'Conta Bancária' : 'Caixa Físico'}</p>
                         </div>
                     </div>
@@ -68,7 +68,7 @@ export function FinancialAccountCard({ account, onDelete, onDetail, onEdit, hide
                 </div>
 
                 <div>
-                    <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 block truncate">
+                    <span className="text-2xl font-medium text-zinc-100 block truncate font-mono">
                         {formatMoney(Number(account.current_balance))}
                     </span>
                 </div>

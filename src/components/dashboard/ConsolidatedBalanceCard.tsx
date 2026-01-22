@@ -21,7 +21,7 @@ export function ConsolidatedBalanceCard({ totalBalance, accounts }: Consolidated
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+                <div className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-zinc-50 font-mono">
                     {formatMoney(totalBalance)}
                 </div>
             </CardContent>

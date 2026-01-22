@@ -6,7 +6,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-// Removed Popover imports
 import {
     LayoutDashboard,
     ShoppingCart,
@@ -30,14 +29,12 @@ import {
 import { SubscriptionTag } from '../components/SubscriptionTag'
 import { Clock } from '../components/Clock'
 import { supabase } from '../lib/supabase'
-import { ThemeToggle } from '../components/ThemeToggle'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { useMobile } from '../hooks/useMobile'
 
 import logo from '../assets/precifix-logo.png'
 
 export const MainLayout = () => {
-    // Mobile Layout Detection
     const isMobile = useMobile();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
@@ -73,7 +70,6 @@ export const MainLayout = () => {
         const handleProfileUpdate = () => {
             if (user?.id) {
                 fetchProfile(user.id)
-                // Also refresh session user to get updated metadata if needed
                 supabase.auth.getUser().then(({ data: { user } }) => {
                     if (user) setUser(user)
                 })
@@ -82,7 +78,6 @@ export const MainLayout = () => {
 
         window.addEventListener('profile-updated', handleProfileUpdate)
 
-        // Get initial session
         const checkSession = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession()
@@ -102,7 +97,6 @@ export const MainLayout = () => {
 
         checkSession()
 
-        // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_OUT' || !session) {
                 navigate('/login')
@@ -117,14 +111,13 @@ export const MainLayout = () => {
             subscription.unsubscribe()
             window.removeEventListener('profile-updated', handleProfileUpdate)
         }
-    }, [navigate, user?.id]) // Added user?.id dependency for handleProfileUpdate
+    }, [navigate, user?.id])
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
         navigate('/login')
     }
 
-    // Get first name for greeting
     const getFirstName = () => {
         if (nickname) return nickname
         const fullName = user?.user_metadata?.full_name || 'Usuário'
@@ -157,7 +150,7 @@ export const MainLayout = () => {
         },
     ]
 
-    const [openSubmenus, setOpenSubmenus] = useState<string[]>(['Cadastros']) // Open Cadastros by default for visibility
+    const [openSubmenus, setOpenSubmenus] = useState<string[]>(['Cadastros'])
 
     const toggleSubmenu = (name: string) => {
         setOpenSubmenus(prev =>
@@ -173,13 +166,11 @@ export const MainLayout = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         )
     }
-
-
 
     if (isMobile) {
         return (
@@ -189,10 +180,8 @@ export const MainLayout = () => {
         );
     }
 
-    // Desktop Layout (original)
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex transition-colors duration-200">
-            {/* Mobile Sidebar Overlay */}
+        <div className="min-h-screen bg-zinc-950 flex transition-colors duration-200">
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -200,17 +189,15 @@ export const MainLayout = () => {
                 />
             )}
 
-            {/* Sidebar */}
             <aside className={`
                 fixed inset-y-0 left-0 z-50 w-64 
-                bg-white dark:bg-zinc-900 
-                transform transition-transform duration-200 ease-in-out border-r border-zinc-200 dark:border-zinc-800
+                bg-zinc-900 
+                transform transition-transform duration-200 ease-in-out border-r border-zinc-800
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 print:hidden
             `}>
                 <div className="h-full flex flex-col">
-                    {/* Logo area */}
-                    <div className="h-16 flex items-center px-6 bg-primary dark:bg-zinc-900 dark:border-b dark:border-primary">
+                    <div className="h-16 flex items-center px-6 bg-zinc-900 border-b border-primary">
                         <Link to="/">
                             <img src={logo} alt="Precifix Logo" className="h-8 w-auto" />
                         </Link>
@@ -222,7 +209,6 @@ export const MainLayout = () => {
                         </button>
                     </div>
 
-                    {/* Navigation */}
                     <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                         {navigation.map((item) => {
                             if (item.children) {
@@ -236,8 +222,8 @@ export const MainLayout = () => {
                                             className={`
                                                 w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                                 ${isActive
-                                                    ? 'text-zinc-900 dark:text-white'
-                                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-primary/80 dark:hover:bg-primary/80 hover:text-primary-foreground dark:hover:text-primary-foreground'
+                                                    ? 'text-white'
+                                                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
                                                 }
                                             `}
                                         >
@@ -250,7 +236,6 @@ export const MainLayout = () => {
                                             />
                                         </button>
 
-                                        {/* Submenu items */}
                                         {isOpen && (
                                             <div className="pl-4 space-y-1">
                                                 {item.children.map((child) => {
@@ -262,8 +247,8 @@ export const MainLayout = () => {
                                                             className={`
                                                                 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                                                                 ${isChildActive
-                                                                    ? 'bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
-                                                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-primary/80 dark:hover:bg-primary/80 hover:text-primary-foreground dark:hover:text-primary-foreground'
+                                                                    ? 'bg-zinc-800 text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
+                                                                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
                                                                 }
                                                             `}
                                                             onClick={() => setIsSidebarOpen(false)}
@@ -286,8 +271,8 @@ export const MainLayout = () => {
                                     className={`
                                         flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                         ${isActive
-                                            ? 'bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
-                                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-primary/80 dark:hover:bg-primary/80 hover:text-primary-foreground dark:hover:text-primary-foreground'
+                                            ? 'bg-zinc-800 text-white font-bold border-l-4 border-yellow-500 shadow-sm pl-[calc(0.75rem-4px)]'
+                                            : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
                                         }
                                     `}
                                     onClick={() => setIsSidebarOpen(false)}
@@ -299,16 +284,15 @@ export const MainLayout = () => {
                         })}
                     </nav>
 
-                    {/* Footer / Theme Toggle */}
-                    <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
+                    <div className="p-4 border-t border-zinc-800">
                         <div className="mb-4">
                             <button
                                 onClick={() => setIsToolsOpen(!isToolsOpen)}
                                 className={`
                                     w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                     ${isToolsOpen
-                                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
-                                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                        ? 'bg-zinc-800 text-white'
+                                        : 'text-zinc-400 hover:bg-zinc-800'
                                     }
                                 `}
                             >
@@ -321,78 +305,66 @@ export const MainLayout = () => {
                                 />
                             </button>
 
-                            {/* Minicard / App Drawer */}
                             {isToolsOpen && (
-                                <div className="mt-2 p-2 bg-zinc-100 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-top-2 duration-200">
+                                <div className="mt-2 p-2 bg-zinc-900/50 rounded-lg border border-zinc-800 animate-in slide-in-from-top-2 duration-200">
                                     <div className="grid grid-cols-4 gap-2">
                                         <Link
                                             to="/tools/dilution-calculator"
-                                            className="flex items-center justify-center p-2 rounded-md bg-white dark:bg-zinc-800 hover:bg-primary/10 hover:text-primary border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm group relative"
+                                            className="flex items-center justify-center p-2 rounded-md bg-zinc-800 hover:bg-primary/10 hover:text-primary border border-zinc-700 transition-all shadow-sm group relative"
                                             onClick={() => setIsSidebarOpen(false)}
                                             title="Calculadora de Diluição"
                                         >
-                                            <Calculator className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-primary transition-colors" />
+                                            <Calculator className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
                                         </Link>
                                         <Link
                                             to="/tools/product-cost"
-                                            className="flex items-center justify-center p-2 rounded-md bg-white dark:bg-zinc-800 hover:bg-primary/10 hover:text-primary border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm group relative"
+                                            className="flex items-center justify-center p-2 rounded-md bg-zinc-800 hover:bg-primary/10 hover:text-primary border border-zinc-700 transition-all shadow-sm group relative"
                                             onClick={() => setIsSidebarOpen(false)}
                                             title="Calculadora de Custos"
                                         >
-                                            <DollarSign className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-primary transition-colors" />
+                                            <DollarSign className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
                                         </Link>
                                     </div>
                                 </div>
                             )}
                         </div>
-                        <ThemeToggle />
                     </div>
                 </div>
             </aside>
 
-            {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 lg:pl-64 transition-all duration-200 print:pl-0">
-                {/* Header */}
-                <header className="h-16 bg-primary dark:bg-zinc-900 dark:border-b dark:border-primary shadow-md flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 print:hidden">
+                <header className="h-16 bg-zinc-900 border-b border-primary shadow-md flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 print:hidden">
                     <button
-                        className="lg:hidden p-2 text-zinc-900 dark:text-zinc-400 hover:text-white"
+                        className="lg:hidden p-2 text-zinc-400 hover:text-white"
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <MenuIcon className="w-6 h-6" />
                     </button>
 
-                    {/* Spacer for when mobile menu is hidden */}
                     <div className="hidden lg:block"></div>
 
-                    {/* Debug Clock */}
                     <Clock />
 
-                    {/* Right Header Section */}
                     <div className="ml-auto flex items-center gap-6">
-                        {/* Subscription Tag */}
                         <SubscriptionTag
                             status={subscriptionData.status}
                             trialEndsAt={subscriptionData.trialEndsAt}
                         />
 
-                        {/* Notifications */}
-                        <button className="relative p-2 text-zinc-900 dark:text-zinc-400 hover:bg-zinc-100/20 dark:hover:bg-zinc-800 rounded-full transition-colors">
+                        <button className="relative p-2 text-zinc-400 hover:bg-zinc-800 rounded-full transition-colors">
                             <Bell className="w-5 h-5" />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-zinc-900"></span>
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-zinc-900"></span>
                         </button>
 
-                        <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800"></div>
+                        <div className="h-6 w-px bg-zinc-800"></div>
 
-                        {/* User Greeting */}
-                        <span className="text-sm font-semibold text-zinc-900 dark:text-white hidden md:block">
+                        <span className="text-sm font-semibold text-white hidden md:block">
                             Olá, {getFirstName()}
                         </span>
 
-
-                        {/* User Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex rounded-full bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900">
+                                <button className="flex rounded-full bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-zinc-900">
                                     <span className="sr-only">Open user menu</span>
                                     {user?.user_metadata?.avatar_url ? (
                                         <img
@@ -401,8 +373,8 @@ export const MainLayout = () => {
                                             alt=""
                                         />
                                     ) : (
-                                        <div className="h-10 w-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
-                                            <User className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+                                        <div className="h-10 w-10 rounded-full bg-zinc-700 flex items-center justify-center">
+                                            <User className="h-6 w-6 text-zinc-400" />
                                         </div>
                                     )}
                                 </button>
@@ -444,8 +416,6 @@ export const MainLayout = () => {
                                     </Link>
                                 </DropdownMenuItem>
 
-
-
                                 <DropdownMenuItem asChild>
                                     <button className="w-full cursor-pointer flex items-center gap-2">
                                         <CreditCard className="w-4 h-4" />
@@ -469,7 +439,6 @@ export const MainLayout = () => {
                     </div>
                 </header>
 
-                {/* Page Content */}
                 <main className="flex-1 p-4 lg:p-8">
                     <div className="max-w-7xl mx-auto">
                         <Outlet />

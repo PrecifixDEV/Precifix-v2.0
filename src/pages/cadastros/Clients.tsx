@@ -255,8 +255,8 @@ export const Clients = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="hidden md:block">
-                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white uppercase tracking-tight">Clientes</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400">Gerencie seus clientes</p>
+                    <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Clientes</h1>
+                    <p className="text-zinc-400">Gerencie seus clientes</p>
                 </div>
                 <Button
                     onClick={handleCreate}
@@ -271,12 +271,12 @@ export const Clients = () => {
             <div className="space-y-4">
                 <div className="flex items-center gap-2 w-full">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
                         <Input
                             placeholder="Buscar clientes..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="h-10 pl-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-sm placeholder:text-zinc-400 w-full"
+                            className="h-10 pl-10 bg-zinc-900 border-zinc-800 text-sm placeholder:text-zinc-400 w-full"
                         />
                     </div>
 
@@ -286,7 +286,7 @@ export const Clients = () => {
                                 variant="outline"
                                 size="icon"
                                 title="Filtrar"
-                                className={`h-10 w-10 shrink-0 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+                                className={`h-10 w-10 shrink-0 bg-zinc-900 border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-400 hover:text-white'}`}
                             >
                                 <SlidersHorizontal className="h-5 w-5" />
                             </Button>
@@ -312,7 +312,7 @@ export const Clients = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    className="h-10 w-10 bg-zinc-900 border-zinc-800"
                                 >
                                     <Printer className="h-5 w-5" />
                                 </Button>
@@ -337,7 +337,7 @@ export const Clients = () => {
                             onCheckedChange={toggleSelectAll}
                             className="h-5 w-5"
                         />
-                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                        <span className="text-sm font-bold text-zinc-100 uppercase tracking-tight">
                             Selecionar Todos
                         </span>
                     </div>
@@ -351,7 +351,7 @@ export const Clients = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    className="h-10 w-10 bg-zinc-900 border-zinc-800"
                                 >
                                     <Printer className="h-5 w-5" />
                                 </Button>
@@ -370,7 +370,7 @@ export const Clients = () => {
                 </div>
             </div>
 
-            <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <Card className="border-zinc-800 bg-zinc-900">
                 <CardContent className="p-0 md:p-6">
                     {filteredClients.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
@@ -379,7 +379,7 @@ export const Clients = () => {
                     ) : (
                         <>
                             {/* Mobile View - List */}
-                            <div className="md:hidden flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+                            <div className="md:hidden flex flex-col divide-zinc-800">
                                 {paginatedClients.map((client) => {
                                     const vehicleCounts = { carro: 0, moto: 0, caminhao: 0 };
                                     client.vehicles?.forEach(v => {
@@ -391,7 +391,7 @@ export const Clients = () => {
                                     return (
                                         <div key={client.id}>
                                             <div
-                                                className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0 cursor-pointer"
+                                                className="px-6 py-4 hover:bg-zinc-900/50 transition-colors border-b border-zinc-800 last:border-0 cursor-pointer"
                                                 onClick={() => handleEdit(client)}
                                             >
                                                 <div className="flex items-center justify-between gap-3 mb-2">
@@ -405,7 +405,7 @@ export const Clients = () => {
                                                         </div>
 
                                                         {/* Avatar for Mobile List */}
-                                                        <Avatar className="h-10 w-10 border border-zinc-200 dark:border-zinc-700">
+                                                        <Avatar className="h-10 w-10 border border-zinc-700">
                                                             <AvatarImage src={undefined} alt={client.name} />
                                                             <AvatarFallback className="bg-yellow-400 text-black font-bold">
                                                                 {getInitials(client.name)}
@@ -449,22 +449,22 @@ export const Clients = () => {
                                                         <span>{client.phone || "-"}</span>
                                                     </div>
                                                     <div
-                                                        className="flex items-center gap-1 mt-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
+                                                        className="flex items-center gap-1 mt-1 hover:bg-zinc-800 p-1 -ml-1 rounded transition-colors"
                                                     >
                                                         <span className="font-bold mr-1">Veículos:</span>
                                                         <div className="flex gap-1.5 flex-wrap">
                                                             {vehicleCounts.carro > 0 && (
-                                                                <div className="flex items-center text-[10px] bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">
+                                                                <div className="flex items-center text-[10px] bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded border border-zinc-700">
                                                                     <Car className="w-3 h-3 mr-1" /> {vehicleCounts.carro}
                                                                 </div>
                                                             )}
                                                             {vehicleCounts.moto > 0 && (
-                                                                <div className="flex items-center text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
+                                                                <div className="flex items-center text-[10px] bg-orange-950/30 text-orange-400 px-1.5 py-0.5 rounded border border-orange-900/30">
                                                                     <Bike className="w-3 h-3 mr-1" /> {vehicleCounts.moto}
                                                                 </div>
                                                             )}
                                                             {vehicleCounts.caminhao > 0 && (
-                                                                <div className="flex items-center text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                                                <div className="flex items-center text-[10px] bg-green-950/30 text-green-400 px-1.5 py-0.5 rounded border border-green-900/30">
                                                                     <Truck className="w-3 h-3 mr-1" /> {vehicleCounts.caminhao}
                                                                 </div>
                                                             )}
@@ -479,9 +479,9 @@ export const Clients = () => {
                             </div>
 
                             {/* Desktop View - Table */}
-                            <div className="hidden md:block rounded-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                            <div className="hidden md:block rounded-md border border-zinc-800 overflow-hidden">
                                 <Table>
-                                    <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
+                                    <TableHeader className="bg-zinc-800/50">
                                         <TableRow>
                                             <TableHead className="w-[50px] text-center">
                                                 <Checkbox
@@ -502,7 +502,7 @@ export const Clients = () => {
                                         {paginatedClients.map((client) => (
                                             <TableRow
                                                 key={client.id}
-                                                className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer"
+                                                className="hover:bg-zinc-800/50 cursor-pointer"
                                                 onClick={() => handleEdit(client)}
                                             >
                                                 <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
@@ -515,7 +515,7 @@ export const Clients = () => {
                                                 <TableCell className="font-medium">
                                                     <div className="flex items-center gap-3">
                                                         {/* Avatar for Desktop Table */}
-                                                        <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-700">
+                                                        <Avatar className="h-8 w-8 border border-zinc-700">
                                                             <AvatarImage src={undefined} alt={client.name} />
                                                             <AvatarFallback className="bg-yellow-400 text-black font-bold text-xs">
                                                                 {getInitials(client.name)}
@@ -538,9 +538,9 @@ export const Clients = () => {
                                                             });
                                                             return (
                                                                 <>
-                                                                    {counts.carro > 0 && <div className="flex items-center text-xs bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded"><Car className="w-3 h-3 mr-1" /> {counts.carro}</div>}
-                                                                    {counts.moto > 0 && <div className="flex items-center text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded"><Bike className="w-3 h-3 mr-1" /> {counts.moto}</div>}
-                                                                    {counts.caminhao > 0 && <div className="flex items-center text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded"><Truck className="w-3 h-3 mr-1" /> {counts.caminhao}</div>}
+                                                                    {counts.carro > 0 && <div className="flex items-center text-xs bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded border border-zinc-700"><Car className="w-3 h-3 mr-1" /> {counts.carro}</div>}
+                                                                    {counts.moto > 0 && <div className="flex items-center text-xs bg-orange-950/30 text-orange-400 px-1.5 py-0.5 rounded border border-orange-900/30"><Bike className="w-3 h-3 mr-1" /> {counts.moto}</div>}
+                                                                    {counts.caminhao > 0 && <div className="flex items-center text-xs bg-green-950/30 text-green-400 px-1.5 py-0.5 rounded border border-green-900/30"><Truck className="w-3 h-3 mr-1" /> {counts.caminhao}</div>}
                                                                     {client.vehicles?.length === 0 && <span className="text-muted-foreground text-xs">-</span>}
                                                                 </>
                                                             );
@@ -554,7 +554,7 @@ export const Clients = () => {
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => handleEdit(client)}
-                                                            className="h-8 w-8 text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100"
+                                                            className="h-8 w-8 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
                                                         >
                                                             <Pencil className="h-4 w-4" />
                                                         </Button>

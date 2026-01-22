@@ -298,19 +298,19 @@ export const Profile = () => {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
             <div>
-                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">Meu Perfil</h1>
-                <p className="text-zinc-500 dark:text-zinc-400">
+                <h1 className="text-2xl font-bold text-white hidden md:block">Meu Perfil</h1>
+                <p className="text-zinc-400">
                     Gerencie suas informações pessoais.
                 </p>
             </div>
 
-            <Card className="shadow-sm">
+            <Card>
                 <CardContent className='pt-6'>
                     <form onSubmit={updateProfile} className="space-y-8">
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center gap-4">
                             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                                <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-zinc-100 dark:ring-zinc-800 bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center">
+                                <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-zinc-800 bg-zinc-800 flex items-center justify-center">
                                     {avatarUrl ? (
                                         <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
@@ -331,79 +331,79 @@ export const Profile = () => {
                                 accept="image/*,.heic,.heif"
                             />
                             <div className="text-center">
-                                <h3 className="text-lg font-medium text-zinc-900 dark:text-white">
+                                <h3 className="text-lg font-medium text-white">
                                     {displayName} {nickname ? '' : lastName}
                                 </h3>
-                                <p className="text-sm text-zinc-500 dark:text-zinc-400">{user?.email}</p>
+                                <p className="text-sm text-zinc-400">{user?.email}</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Personal Info */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-zinc-900 dark:text-white pb-2 border-b border-zinc-200 dark:border-zinc-800">
+                                <h4 className="font-medium text-white pb-2 border-b border-zinc-800">
                                     Informações Pessoais
                                 </h4>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Nome Completo</label>
+                                    <label className="text-sm font-medium text-zinc-300">Nome Completo</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <input
                                             type="text"
                                             placeholder="Nome"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-background text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                         <input
                                             type="text"
                                             placeholder="Sobrenome"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-background text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Apelido (Opcional)</label>
+                                    <label className="text-sm font-medium text-zinc-300">Apelido (Opcional)</label>
                                     <input
                                         type="text"
                                         value={nickname}
                                         onChange={(e) => setNickname(e.target.value)}
                                         placeholder="Como você gostaria de ser chamado?"
-                                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                     />
                                     <p className="text-xs text-zinc-500">Se preenchido, será usado na saudação inicial.</p>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">CPF</label>
+                                    <label className="text-sm font-medium text-zinc-300">CPF</label>
                                     <input
                                         type="text"
                                         value={documentNumber}
                                         onChange={handleCpfChange}
                                         maxLength={14}
                                         placeholder="000.000.000-00"
-                                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Telefone</label>
+                                    <label className="text-sm font-medium text-zinc-300">Telefone</label>
                                     <input
                                         type="text"
                                         value={phoneNumber}
                                         onChange={handlePhoneChange}
                                         maxLength={15}
                                         placeholder="(XX) XXXXX-XXXX"
-                                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">E-mail</label>
+                                        <label className="text-sm font-medium text-zinc-300">E-mail</label>
                                         <TooltipProvider>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
@@ -419,20 +419,20 @@ export const Profile = () => {
                                         type="email"
                                         value={user?.email || ''}
                                         readOnly
-                                        className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800/50 text-zinc-500 cursor-not-allowed outline-none"
+                                        className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-800/50 text-zinc-500 cursor-not-allowed outline-none"
                                     />
                                 </div>
                             </div>
 
                             {/* Residential Address Info */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-zinc-900 dark:text-white pb-2 border-b border-zinc-200 dark:border-zinc-800">
+                                <h4 className="font-medium text-white pb-2 border-b border-zinc-800">
                                     Endereço Residencial
                                 </h4>
 
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="space-y-2 col-span-1">
-                                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">CEP</label>
+                                        <label className="text-sm font-medium text-zinc-300">CEP</label>
                                         <input
                                             type="text"
                                             value={zipCode}
@@ -440,38 +440,38 @@ export const Profile = () => {
                                             onBlur={handleZipCodeBlur}
                                             maxLength={9}
                                             placeholder="00000-000"
-                                            className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-background text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2 col-span-2">
-                                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Endereço</label>
+                                        <label className="text-sm font-medium text-zinc-300">Endereço</label>
                                         <input
                                             type="text"
                                             value={address}
                                             onChange={(e) => setAddress(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-background text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="space-y-2 col-span-1">
-                                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Número</label>
+                                        <label className="text-sm font-medium text-zinc-300">Número</label>
                                         <input
                                             type="text"
                                             value={addressNumber}
                                             onChange={(e) => setAddressNumber(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-background text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2 col-span-2">
-                                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Complemento (Opcional)</label>
+                                        <label className="text-sm font-medium text-zinc-300">Complemento (Opcional)</label>
                                         <input
                                             type="text"
                                             value={addressComplement}
                                             onChange={(e) => setAddressComplement(e.target.value)}
                                             placeholder="Ex: Apto 101"
-                                            className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-background text-zinc-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
@@ -482,7 +482,7 @@ export const Profile = () => {
                             <button
                                 type="button"
                                 onClick={() => window.location.href = '/minha-empresa'}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-medium rounded-lg transition-colors border border-zinc-200 dark:border-zinc-700"
+                                className="flex items-center gap-2 px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg transition-colors border border-zinc-700"
                             >
                                 <span>Minha Empresa</span>
                                 <ArrowRight className="w-5 h-5" />

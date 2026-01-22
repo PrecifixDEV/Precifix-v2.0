@@ -351,8 +351,8 @@ export const MyCompany = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 max-w-4xl pb-20 animate-in fade-in duration-500">
             <div>
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white hidden md:block">Minha Empresa</h1>
-                <p className="text-zinc-500 dark:text-zinc-400">Gerencie as configurações da sua empresa, marca e horários.</p>
+                <h1 className="text-3xl font-bold text-white hidden md:block">Minha Empresa</h1>
+                <p className="text-zinc-400">Gerencie as configurações da sua empresa, marca e horários.</p>
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-6">
@@ -367,7 +367,7 @@ export const MyCompany = () => {
                             {/* Logo Upload */}
                             <div className="flex flex-col items-center gap-3">
                                 <div
-                                    className="relative group cursor-pointer w-48 h-32 bg-zinc-100 dark:bg-zinc-800 rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center overflow-hidden hover:border-yellow-500 transition-colors"
+                                    className="relative group cursor-pointer w-48 h-32 bg-zinc-800 rounded-xl border-2 border-dashed border-zinc-700 flex items-center justify-center overflow-hidden hover:border-yellow-500 transition-colors"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     {logoUrl ? (
@@ -402,7 +402,7 @@ export const MyCompany = () => {
                                             type="text"
                                             value={companyName}
                                             onChange={(e) => setCompanyName(e.target.value)}
-                                            className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                            className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                             placeholder="Nome fantasia"
                                         />
                                     </div>
@@ -414,7 +414,7 @@ export const MyCompany = () => {
                                         value={cnpj}
                                         onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
                                         maxLength={18}
-                                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                        className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                         placeholder="00.000.000/0000-00"
                                     />
                                 </div>
@@ -438,7 +438,7 @@ export const MyCompany = () => {
                                             onChange={(e) => setPrimaryColor(e.target.value)}
                                             className="h-10 w-20 rounded cursor-pointer border-0 p-0"
                                         />
-                                        <span className="text-xs font-mono bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">{primaryColor}</span>
+                                        <span className="text-xs font-mono bg-zinc-800 px-2 py-1 rounded">{primaryColor}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -450,7 +450,7 @@ export const MyCompany = () => {
                                             onChange={(e) => setSecondaryColor(e.target.value)}
                                             className="h-10 w-20 rounded cursor-pointer border-0 p-0"
                                         />
-                                        <span className="text-xs font-mono bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">{secondaryColor}</span>
+                                        <span className="text-xs font-mono bg-zinc-800 px-2 py-1 rounded">{secondaryColor}</span>
                                     </div>
                                 </div>
                             </div>
@@ -473,7 +473,7 @@ export const MyCompany = () => {
                                         type="text"
                                         value={phone}
                                         onChange={(e) => setPhone(formatPhone(e.target.value))}
-                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                         placeholder="(00) 00000-0000"
                                     />
                                 </div>
@@ -486,7 +486,7 @@ export const MyCompany = () => {
                                         type="text"
                                         value={instagram}
                                         onChange={(e) => setInstagram(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                         placeholder="@suaempresa"
                                     />
                                 </div>
@@ -499,7 +499,7 @@ export const MyCompany = () => {
                                         type="text"
                                         value={website}
                                         onChange={(e) => setWebsite(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                         placeholder="www.suaempresa.com.br"
                                     />
                                 </div>
@@ -519,7 +519,7 @@ export const MyCompany = () => {
                                         value={zipCode}
                                         onChange={(e) => setZipCode(formatCEP(e.target.value))}
                                         onBlur={handleZipCodeBlur}
-                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                         placeholder="00000-000"
                                     />
                                 </div>
@@ -530,7 +530,7 @@ export const MyCompany = () => {
                                     type="text"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                    className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                     placeholder="Rua, Avenida..."
                                 />
                             </div>
@@ -540,7 +540,7 @@ export const MyCompany = () => {
                                     type="text"
                                     value={addressNumber}
                                     onChange={(e) => setAddressNumber(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                    className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                 />
                             </div>
                             <div className="space-y-2 md:col-span-3">
@@ -549,14 +549,14 @@ export const MyCompany = () => {
                                     type="text"
                                     value={addressComplement}
                                     onChange={(e) => setAddressComplement(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
+                                    className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 focus:ring-2 focus:ring-yellow-500 outline-none"
                                     placeholder="Sala, Andar, Galpão..."
                                 />
                             </div>
                         </div>
 
                         <div className="flex justify-end pt-4">
-                            <Button type="submit" disabled={savingProfile} className="bg-yellow-500 hover:bg-yellow-600 text-zinc-900">
+                            <Button type="submit" disabled={savingProfile} className="bg-yellow-500 hover:bg-yellow-600 text-zinc-950">
                                 {savingProfile ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                                 Salvar Dados da Empresa
                             </Button>

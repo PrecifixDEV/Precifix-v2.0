@@ -7,16 +7,11 @@ import {
     CreditCard,
     Settings,
     LogOut,
-    ChevronRight,
-    Moon,
-    Sun
+    ChevronRight
 } from 'lucide-react'
-import { Switch } from '@/components/ui/switch'
-import { useTheme } from '@/contexts/ThemeContext'
 
 export const ProfileMenu = () => {
     const navigate = useNavigate()
-    const { theme, toggleTheme } = useTheme()
     const [userProfile, setUserProfile] = useState<{ name: string; avatar_url: string | null } | null>(null)
 
     useEffect(() => {
@@ -77,12 +72,12 @@ export const ProfileMenu = () => {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="min-h-screen bg-zinc-950 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header Section */}
-            <div className="bg-white dark:bg-zinc-900 pt-8 pb-6 px-4 mb-4 shadow-sm border-b border-zinc-100 dark:border-zinc-800">
+            <div className="bg-zinc-900 pt-8 pb-6 px-4 mb-4 shadow-sm border-b border-zinc-800">
                 <div className="flex items-center gap-4">
                     <div className="relative">
-                        <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-yellow-500 p-0.5 bg-white dark:bg-zinc-800">
+                        <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-yellow-500 p-0.5 bg-zinc-800">
                             {userProfile?.avatar_url ? (
                                 <img
                                     src={userProfile.avatar_url}
@@ -90,7 +85,7 @@ export const ProfileMenu = () => {
                                     className="h-full w-full rounded-full object-cover"
                                 />
                             ) : (
-                                <div className="h-full w-full rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                                <div className="h-full w-full rounded-full bg-zinc-800 flex items-center justify-center">
                                     <User className="h-8 w-8 text-zinc-400" />
                                 </div>
                             )}
@@ -98,12 +93,12 @@ export const ProfileMenu = () => {
                     </div>
 
                     <div className="flex flex-col">
-                        <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+                        <h2 className="text-xl font-bold text-white">
                             {userProfile?.name || 'Carregando...'}
                         </h2>
                         <Link
                             to="/profile"
-                            className="text-sm font-medium text-yellow-600 dark:text-yellow-500 hover:text-yellow-700 dark:hover:text-yellow-400 flex items-center gap-1 transition-colors"
+                            className="text-sm font-medium text-yellow-500 hover:text-yellow-400 flex items-center gap-1 transition-colors"
                         >
                             Ver meu Perfil
                             <ChevronRight className="h-3 w-3" />
@@ -116,19 +111,19 @@ export const ProfileMenu = () => {
             <div className="px-4 space-y-6">
 
                 {/* Section 1: User & App */}
-                <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div className="bg-zinc-900 rounded-2xl shadow-sm border border-zinc-800 overflow-hidden">
                     {startMenuItems.map((item, index) => (
                         <Link
                             key={index}
                             to={item.href}
-                            className={`flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${index !== startMenuItems.length - 1 ? 'border-b border-zinc-100 dark:border-zinc-800' : ''
+                            className={`flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors ${index !== startMenuItems.length - 1 ? 'border-b border-zinc-800' : ''
                                 }`}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-                                    <item.icon className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                                <div className="p-2 rounded-lg bg-zinc-800">
+                                    <item.icon className="h-5 w-5 text-zinc-400" />
                                 </div>
-                                <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                                <span className="font-medium text-zinc-100">
                                     {item.label}
                                 </span>
                             </div>
@@ -137,33 +132,12 @@ export const ProfileMenu = () => {
                     ))}
                 </div>
 
-                {/* Section 2: Appearance */}
-                <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden p-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-                                {theme === 'dark' ? (
-                                    <Moon className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                                ) : (
-                                    <Sun className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                                )}
-                            </div>
-                            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                                Modo Escuro
-                            </span>
-                        </div>
-                        <Switch
-                            checked={theme === 'dark'}
-                            onCheckedChange={toggleTheme}
-                            className="data-[state=checked]:bg-yellow-500"
-                        />
-                    </div>
-                </div>
+                {/* Section 2: Appearance - REMOVED since Dark is now the single theme */}
 
                 {/* Section 3: Logout */}
                 <button
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 p-4 text-red-600 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20 active:scale-95 transition-transform font-medium"
+                    className="w-full flex items-center justify-center gap-2 p-4 text-red-500 bg-red-900/10 rounded-2xl border border-red-900/20 active:scale-95 transition-transform font-medium"
                 >
                     <LogOut className="w-5 h-5" />
                     Sair da conta

@@ -272,7 +272,7 @@ export const Products = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white hidden md:block">PRODUTOS</h1>
+                <h1 className="text-2xl font-bold text-white hidden md:block">PRODUTOS</h1>
                 <Button
                     onClick={handleCreateNew}
                     className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02]"
@@ -289,7 +289,7 @@ export const Products = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
                         <Input
                             placeholder="Buscar produto..."
-                            className="pl-10 h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white w-full"
+                            className="pl-10 h-10 bg-zinc-900 border-zinc-800 text-white w-full"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -301,7 +301,7 @@ export const Products = () => {
                                 variant="outline"
                                 size="icon"
                                 title="Filtrar"
-                                className={`h-10 w-10 shrink-0 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+                                className={`h-10 w-10 shrink-0 bg-zinc-900 border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-400 hover:text-white'}`}
                             >
                                 <SlidersHorizontal className="h-5 w-5" />
                             </Button>
@@ -345,7 +345,7 @@ export const Products = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    className="h-10 w-10 bg-zinc-900 border-zinc-800"
                                 >
                                     <Printer className="h-5 w-5" />
                                 </Button>
@@ -370,7 +370,7 @@ export const Products = () => {
                             onCheckedChange={toggleSelectAll}
                             className="h-5 w-5"
                         />
-                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                        <span className="text-sm font-bold text-zinc-100 uppercase tracking-tight">
                             Selecionar Todos
                         </span>
                     </div>
@@ -385,7 +385,7 @@ export const Products = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    className="h-10 w-10 bg-zinc-900 border-zinc-800"
                                 >
                                     <Printer className="h-5 w-5" />
                                 </Button>
@@ -404,7 +404,7 @@ export const Products = () => {
                 </div>
             </div>
 
-            <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <Card className="border-zinc-800 bg-zinc-900">
 
                 <CardContent className="p-0 md:p-6">
                     {/* Active Filters */}
@@ -422,9 +422,9 @@ export const Products = () => {
                     )}
 
                     {/* Desktop Table View */}
-                    <div className="hidden md:block rounded-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                    <div className="hidden md:block rounded-md border border-zinc-800 overflow-hidden">
                         <Table>
-                            <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
+                            <TableHeader className="bg-zinc-800/50">
                                 <TableRow>
                                     <TableHead className="w-[50px] text-center">
                                         <Checkbox
@@ -458,7 +458,7 @@ export const Products = () => {
                                     </TableRow>
                                 ) : (
                                     paginatedProducts.map((product) => (
-                                        <TableRow key={product.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer" onClick={() => handleEdit(product)}>
+                                        <TableRow key={product.id} className="hover:bg-zinc-800/50 cursor-pointer" onClick={() => handleEdit(product)}>
                                             <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                 <Checkbox
                                                     checked={selectedProducts.includes(product.id)}
@@ -471,24 +471,24 @@ export const Products = () => {
                                                     <img
                                                         src={product.image_url}
                                                         alt={product.name}
-                                                        className="w-10 h-10 rounded-md object-cover border border-zinc-200 dark:border-zinc-700"
+                                                        className="w-10 h-10 rounded-md object-cover border border-zinc-700"
                                                     />
                                                 ) : (
-                                                    <div className="w-10 h-10 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+                                                    <div className="w-10 h-10 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-400">
                                                         <Package className="w-5 h-5" />
                                                     </div>
                                                 )}
                                             </TableCell>
-                                            <TableCell className="font-medium text-zinc-900 dark:text-white">
+                                            <TableCell className="font-medium text-white">
                                                 {product.name}
                                             </TableCell>
-                                            <TableCell className="text-zinc-600 dark:text-zinc-400">
+                                            <TableCell className="text-zinc-400">
                                                 {product.is_for_sale ? (
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400">
                                                         Revenda
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-400">
                                                         Uso Próprio
                                                     </span>
                                                 )}
@@ -499,17 +499,17 @@ export const Products = () => {
                                             <TableCell className="text-zinc-600 dark:text-zinc-400">
                                                 {product.is_dilutable ? (product.dilution_ratio || '-') : 'Pronto Uso'}
                                             </TableCell>
-                                            <TableCell className="text-zinc-600 dark:text-zinc-400">
+                                            <TableCell className="text-zinc-400">
                                                 {product.stock_quantity}
                                             </TableCell>
-                                            <TableCell className="text-right font-medium text-zinc-900 dark:text-white">
+                                            <TableCell className="text-right font-medium text-white">
                                                 <div className="flex items-center justify-end gap-2 text-sm">
                                                     {product.is_for_sale ? (
                                                         <div className="flex flex-col items-end">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-zinc-500 text-xs">{formatCurrency(product.price || 0)}</span>
+                                                                <span className="text-zinc-500 text-xs font-mono">{formatCurrency(product.price || 0)}</span>
                                                                 <span className="text-zinc-400">/</span>
-                                                                <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(product.sale_price || 0)}</span>
+                                                                <span className="font-medium text-green-400 font-mono">{formatCurrency(product.sale_price || 0)}</span>
 
                                                                 <Button
                                                                     variant="ghost"
@@ -526,7 +526,7 @@ export const Products = () => {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-zinc-600 dark:text-zinc-400">{formatCurrency(product.price || 0)}</span>
+                                                        <span className="text-zinc-600 dark:text-zinc-400 font-mono font-medium">{formatCurrency(product.price || 0)}</span>
                                                     )}
                                                 </div>
                                             </TableCell>
@@ -564,7 +564,7 @@ export const Products = () => {
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             onClick={() => handleDelete(product.id)}
-                                                            className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                            className="text-red-500 focus:text-red-500 focus:bg-red-900/20"
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" />
                                                             Apagar
@@ -589,7 +589,7 @@ export const Products = () => {
                     />
 
                     {/* Mobile List View */}
-                    <div className="md:hidden flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <div className="md:hidden flex flex-col divide-zinc-800">
                         {loading ? (
                             <div className="py-10 text-center text-zinc-500">
                                 Carregando produtos...
@@ -600,7 +600,7 @@ export const Products = () => {
                             </div>
                         ) : (
                             filteredProducts.map((product) => (
-                                <div key={product.id} className="px-6 py-4 flex flex-col hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                                <div key={product.id} className="px-6 py-4 flex flex-col hover:bg-zinc-900/50 transition-colors border-b border-zinc-800 last:border-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <Checkbox
@@ -614,25 +614,25 @@ export const Products = () => {
                                                     <img
                                                         src={product.image_url}
                                                         alt={product.name}
-                                                        className="w-full h-full object-cover rounded-md border border-zinc-200 dark:border-zinc-700"
+                                                        className="w-full h-full object-cover rounded-md border border-zinc-700"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+                                                    <div className="w-full h-full rounded-md bg-zinc-800 flex items-center justify-center text-zinc-400">
                                                         <Package className="w-6 h-6 opacity-50" />
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="flex flex-col gap-1 min-w-0">
-                                                <h3 className="font-bold text-sm text-zinc-900 dark:text-white line-clamp-2">
+                                                <h3 className="font-bold text-sm text-white line-clamp-2">
                                                     {product.name}
                                                 </h3>
                                                 {product.is_for_sale ? (
-                                                    <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                    <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-900/30 text-green-400">
                                                         Revenda
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                                                    <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-400">
                                                         Uso Próprio
                                                     </span>
                                                 )}
@@ -687,12 +687,12 @@ export const Products = () => {
                                                 {product.is_for_sale ? (
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-zinc-500">Custo:</span>
-                                                        <span className="text-zinc-500">{formatCurrency(product.price || 0)}</span>
+                                                        <span className="text-zinc-500 font-mono">{formatCurrency(product.price || 0)}</span>
                                                         <span className="text-zinc-400">/</span>
-                                                        <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(product.sale_price || 0)}</span>
+                                                        <span className="font-medium text-green-400 font-mono">{formatCurrency(product.sale_price || 0)}</span>
                                                     </div>
                                                 ) : (
-                                                    <div>Preço Custo: {formatCurrency(product.price || 0)}</div>
+                                                    <div className="font-mono">Preço Custo: {formatCurrency(product.price || 0)}</div>
                                                 )}
 
                                                 <div className={(product.stock_quantity || 0) <= 0 ? 'text-red-500 font-medium' : ''}>

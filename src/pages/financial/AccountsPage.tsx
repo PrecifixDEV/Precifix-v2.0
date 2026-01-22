@@ -104,8 +104,8 @@ export default function AccountsPage() {
             {/* Header */}
             <div className="flex items-center justify-between gap-4 print:hidden">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 hidden md:block">Caixas e Bancos</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1">
+                    <h1 className="text-3xl font-bold tracking-tight text-zinc-50 hidden md:block">Caixas e Bancos</h1>
+                    <p className="text-zinc-400 mt-1">
                         Gerencie suas contas bancárias e acompanhe o fluxo financeiro.
                     </p>
                 </div>
@@ -115,7 +115,7 @@ export default function AccountsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsDateDrawerOpen(true)}
-                        className="bg-zinc-100 dark:bg-zinc-800 rounded-full w-10 h-10 hover:bg-yellow-400 hover:text-yellow-950 transition-all shadow-sm"
+                        className="bg-zinc-800 rounded-full w-10 h-10 hover:bg-yellow-400 hover:text-yellow-950 transition-all shadow-sm"
                         title="Filtrar por Data"
                     >
                         <CalendarIcon className="h-5 w-5" />
@@ -163,13 +163,13 @@ export default function AccountsPage() {
                     <Button
                         variant="ghost"
                         onClick={() => setIsTransferOpen(true)}
-                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-primary/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
+                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-800 hover:border-primary/50 hover:bg-zinc-900 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
                     >
-                        <div className="h-10 w-10 rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-white dark:group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
+                        <div className="h-10 w-10 rounded-full bg-zinc-800 group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
                             <ArrowRightLeft className="h-5 w-5 text-zinc-500 group-hover:text-primary transition-colors" />
                         </div>
                         <div className="text-center">
-                            <span className="block font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-primary">Transferir</span>
+                            <span className="block font-semibold text-zinc-300 group-hover:text-primary">Transferir</span>
                             <span className="block text-xs text-zinc-400 hidden sm:block">Entre contas</span>
                         </div>
                     </Button>
@@ -177,13 +177,13 @@ export default function AccountsPage() {
                     <Button
                         variant="ghost"
                         onClick={() => handleOpenTransaction('credit')}
-                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
+                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-800 hover:border-emerald-500/50 hover:bg-emerald-950/20 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
                     >
-                        <div className="h-10 w-10 rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-white dark:group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
+                        <div className="h-10 w-10 rounded-full bg-zinc-800 group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
                             <ArrowUpRight className="h-5 w-5 text-zinc-500 group-hover:text-emerald-500 transition-colors" />
                         </div>
                         <div className="text-center">
-                            <span className="block font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-500">Entrada</span>
+                            <span className="block font-semibold text-zinc-300 group-hover:text-emerald-500">Entrada</span>
                             <span className="block text-xs text-zinc-400 hidden sm:block">Nova Entrada de Valor</span>
                         </div>
                     </Button>
@@ -191,13 +191,13 @@ export default function AccountsPage() {
                     <Button
                         variant="ghost"
                         onClick={() => handleOpenTransaction('debit')}
-                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-red-500/50 hover:bg-red-50/50 dark:hover:bg-red-950/20 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
+                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-800 hover:border-red-500/50 hover:bg-red-950/20 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
                     >
-                        <div className="h-10 w-10 rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-white dark:group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
+                        <div className="h-10 w-10 rounded-full bg-zinc-800 group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
                             <ArrowDownRight className="h-5 w-5 text-zinc-500 group-hover:text-red-500 transition-colors" />
                         </div>
                         <div className="text-center">
-                            <span className="block font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-red-600 dark:group-hover:text-red-500">Saída</span>
+                            <span className="block font-semibold text-zinc-300 group-hover:text-red-500">Saída</span>
                             <span className="block text-xs text-zinc-400 hidden sm:block">Nova Saída de Valor</span>
                         </div>
                     </Button>
@@ -207,7 +207,7 @@ export default function AccountsPage() {
             {/* Carousel Section */}
             <div className="space-y-4 print:hidden">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Contas</h2>
+                    <h2 className="text-lg font-semibold text-zinc-100">Contas</h2>
                 </div>
 
                 {loadingAccounts ? (
@@ -252,7 +252,7 @@ export default function AccountsPage() {
                 ) : (
                     <div
                         onClick={handleCreateAccount}
-                        className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-900/50 cursor-pointer transition-all text-zinc-400 hover:text-primary hover:border-primary/50 gap-2 min-h-[140px]"
+                        className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-xl hover:bg-zinc-900/50 cursor-pointer transition-all text-zinc-400 hover:text-primary hover:border-primary/50 gap-2 min-h-[140px]"
                     >
                         <Plus className="h-8 w-8" />
                         <span className="font-medium text-sm">Adicionar primeira conta</span>

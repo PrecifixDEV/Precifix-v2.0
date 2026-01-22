@@ -270,8 +270,8 @@ export const Services = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="hidden md:block">
-                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white uppercase tracking-tight">Serviços</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400">Gerencie os serviços oferecidos</p>
+                    <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Serviços</h1>
+                    <p className="text-zinc-400">Gerencie os serviços oferecidos</p>
                 </div>
                 <Button
                     onClick={handleCreate}
@@ -286,12 +286,12 @@ export const Services = () => {
             <div className="space-y-4">
                 <div className="flex items-center gap-2 w-full">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
                         <Input
                             placeholder="Buscar serviços..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="h-10 pl-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-sm placeholder:text-zinc-400 w-full"
+                            className="h-10 pl-10 bg-zinc-900 border-zinc-800 text-sm placeholder:text-zinc-400 w-full"
                         />
                     </div>
 
@@ -301,7 +301,7 @@ export const Services = () => {
                                 variant="outline"
                                 size="icon"
                                 title="Filtrar"
-                                className={`h-10 w-10 shrink-0 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+                                className={`h-10 w-10 shrink-0 bg-zinc-900 border-zinc-800 transition-colors ${filterType !== 'all' ? 'bg-yellow-500 hover:bg-yellow-600 text-zinc-900 border-yellow-500' : 'text-zinc-400 hover:text-white'}`}
                             >
                                 <SlidersHorizontal className="h-5 w-5" />
                             </Button>
@@ -327,7 +327,7 @@ export const Services = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    className="h-10 w-10 bg-zinc-900 border-zinc-800"
                                 >
                                     <Printer className="h-5 w-5" />
                                 </Button>
@@ -352,7 +352,7 @@ export const Services = () => {
                             onCheckedChange={toggleSelectAll}
                             className="h-5 w-5"
                         />
-                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                        <span className="text-sm font-bold text-zinc-100 uppercase tracking-tight">
                             Selecionar Todos
                         </span>
                     </div>
@@ -366,7 +366,7 @@ export const Services = () => {
                                     size="icon"
                                     onClick={handleBulkPrint}
                                     title="Imprimir Selecionados"
-                                    className="h-10 w-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                                    className="h-10 w-10 bg-zinc-900 border-zinc-800"
                                 >
                                     <Printer className="h-5 w-5" />
                                 </Button>
@@ -385,7 +385,7 @@ export const Services = () => {
                 </div>
             </div>
 
-            <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <Card className="border-zinc-800 bg-zinc-900">
                 <CardContent className="p-0 md:p-6">
                     {filteredServices.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
@@ -394,11 +394,11 @@ export const Services = () => {
                     ) : (
                         <>
                             {/* Mobile List View */}
-                            <div className="md:hidden flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+                            <div className="md:hidden flex flex-col divide-zinc-800">
                                 {filteredServices.map((service) => {
                                     const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                     return (
-                                        <div key={service.id} className="px-6 py-4 flex flex-col hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                                        <div key={service.id} className="px-6 py-4 flex flex-col hover:bg-zinc-900/50 transition-colors border-b border-zinc-800 last:border-0">
                                             <div className="flex items-start justify-between gap-3 mb-2">
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <Checkbox
@@ -412,7 +412,7 @@ export const Services = () => {
                                                     </div>
 
                                                     <div className="flex flex-col gap-0.5 min-w-0">
-                                                        <h3 className="font-bold text-sm text-zinc-900 dark:text-white line-clamp-2">
+                                                        <h3 className="font-bold text-sm text-white line-clamp-2">
                                                             {service.name}
                                                         </h3>
                                                         <p className="text-xs text-muted-foreground line-clamp-1">
@@ -445,7 +445,7 @@ export const Services = () => {
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             onClick={() => setServiceToDelete(service)}
-                                                            className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                                                            className="text-red-500 focus:text-red-500 focus:bg-red-900/20"
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" />
                                                             Excluir
@@ -456,7 +456,7 @@ export const Services = () => {
 
                                             <div className="pl-0 text-xs text-muted-foreground">
                                                 <div onClick={() => handleEdit(service)} className="cursor-pointer space-y-1">
-                                                    <div className="font-medium text-zinc-900 dark:text-zinc-200">
+                                                    <div className="font-medium text-zinc-200">
                                                         Preço: R$ {(service.base_price || 0).toFixed(2)}
                                                     </div>
                                                     <div>Duração: {service.duration_minutes} min</div>
@@ -478,9 +478,9 @@ export const Services = () => {
                             </div>
 
                             {/* Desktop View - Table */}
-                            <div className="hidden md:block rounded-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                            <div className="hidden md:block rounded-md border border-zinc-800 overflow-hidden">
                                 <Table>
-                                    <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
+                                    <TableHeader className="bg-zinc-800/50">
                                         <TableRow>
                                             <TableHead className="w-[50px] text-center">
                                                 <Checkbox
@@ -504,7 +504,7 @@ export const Services = () => {
                                         {paginatedServices.map((service) => {
                                             const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                             return (
-                                                <TableRow key={service.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer" onClick={() => handleEdit(service)}>
+                                                <TableRow key={service.id} className="hover:bg-zinc-800/50 cursor-pointer" onClick={() => handleEdit(service)}>
                                                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                         <Checkbox
                                                             checked={selectedServices.includes(service.id)}
@@ -522,11 +522,11 @@ export const Services = () => {
                                                         {service.description || "-"}
                                                     </TableCell>
                                                     <TableCell className="text-center">
-                                                        <div className="inline-flex items-center justify-center px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium">
+                                                        <div className="inline-flex items-center justify-center px-2 py-1 rounded-full bg-zinc-800 text-xs font-medium">
                                                             {service.total_sales_count || 0}
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="text-right font-medium text-zinc-700 dark:text-zinc-300">
+                                                    <TableCell className="text-right font-medium text-zinc-300">
                                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(service.total_sales_value || 0)}
                                                     </TableCell>
                                                     <TableCell className="text-center">

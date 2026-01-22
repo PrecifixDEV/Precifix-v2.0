@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Calculator, Beaker, ArrowLeft, TrendingDown, DollarSign } from "lucide-react";
+import { Loader2, PackageSearch, Beaker, ArrowLeft, TrendingDown, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -78,21 +78,8 @@ export const ProductCostCalculator = () => {
                 return;
             }
 
-            // Logic: The user wants to prepare X ml of SOLUTION or used X ml of SOLUTION?
-            // "Quanto foi gasto daquele produto" -> usually means "I used 500ml of Ready-to-Use solution, how much did that cost me?"
-
-            // Total Parts = 1 + solventParts
-            // Concentrate used = Quantity Solution / Total Parts? 
-            // OR Dilution 1:10 means 1 part product + 10 parts water? Yes.
-            // Factor = solventParts (if 1:10, factor is 10? No, usually ratio is 1 part solute : X parts solvent)
-
-            // Formula for cost of Diluted Solution per ML:
-            // 1 Unit of Concentrate makes (1 + solventParts) Units of Solution.
-            // Cost of 1 Unit of Concentrate = pricePerMlConcentrate * 1
-            // Cost of (1 + solventParts) Units of Solution = pricePerMlConcentrate * 1 (assuming water is free)
-            // Cost per ML of Solution = pricePerMlConcentrate / (1 + solventParts)
-
-            const dilutionFactor = 1 + solventParts;
+            // NEW Logic: 1:N means product is 1/N of total volume
+            const dilutionFactor = solventParts;
             const pricePerMlSolution = pricePerMlConcentrate / dilutionFactor;
 
             finalCost = qty * pricePerMlSolution;
@@ -133,12 +120,12 @@ export const ProductCostCalculator = () => {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-3xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                        <Calculator className="h-8 w-8 text-primary" />
-                        Calculadora de Custos
+                    <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+                        <PackageSearch className="h-8 w-8 text-yellow-500" />
+                        Calculadora de Custo de Produto
                     </h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-                        Descubra quanto custa cada ml ou aplicação dos seus produtos.
+                    <p className="text-zinc-400 mt-1">
+                        Calcule o custo exato de produção considerando insumos e mão de obra.
                     </p>
                 </div>
             </div>
@@ -177,7 +164,7 @@ export const ProductCostCalculator = () => {
 
                         {selectedProduct && (
                             <>
-                                <div className="flex items-center justify-between border p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
+                                <div className="flex items-center justify-between border p-3 rounded-lg bg-zinc-900/50">
                                     <div className="space-y-0.5">
                                         <Label>Produto Diluído?</Label>
                                         <p className="text-xs text-muted-foreground">O produto será misturado com água?</p>
@@ -192,16 +179,21 @@ export const ProductCostCalculator = () => {
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                         <Label>Proporção da Diluição (1:X)</Label>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium">1 :</span>
+                                            <div className="bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm font-bold text-zinc-400 select-none">1</div>
+                                            <span className="text-sm font-bold">:</span>
                                             <Input
-                                                type="text"
-                                                value={dilutionRatio.replace('1:', '')}
-                                                onChange={(e) => setDilutionRatio(`1:${e.target.value}`)}
-                                                placeholder="ex: 10"
+                                                type="number"
+                                                min="1"
+                                                value={dilutionRatio.replace('1:', '') || ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setDilutionRatio(`1:${val}`);
+                                                }}
+                                                placeholder="10"
                                             />
                                         </div>
                                         <p className="text-xs text-muted-foreground">
-                                            Exemplo: 1:10 significa 1 parte de produto para 10 partes de água.
+                                            Exemplo: 1:10 significa que o produto é 1/10 do volume total.
                                         </p>
                                     </div>
                                 )}
@@ -266,7 +258,7 @@ export const ProductCostCalculator = () => {
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border-dashed border-2">
+                        <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground bg-zinc-900/50 rounded-xl border-dashed border-2">
                             <TrendingDown className="h-12 w-12 mb-4 opacity-50" />
                             <h3 className="text-lg font-semibold mb-2">Aguardando Cálculo</h3>
                             <p className="max-w-xs">

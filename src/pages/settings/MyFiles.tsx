@@ -81,8 +81,8 @@ export const MyFiles = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 max-w-6xl pb-20 animate-in fade-in duration-500">
             <div>
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white hidden md:block">Meus Arquivos</h1>
-                <p className="text-zinc-500 dark:text-zinc-400">Gerencie fotos e arquivos enviados para o sistema.</p>
+                <h1 className="text-3xl font-bold text-white hidden md:block">Meus Arquivos</h1>
+                <p className="text-zinc-400">Gerencie fotos e arquivos enviados para o sistema.</p>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -98,15 +98,15 @@ export const MyFiles = () => {
                             <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
                         </div>
                     ) : files.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-400">
+                        <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-500">
                             <FileIcon className="w-12 h-12 mb-4 opacity-50" />
                             <p>Nenhum arquivo encontrado nesta categoria.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             {files.map((file) => (
-                                <Card key={file.id} className="overflow-hidden group hover:shadow-lg transition-all border-zinc-200 dark:border-zinc-800">
-                                    <div className="aspect-square relative bg-zinc-100 dark:bg-zinc-800">
+                                <Card key={file.id} className="overflow-hidden group hover:shadow-lg transition-all border-zinc-800 bg-zinc-900">
+                                    <div className="aspect-square relative bg-zinc-800">
                                         {/* Assuming mostly images for now */}
                                         <img
                                             src={file.url}
@@ -118,8 +118,8 @@ export const MyFiles = () => {
                                                 (e.target as HTMLImageElement).style.display = 'none';
                                             }}
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800" style={{ display: 'none' }}>
-                                            <ImageIcon className="w-8 h-8 text-zinc-400" /> {/* Fallback icon - currently hidden unless img fails logic added properly */}
+                                        <div className="absolute inset-0 flex items-center justify-center bg-zinc-800" style={{ display: 'none' }}>
+                                            <ImageIcon className="w-8 h-8 text-zinc-500" /> {/* Fallback icon - currently hidden unless img fails logic added properly */}
                                         </div>
 
                                         {/* Overlay Actions */}
