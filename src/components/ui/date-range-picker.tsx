@@ -10,10 +10,12 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
 
 interface DateRangePickerProps {
     date: DateRange | undefined
@@ -29,9 +31,9 @@ export function DateRangePicker({
     const [open, setOpen] = React.useState(false)
     const [tempDate, setTempDate] = React.useState<DateRange | undefined>(date)
     const [month, setMonth] = React.useState<Date>(new Date())
-    const [isDesktop, setIsDesktop] = React.useState(window.innerWidth >= 768)
+    const [isDesktop, setIsDesktop] = React.useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true)
 
-    // Sincroniza ao abrir
+    // Sync when opening
     React.useEffect(() => {
         if (open) {
             setTempDate(date)
@@ -41,18 +43,14 @@ export function DateRangePicker({
         }
     }, [open, date])
 
-    // Detectar tamanho da tela para responsividade
+    // Detect screen size
     React.useEffect(() => {
         const handleResize = () => {
             setIsDesktop(window.innerWidth >= 768)
         }
-
-        // Check initial logic safely (already initialized above but good to be explicit for hydration if needed, though this is client comp)
-        // Add listener
         window.addEventListener("resize", handleResize)
         return () => window.removeEventListener("resize", handleResize)
     }, [])
-
 
     const handleApply = () => {
         setDate(tempDate)
@@ -70,113 +68,95 @@ export function DateRangePicker({
         }
     }
 
-    // Presets Inteligentes
+    // Smart Presets
     const presets = React.useMemo(() => {
-        if (isDesktop) {
-            return [
-                { label: "Hoje", getValue: () => ({ from: new Date(), to: new Date() }) },
-                { label: "Ontem", getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) },
-                { label: "Últimos 7 dias", getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
-                { label: "Últimos 30 dias", getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }) },
-                { label: "Este Mês", getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
-                { label: "Mês Passado", getValue: () => ({ from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) }) },
-            ]
-        }
-        return [
+        const basePresets = [
             { label: "Hoje", getValue: () => ({ from: new Date(), to: new Date() }) },
             { label: "Ontem", getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) },
-            { label: "7d atrás", getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
-            { label: "30d atrás", getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }) },
+            { label: "Últimos 7 dias", getValue: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
+            { label: "Últimos 30 dias", getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }) },
             { label: "Este Mês", getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+            { label: "Mês Passado", getValue: () => ({ from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) }) },
         ]
-    }, [isDesktop])
+        return basePresets
+    }, [])
 
     return (
         <div className={cn("grid gap-2", className)}>
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
+            <Drawer open={open} onOpenChange={setOpen}>
+                <DrawerTrigger asChild>
                     <Button
                         id="date"
                         variant={"outline"}
                         size="icon"
                         className={cn(
-                            "bg-zinc-50 dark:bg-zinc-900/50 border-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            "bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-colors"
                         )}
                         title="Selecionar Período"
                     >
                         <CalendarIcon className="h-4 w-4" />
                     </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                    <div className="flex flex-col md:flex-row h-full max-h-[80vh] overflow-y-auto md:overflow-hidden">
-                        {/* Calendários */}
-                        <div className="p-3">
-                            <Calendar
-                                mode="range"
-                                defaultMonth={month}
-                                month={month}
-                                onMonthChange={setMonth}
-                                selected={tempDate}
-                                onSelect={setTempDate}
-                                numberOfMonths={isDesktop ? 2 : 1}
-                                locale={ptBR}
-                                captionLayout="dropdown"
-                                fromYear={2020}
-                                toYear={2030}
-                                classNames={!isDesktop ? {
-                                    button_previous: "hidden",
-                                    button_next: "hidden"
-                                } : undefined}
-                            />
-                        </div>
-
-                        {/* Sidebar Direita */}
-                        <div className="border-t md:border-t-0 md:border-l border-border bg-muted/5 p-3 flex flex-col justify-between min-w-[160px]">
-                            <div className="flex flex-col gap-2">
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                                    Períodos Rápidos
-                                </span>
-                                <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
-                                    {presets.map((preset) => (
-                                        <Button
-                                            key={preset.label}
-                                            variant="ghost"
-                                            size="sm"
-                                            className="justify-start font-normal"
-                                            onClick={() => handlePresetSelect(preset.getValue())}
-                                        >
-                                            {preset.label}
-                                        </Button>
-                                    ))}
-                                    {/* Botões de Ação Mobiles (Dentro do Grid para economizar espaço) */}
-                                    {!isDesktop && (
-                                        <div className="flex gap-1 items-center">
-                                            <Button onClick={handleApply} size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1">
-                                                <Check className="h-4 w-4" />
-                                            </Button>
-                                            <Button onClick={handleCancel} variant="ghost" size="sm" className="flex-1">
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
+                </DrawerTrigger>
+                <DrawerContent className="bg-zinc-900 border-zinc-800">
+                    <div className="mx-auto w-full max-w-4xl">
+                        <DrawerHeader className="border-b border-zinc-800">
+                            <DrawerTitle className="text-center text-zinc-100 uppercase tracking-tight font-bold">
+                                Selecionar Período
+                            </DrawerTitle>
+                        </DrawerHeader>
+                        <div className="flex flex-col md:flex-row h-full max-h-[80vh] overflow-y-auto md:overflow-hidden p-4">
+                            {/* Calendars */}
+                            <div className="flex-1 flex justify-center p-2">
+                                <Calendar
+                                    mode="range"
+                                    defaultMonth={month}
+                                    month={month}
+                                    onMonthChange={setMonth}
+                                    selected={tempDate}
+                                    onSelect={setTempDate}
+                                    numberOfMonths={isDesktop ? 2 : 1}
+                                    locale={ptBR}
+                                    captionLayout="dropdown"
+                                    fromYear={2020}
+                                    toYear={2030}
+                                    className="bg-transparent"
+                                />
                             </div>
 
-                            {/* Botões de Ação Desktop (Mantidos no rodapé) */}
-                            {isDesktop && (
-                                <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
-                                    <Button onClick={handleApply} size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                                        <Check className="mr-2 h-3 w-3" /> Aplicar
+                            {/* Sidebar / Presets */}
+                            <div className="border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-900/50 p-4 flex flex-col justify-between min-w-[200px]">
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                                        Períodos Rápidos
+                                    </span>
+                                    <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                                        {presets.map((preset) => (
+                                            <Button
+                                                key={preset.label}
+                                                variant="ghost"
+                                                size="sm"
+                                                className="justify-start font-normal text-zinc-300 hover:text-primary hover:bg-primary/10"
+                                                onClick={() => handlePresetSelect(preset.getValue())}
+                                            >
+                                                {preset.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-2 mt-6 pt-4 border-t border-zinc-800">
+                                    <Button onClick={handleApply} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-wider">
+                                        <Check className="mr-2 h-4 w-4" /> Aplicar
                                     </Button>
-                                    <Button onClick={handleCancel} variant="ghost" size="sm" className="w-full">
-                                        <X className="mr-2 h-3 w-3" /> Cancelar
+                                    <Button onClick={handleCancel} variant="ghost" className="w-full text-zinc-400">
+                                        <X className="mr-2 h-4 w-4" /> Cancelar
                                     </Button>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
-                </PopoverContent>
-            </Popover>
+                </DrawerContent>
+            </Drawer>
         </div>
     )
 }

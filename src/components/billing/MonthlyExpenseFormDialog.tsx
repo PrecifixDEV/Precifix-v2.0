@@ -7,11 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { ResponsiveDatePicker } from '@/components/ui/responsive-date-picker';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { MonthlyExpense } from '@/types/billing';
 
 interface MonthlyExpenseFormDialogProps {
@@ -28,7 +25,6 @@ export const MonthlyExpenseFormDialog = ({ isOpen, onClose, monthlyBillingId, ex
     const [value, setValue] = useState(expense?.value.toFixed(2) || '');
     const [type, setType] = useState<'fixed' | 'variable'>(expense?.type || 'fixed');
     const [expenseDate, setExpenseDate] = useState<Date | undefined>(expense?.created_at ? new Date(expense.created_at) : undefined);
-    const [isExpenseDateOpen, setIsExpenseDateOpen] = useState(false);
 
     useEffect(() => {
         if (expense) {
@@ -180,31 +176,12 @@ export const MonthlyExpenseFormDialog = ({ isOpen, onClose, monthlyBillingId, ex
 
                     <div className="space-y-2">
                         <Label htmlFor="expense-date">Data da Despesa</Label>
-                        <Popover modal={true} open={isExpenseDateOpen} onOpenChange={setIsExpenseDateOpen}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal bg-background",
-                                        !expenseDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {expenseDate ? format(expenseDate, "PPP") : <span>Selecione uma data</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start" side="bottom">
-                                <Calendar
-                                    mode="single"
-                                    selected={expenseDate}
-                                    onSelect={(date) => {
-                                        setExpenseDate(date);
-                                        setIsExpenseDateOpen(false);
-                                    }}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <ResponsiveDatePicker
+                            date={expenseDate}
+                            onSelect={setExpenseDate}
+                            label="Data da Despesa"
+                            className="bg-background"
+                        />
                     </div>
                 </div>
                 <DialogFooter>

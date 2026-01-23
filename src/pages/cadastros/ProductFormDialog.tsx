@@ -193,7 +193,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
         if (!isValid) {
             const fieldLabels: Record<string, string> = {
                 name: 'Nome do Produto',
-                price: 'Preço de Custo',
+                price: 'Custo do Produto',
                 stock_quantity: 'Estoque',
                 container_size_ml: 'Tamanho da Embalagem',
                 dilution_ratio: 'Proporção da Diluição'
@@ -400,7 +400,9 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="price">Qt. Pagou (R$) <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="price" className="whitespace-nowrap flex items-center gap-1">
+                                    Custo do Produto (R$) <span className="text-red-500">*</span>
+                                </Label>
                                 <CurrencyInput
                                     id="price"
                                     placeholder="0,00"
@@ -408,20 +410,22 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                     onValueChange={(val) => setValue('price', val)}
                                     className="bg-white dark:bg-zinc-950 border-input"
                                 />
+                                {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
                             </div>
-                            {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="stock_quantity">Estoque <span className="text-red-500">*</span></Label>
-                            <Input
-                                id="stock_quantity"
-                                type="number"
-                                {...register("stock_quantity")}
-                                className="bg-white dark:bg-zinc-950 border-input"
-                                placeholder="0"
-                            />
-                            {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity.message}</p>}
+                            <div className="space-y-2">
+                                <Label htmlFor="stock_quantity" className="whitespace-nowrap flex items-center gap-1">
+                                    Estoque <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="stock_quantity"
+                                    type="number"
+                                    {...register("stock_quantity")}
+                                    className="bg-white dark:bg-zinc-950 border-input"
+                                    placeholder="0"
+                                />
+                                {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity.message}</p>}
+                            </div>
                         </div>
                     </div>
                     {/* 3. CONDITIONAL FIELDS (LIQUID ONLY) */}
@@ -439,32 +443,36 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                                 {errors.container_size_ml && <p className="text-sm text-destructive">{errors.container_size_ml.message}</p>}
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Tipo de Uso</Label>
-                                <div className="flex gap-4 pt-1">
-                                    <label className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex-1 border border-transparent has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-500/5">
-                                        <input
-                                            type="radio"
-                                            name="dilutionType"
-                                            checked={!watch("is_dilutable")}
-                                            onChange={() => {
-                                                setValue('is_dilutable', false);
-                                                setValue('dilution_ratio', '');
-                                            }}
-                                            className="accent-yellow-500 w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium">Pronto Uso</span>
-                                    </label>
-                                    <label className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex-1 border border-transparent has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-500/5">
-                                        <input
-                                            type="radio"
-                                            name="dilutionType"
-                                            checked={watch("is_dilutable")}
-                                            onChange={() => setValue('is_dilutable', true)}
-                                            className="accent-yellow-500 w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium">Diluível</span>
-                                    </label>
+                            <div className="space-y-3">
+                                <Label className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Tipo de Uso</Label>
+                                <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-900/50 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setValue('is_dilutable', false);
+                                            setValue('dilution_ratio', '');
+                                        }}
+                                        className={cn(
+                                            "flex items-center justify-center py-2 px-4 rounded-lg transition-all font-bold text-sm border",
+                                            !watch("is_dilutable")
+                                                ? "border-primary bg-primary/10 text-primary shadow-sm"
+                                                : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                                        )}
+                                    >
+                                        Pronto Uso
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setValue('is_dilutable', true)}
+                                        className={cn(
+                                            "flex items-center justify-center py-2 px-4 rounded-lg transition-all font-bold text-sm border",
+                                            watch("is_dilutable")
+                                                ? "border-primary bg-primary/10 text-primary shadow-sm"
+                                                : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                                        )}
+                                    >
+                                        Diluível
+                                    </button>
                                 </div>
                             </div>
 
@@ -588,9 +596,8 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit, onSuccess
                             </div>
                         </div>
                     )}
-
-                </form >
-            </div >
+                </form>
+            </div>
         </StandardSheet >
     );
 }

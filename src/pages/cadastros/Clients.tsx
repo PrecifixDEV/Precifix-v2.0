@@ -44,6 +44,7 @@ import { ClientFormDialog } from "./ClientFormDialog";
 import { clientsService } from "@/services/clientsService";
 import type { ClientWithVehicles } from "@/services/clientsService";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const getInitials = (name: string) => {
     return name
@@ -60,6 +61,7 @@ export const Clients = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState<"all">("all");
     const [selectedClients, setSelectedClients] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [clientToEdit, setClientToEdit] = useState<ClientWithVehicles | null>(null);
@@ -68,7 +70,7 @@ export const Clients = () => {
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 25;
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const [companyInfo, setCompanyInfo] = useState<{ name: string; logo: string | null; primaryColor: string }>({
         name: '',
@@ -205,6 +207,7 @@ export const Clients = () => {
     };
 
     const loadClients = async () => {
+        setLoading(true);
         try {
             const data = await clientsService.getClients();
             setClients(data || []);
@@ -212,6 +215,8 @@ export const Clients = () => {
         } catch (error) {
             console.error("Error loading clients:", error);
             toast.error("Erro ao carregar clientes.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -252,7 +257,7 @@ export const Clients = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-16">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="hidden md:block">
                     <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Clientes</h1>
@@ -372,7 +377,68 @@ export const Clients = () => {
 
             <Card className="border-zinc-800 bg-zinc-900">
                 <CardContent className="p-0 md:p-6">
-                    {filteredClients.length === 0 ? (
+                    {loading ? (
+                        <>
+                            {/* Mobile View Skeleton */}
+                            <div className="md:hidden flex flex-col divide-zinc-800">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} className="px-6 py-4 flex flex-col border-b border-zinc-800 last:border-0 gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <Skeleton className="h-5 w-5 rounded" />
+                                            <Skeleton className="h-10 w-10 rounded-full" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-3/4" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-2 pl-0">
+                                            <Skeleton className="h-3 w-1/2" />
+                                            <Skeleton className="h-3 w-1/3" />
+                                            <Skeleton className="h-3 w-1/4" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Desktop View Skeleton */}
+                            <div className="hidden md:block rounded-md border border-zinc-800 overflow-hidden">
+                                <Table>
+                                    <TableHeader className="bg-zinc-800/50">
+                                        <TableRow>
+                                            <TableHead className="w-[50px] text-center"></TableHead>
+                                            <TableHead>Nome</TableHead>
+                                            <TableHead>CPF/CNPJ</TableHead>
+                                            <TableHead>Cidade/UF</TableHead>
+                                            <TableHead>Telefone</TableHead>
+                                            <TableHead>Veículos</TableHead>
+                                            <TableHead className="w-[100px] text-right"></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <TableRow key={i} className="border-zinc-800">
+                                                <TableCell className="text-center"><Skeleton className="h-5 w-5 mx-auto" /></TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Skeleton className="h-8 w-8 rounded-full" />
+                                                        <Skeleton className="h-4 w-32" />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-2 text-xs">
+                                                        <Skeleton className="h-6 w-12 rounded" />
+                                                        <Skeleton className="h-6 w-12 rounded" />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell><Skeleton className="h-8 w-16 ml-auto rounded-md" /></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
+                    ) : filteredClients.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
                             Nenhum cliente encontrado.
                         </div>
@@ -582,6 +648,7 @@ export const Clients = () => {
                         totalItems={filteredClients.length}
                         itemsPerPage={itemsPerPage}
                         onPageChange={setCurrentPage}
+                        onItemsPerPageChange={setItemsPerPage}
                     />
                 </CardContent>
             </Card>

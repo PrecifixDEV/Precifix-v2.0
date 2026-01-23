@@ -62,13 +62,13 @@ export function StandardSheet({
         <Sheet open={open} onOpenChange={onOpenChange}>
             {/* Standardized Content Wrapper */}
             <SheetContent
-                className="sm:max-w-[600px] w-full p-0 flex flex-col bg-white dark:bg-zinc-900 shadow-xl z-[100] border-l border-zinc-200 dark:border-zinc-800"
+                className="sm:max-w-[600px] w-full p-0 gap-0 flex flex-col bg-white dark:bg-zinc-900 shadow-xl z-[100] border-l border-zinc-200 dark:border-zinc-800"
                 side="right"
                 aria-describedby={undefined}
             >
                 {/* Standardized Header */}
-                <SheetHeader className="h-16 px-6 shadow-md flex justify-center shrink-0 bg-yellow-500">
-                    <SheetTitle className="text-zinc-900 text-center font-bold text-lg uppercase tracking-tighter">
+                <SheetHeader className="h-16 px-6 border-b border-zinc-800 flex justify-center shrink-0 bg-black">
+                    <SheetTitle className="text-primary text-center font-bold text-xl uppercase tracking-tighter">
                         {title}
                     </SheetTitle>
                 </SheetHeader>
@@ -81,7 +81,7 @@ export function StandardSheet({
                         </div>
 
                         {optionalFieldsToggles && (
-                            <div className="mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+                            <div className="mt-8">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="h-[1px] flex-1 bg-zinc-100 dark:bg-zinc-800/50" />
                                     <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] whitespace-nowrap">
@@ -98,15 +98,16 @@ export function StandardSheet({
                 </div>
 
                 {/* Standardized Sticky Footer */}
-                <div className="p-4 shadow-[0_-2px_8px_rgba(0,0,0,0.1)] bg-white dark:bg-zinc-900 shrink-0 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="p-4 bg-black shrink-0 border-t border-zinc-800">
                     {saveButton ? (
                         saveButton
                     ) : (
                         <div className="flex w-full gap-2">
                             <Button
+                                variant="secondary-yellow"
                                 onClick={onSave}
                                 disabled={isLoading || isSaveDisabled}
-                                className="flex-1 h-10 border-none bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02] flex items-center justify-between"
+                                className="flex-1 h-10 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02] flex items-center justify-between"
                             >
                                 <span className="flex items-center">
                                     {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -120,11 +121,11 @@ export function StandardSheet({
                                     <Button
                                         onClick={handleDeleteClick}
                                         disabled={isLoading}
-                                        variant="destructive"
+                                        variant="outline-destructive"
                                         size="icon"
-                                        className="rounded-lg w-10 h-10 shrink-0 bg-red-600 hover:bg-red-700 shadow-md"
+                                        className="rounded-lg w-10 h-10 shrink-0 shadow-md transition-all hover:scale-110"
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="h-5 w-5" />
                                     </Button>
 
                                     <ConfirmDrawer

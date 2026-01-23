@@ -8,23 +8,27 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
 
 interface DatePickerWithInputProps {
     date?: Date
     setDate: (date: Date | undefined) => void
     className?: string
     placeholder?: string
+    label?: string
 }
 
 export function DatePickerWithInput({
     date,
     setDate,
     className,
-    placeholder = "Selecione uma data"
+    placeholder = "Selecione uma data",
+    label = "Selecionar Data"
 }: DatePickerWithInputProps) {
     const [inputValue, setInputValue] = React.useState("")
     const [isOpen, setIsOpen] = React.useState(false)
@@ -57,43 +61,53 @@ export function DatePickerWithInput({
     }
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
             <div className={cn("relative w-full", className)}>
                 <Input
                     type="text"
                     value={inputValue}
                     onChange={handleInputChange}
                     placeholder={placeholder}
-                    className={cn("bg-white dark:bg-zinc-800", className)}
+                    className={cn("bg-zinc-900 border-zinc-800 text-white", className)}
                     endIcon={
-                        <PopoverTrigger asChild>
+                        <DrawerTrigger asChild>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-transparent"
                             >
                                 <CalendarIcon className="h-4 w-4" />
                                 <span className="sr-only">Abrir calendário</span>
                             </Button>
-                        </PopoverTrigger>
+                        </DrawerTrigger>
                     }
                 />
             </div>
-            <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(selectedDate) => {
-                        setDate(selectedDate)
-                        setIsOpen(false)
-                    }}
-                    initialFocus
-                    locale={ptBR}
-                    captionLayout="dropdown"
-                    fromYear={1900}
-                    toYear={2100}
-                />
-            </PopoverContent>
-        </Popover>
+            <DrawerContent className="bg-zinc-900 border-zinc-800">
+                <div className="mx-auto w-full max-w-sm">
+                    <DrawerHeader className="border-b border-zinc-800 pb-4">
+                        <DrawerTitle className="text-center text-zinc-100 uppercase tracking-tight font-bold">
+                            {label}
+                        </DrawerTitle>
+                    </DrawerHeader>
+                    <div className="p-4 flex justify-center">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(selectedDate) => {
+                                setDate(selectedDate)
+                                setIsOpen(false)
+                            }}
+                            initialFocus
+                            locale={ptBR}
+                            captionLayout="dropdown"
+                            fromYear={1900}
+                            toYear={2100}
+                            className="bg-transparent"
+                        />
+                    </div>
+                </div>
+            </DrawerContent>
+        </Drawer>
     )
 }

@@ -38,6 +38,7 @@ import { productService, type Product } from '@/services/productService';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { TablePagination } from '@/components/ui/table-pagination';
+import { Skeleton } from "@/components/ui/skeleton";
 import { ActiveFilters } from '@/components/ui/active-filters';
 
 export const Products = () => {
@@ -58,7 +59,7 @@ export const Products = () => {
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 25;
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
 
     useEffect(() => {
@@ -264,13 +265,13 @@ export const Products = () => {
     }, [searchTerm, filterType]);
 
     // Paginated products
-    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
     const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-x-hidden pb-16">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold text-white hidden md:block">PRODUTOS</h1>
                 <Button
@@ -339,7 +340,7 @@ export const Products = () => {
                     {/* Desktop Bulk Actions */}
                     <div className="hidden md:flex items-center gap-2">
                         {selectedProducts.length > 0 && (
-                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2">
                                 <Button
                                     variant="outline"
                                     size="icon"
@@ -379,7 +380,7 @@ export const Products = () => {
                     {/* Mobile Bulk Actions */}
                     <div className="md:hidden flex items-center gap-2">
                         {selectedProducts.length > 0 && (
-                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5">
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2">
                                 <Button
                                     variant="outline"
                                     size="icon"
@@ -579,27 +580,36 @@ export const Products = () => {
                         </Table>
                     </div>
 
-                    {/* Pagination */}
-                    <TablePagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                        totalItems={filteredProducts.length}
-                        itemsPerPage={ITEMS_PER_PAGE}
-                    />
+
+                    {loading ? (
+                        <div className="md:hidden flex flex-col divide-zinc-800">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} className="px-6 py-4 flex flex-col border-b border-zinc-800 last:border-0 gap-3">
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="h-5 w-5 rounded" />
+                                        <Skeleton className="h-10 w-10 rounded-lg" />
+                                        <div className="flex-1 space-y-2">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-3 w-1/2" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1 mt-2">
+                                        <Skeleton className="h-3 w-1/4" />
+                                        <Skeleton className="h-3 w-1/3" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : null}
 
                     {/* Mobile List View */}
                     <div className="md:hidden flex flex-col divide-zinc-800">
-                        {loading ? (
-                            <div className="py-10 text-center text-zinc-500">
-                                Carregando produtos...
-                            </div>
-                        ) : filteredProducts.length === 0 ? (
+                        {!loading && filteredProducts.length === 0 ? (
                             <div className="py-10 text-center text-zinc-500">
                                 Nenhum produto encontrado.
                             </div>
-                        ) : (
-                            filteredProducts.map((product) => (
+                        ) : !loading && (
+                            paginatedProducts.map((product) => (
                                 <div key={product.id} className="px-6 py-4 flex flex-col hover:bg-zinc-900/50 transition-colors border-b border-zinc-800 last:border-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -687,12 +697,12 @@ export const Products = () => {
                                                 {product.is_for_sale ? (
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-zinc-500">Custo:</span>
-                                                        <span className="text-zinc-500 font-mono">{formatCurrency(product.price || 0)}</span>
+                                                        <span className="text-zinc-500">{formatCurrency(product.price || 0)}</span>
                                                         <span className="text-zinc-400">/</span>
-                                                        <span className="font-medium text-green-400 font-mono">{formatCurrency(product.sale_price || 0)}</span>
+                                                        <span className="font-medium text-green-400">{formatCurrency(product.sale_price || 0)}</span>
                                                     </div>
                                                 ) : (
-                                                    <div className="font-mono">Preço Custo: {formatCurrency(product.price || 0)}</div>
+                                                    <div className="">Preço Custo: {formatCurrency(product.price || 0)}</div>
                                                 )}
 
                                                 <div className={(product.stock_quantity || 0) <= 0 ? 'text-red-500 font-medium' : ''}>
@@ -707,6 +717,16 @@ export const Products = () => {
                             ))
                         )}
                     </div>
+
+                    {/* Pagination - Moved to end for proper mobile positioning */}
+                    <TablePagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        totalItems={filteredProducts.length}
+                        itemsPerPage={itemsPerPage}
+                        onItemsPerPageChange={setItemsPerPage}
+                    />
                 </CardContent>
             </Card>
 

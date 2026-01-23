@@ -52,10 +52,12 @@ import { servicesService } from "@/services/servicesService";
 import type { Service, ServiceWithProductCount } from "@/services/servicesService";
 import { SERVICE_ICONS } from "@/components/services/ServiceIconSelector";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Services = () => {
     const [services, setServices] = useState<ServiceWithProductCount[]>([]);
     const [filteredServices, setFilteredServices] = useState<ServiceWithProductCount[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState<"all">("all");
@@ -77,7 +79,7 @@ export const Services = () => {
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 25;
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     useEffect(() => {
         loadServices();
@@ -129,9 +131,9 @@ export const Services = () => {
     }, [searchTerm, filterType]);
 
     // Paginated services
-    const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
     const paginatedServices = filteredServices.slice(startIndex, endIndex);
 
     // Selection Helpers
@@ -207,6 +209,7 @@ export const Services = () => {
     };
 
     const loadServices = async () => {
+        setLoading(true);
         try {
             const data = await servicesService.getServices();
             setServices(data || []);
@@ -214,6 +217,8 @@ export const Services = () => {
         } catch (error) {
             console.error("Error loading services:", error);
             toast.error("Erro ao carregar serviços.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -267,7 +272,7 @@ export const Services = () => {
 
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-16">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="hidden md:block">
                     <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Serviços</h1>
@@ -387,7 +392,65 @@ export const Services = () => {
 
             <Card className="border-zinc-800 bg-zinc-900">
                 <CardContent className="p-0 md:p-6">
-                    {filteredServices.length === 0 ? (
+                    {loading ? (
+                        <>
+                            {/* Mobile Skeletons */}
+                            <div className="md:hidden flex flex-col divide-zinc-800">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} className="px-6 py-4 flex flex-col border-b border-zinc-800 last:border-0 gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <Skeleton className="h-5 w-5 rounded" />
+                                            <Skeleton className="h-10 w-10 rounded-full" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-3/4" />
+                                                <Skeleton className="h-3 w-1/2" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1 mt-2">
+                                            <Skeleton className="h-3 w-1/4" />
+                                            <Skeleton className="h-3 w-1/3" />
+                                            <Skeleton className="h-3 w-1/5 mt-1" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Desktop Skeletons */}
+                            <div className="hidden md:block rounded-md border border-zinc-800 overflow-hidden">
+                                <Table>
+                                    <TableHeader className="bg-zinc-800/50">
+                                        <TableRow>
+                                            <TableHead className="w-[50px] text-center"></TableHead>
+                                            <TableHead className="w-[80px] text-center"></TableHead>
+                                            <TableHead>Nome</TableHead>
+                                            <TableHead>Descrição</TableHead>
+                                            <TableHead className="text-center">Vendas</TableHead>
+                                            <TableHead className="text-right">Total</TableHead>
+                                            <TableHead className="text-center">Produtos</TableHead>
+                                            <TableHead className="text-center">Duração</TableHead>
+                                            <TableHead className="text-right">Preço</TableHead>
+                                            <TableHead className="w-[100px] text-right"></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <TableRow key={i} className="border-zinc-800">
+                                                <TableCell className="text-center"><Skeleton className="h-5 w-5 mx-auto" /></TableCell>
+                                                <TableCell><Skeleton className="h-10 w-10 rounded-full mx-auto" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                                                <TableCell><Skeleton className="h-6 w-10 mx-auto rounded-full" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-24 mx-auto" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                                                <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                                                <TableCell><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
+                    ) : filteredServices.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
                             Nenhum serviço encontrado.
                         </div>
@@ -395,7 +458,7 @@ export const Services = () => {
                         <>
                             {/* Mobile List View */}
                             <div className="md:hidden flex flex-col divide-zinc-800">
-                                {filteredServices.map((service) => {
+                                {paginatedServices.map((service) => {
                                     const IconComponent = service.icon && SERVICE_ICONS[service.icon] ? SERVICE_ICONS[service.icon] : CarFront;
                                     return (
                                         <div key={service.id} className="px-6 py-4 flex flex-col hover:bg-zinc-900/50 transition-colors border-b border-zinc-800 last:border-0">
@@ -583,13 +646,14 @@ export const Services = () => {
                                 </Table>
                             </div>
 
-                            {/* Pagination */}
+                            {/* Pagination - Moved to end for proper mobile positioning */}
                             <TablePagination
                                 currentPage={currentPage}
                                 totalPages={totalPages}
                                 onPageChange={setCurrentPage}
                                 totalItems={filteredServices.length}
-                                itemsPerPage={ITEMS_PER_PAGE}
+                                itemsPerPage={itemsPerPage}
+                                onItemsPerPageChange={setItemsPerPage}
                             />
                         </>
                     )}

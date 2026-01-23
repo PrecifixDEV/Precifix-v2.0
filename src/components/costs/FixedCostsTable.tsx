@@ -4,6 +4,8 @@ import { Pencil, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OperationalCost } from '@/types/costs';
+import { useState, useMemo } from "react";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface FixedCostsTableProps {
     costs: OperationalCost[];
@@ -12,6 +14,20 @@ interface FixedCostsTableProps {
 }
 
 export const FixedCostsTable = ({ costs, onEdit, onDelete }: FixedCostsTableProps) => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    // Reset pagination when data changes
+    useMemo(() => {
+        setCurrentPage(1);
+    }, [costs]);
+
+    const totalPages = Math.ceil(costs.length / itemsPerPage);
+    const paginatedCosts = costs.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
     return (
         <Card>
             <CardHeader>
@@ -28,8 +44,8 @@ export const FixedCostsTable = ({ costs, onEdit, onDelete }: FixedCostsTableProp
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {costs.length > 0 ? (
-                            costs.map((cost) => (
+                        {paginatedCosts.length > 0 ? (
+                            paginatedCosts.map((cost) => (
                                 <TableRow key={cost.id}>
                                     <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
                                         {cost.description}
@@ -82,6 +98,16 @@ export const FixedCostsTable = ({ costs, onEdit, onDelete }: FixedCostsTableProp
                     </TableBody>
                 </Table>
             </CardContent>
+            <div className="px-6 pb-6">
+                <TablePagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={costs.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                />
+            </div>
         </Card>
     );
 };

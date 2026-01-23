@@ -21,6 +21,7 @@ import { CheckCircle2, Search, Filter } from "lucide-react";
 import { format, isBefore, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { TablePagination } from "@/components/ui/table-pagination";
 import type { OperationalCostPayment } from "@/types/billing";
 import type { OperationalCost } from "@/types/costs";
 
@@ -52,6 +53,10 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
     const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<VirtualPayment | null>(null);
     const [paymentAmount, setPaymentAmount] = useState<string>("");
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Fetch User
     const { data: user } = useQuery({
@@ -262,6 +267,17 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
         return matchesSearch && matchesStatus;
     });
 
+    // Reset pagination when filters change
+    useMemo(() => {
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter, month, year]);
+
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const paginatedData = filteredData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
     const openPaymentDialog = (item: VirtualPayment) => {
         setSelectedPayment(item);
         // Default amount is the amount paid if exists, otherwise the original amount
@@ -349,8 +365,8 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredData.length > 0 ? (
-                            filteredData.map((item) => (
+                        {paginatedData.length > 0 ? (
+                            paginatedData.map((item) => (
                                 <TableRow key={item.id} className="hover:bg-muted/50">
                                     <TableCell className="font-medium">{item.description}</TableCell>
                                     <TableCell>
@@ -399,6 +415,15 @@ export const AccountsPayableTable = ({ month, year }: AccountsPayableTableProps)
                     </TableBody>
                 </Table>
             </div>
+
+            <TablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredData.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+            />
 
             <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
                 <DialogContent className="sm:max-w-md" aria-describedby={undefined}>

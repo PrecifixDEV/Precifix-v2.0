@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BankLogo } from "@/components/ui/bank-logo";
-import { Wallet, CheckCircle2, Loader2, ArrowUpRight, ArrowDownRight, Calendar as CalendarIcon } from "lucide-react";
+import { Wallet, CheckCircle2, Loader2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { financialService } from "@/services/financialService";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,9 +14,7 @@ import { cn } from "@/lib/utils";
 import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
 import { financialCategoriesService, type FinancialCategory } from "@/services/financialCategoriesService";
 import { paymentMethodsService } from "@/services/paymentMethodsService";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { ResponsiveDatePicker } from "@/components/ui/responsive-date-picker";
 
 interface AddValueDialogProps {
     open: boolean;
@@ -226,28 +224,11 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                                     </div>
                                     <div className="space-y-1">
                                         <Label>Data da Transação</Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant={"outline"}
-                                                    className={cn(
-                                                        "w-full justify-start text-left font-normal",
-                                                        !transactionDate && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {transactionDate ? format(transactionDate, "dd/MM/yyyy") : <span>Selecione</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0 z-[9999]">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={transactionDate}
-                                                    onSelect={setTransactionDate}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
+                                        <ResponsiveDatePicker
+                                            date={transactionDate}
+                                            onSelect={setTransactionDate}
+                                            label="Data da Transação"
+                                        />
                                     </div>
                                 </div>
 

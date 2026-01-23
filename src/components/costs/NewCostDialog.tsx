@@ -4,12 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/lib/supabase";
-import { cn } from "@/lib/utils";
 import { useMobile } from "@/hooks/useMobile";
 import { Button } from "@/components/ui/button";
 import { CategoryTreeSelect, type CategoryNode } from "@/components/ui/category-tree-select";
@@ -47,9 +45,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { ResponsiveDatePicker } from "@/components/ui/responsive-date-picker";
 import { Textarea } from "@/components/ui/textarea";
 
 import { costService } from "@/services/costService";
@@ -259,35 +256,14 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                         render={({ field }) => (
                             <FormItem className="flex flex-col w-[150px]">
                                 <FormLabel>Vencimento</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-full pl-3 text-left font-normal",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {field.value ? (
-                                                    format(field.value, "dd/MM/yyyy")
-                                                ) : (
-                                                    <span>Data</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="end">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            locale={ptBR}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <FormControl>
+                                    <ResponsiveDatePicker
+                                        date={field.value}
+                                        onSelect={field.onChange}
+                                        label="Data de Vencimento"
+                                        className="h-9"
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -399,31 +375,13 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Repetir até (Opcional)</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant={"outline"}
-                                                    className={cn(
-                                                        "w-full pl-3 text-left font-normal bg-background",
-                                                        !field.value && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    {field.value ? format(field.value, "dd/MM/yyyy") : <span>Indefinido</span>}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                disabled={(date) => date < new Date()}
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                    <ResponsiveDatePicker
+                                        date={field.value}
+                                        onSelect={field.onChange}
+                                        label="Repetir até"
+                                        placeholder="Indefinido"
+                                        disabled={(date) => date < new Date()}
+                                    />
                                 </FormItem>
                             )}
                         />
@@ -457,19 +415,13 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
                                         <FormLabel>Data Pagamento</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-background", !field.value && "text-muted-foreground")}>
-                                                        {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione</span>}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                                            </PopoverContent>
-                                        </Popover>
+                                        <FormControl>
+                                            <ResponsiveDatePicker
+                                                date={field.value}
+                                                onSelect={field.onChange}
+                                                label="Data do Pagamento"
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
