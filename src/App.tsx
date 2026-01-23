@@ -24,6 +24,7 @@ import FinancialCategories from './pages/settings/FinancialCategories';
 import { MyFiles } from './pages/settings/MyFiles';
 import Settings from './pages/settings/Settings';
 import { VisualTest } from './pages/tests/VisualTest';
+import { AgendaPage } from './pages/AgendaPage';
 
 
 import { ProfileMenu } from './pages/ProfileMenu'
@@ -64,7 +65,7 @@ function App() {
             <Route path="/cadastros/formas-pagamento" element={<div className="text-zinc-900 dark:text-white p-6">Formas de Pagamento (Em breve)</div>} />
 
             <Route path="/sales" element={<div className="text-zinc-900 dark:text-white p-6">Vendas (Em breve)</div>} />
-            <Route path="/schedule" element={<div className="text-zinc-900 dark:text-white p-6">Agenda (Em breve)</div>} />
+            <Route path="/schedule" element={<AgendaPage />} />
             <Route path="/financial" element={<FinancialOverview />} />
 
             <Route path="/settings" element={<Settings />} />

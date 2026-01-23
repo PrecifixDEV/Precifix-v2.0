@@ -1,13 +1,56 @@
 "use client"
 
 import * as React from "react"
-import { DayPicker } from "react-day-picker"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { DayPicker, useDayPicker } from "react-day-picker"
+import { ptBR } from "date-fns/locale"
+import { format } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
+
+// Componente de Cabeçalho Customizado (Injetado via MonthCaption)
+function CustomMonthCaption() {
+  const { goToMonth, nextMonth, previousMonth, months } = useDayPicker()
+  const currentMonth = months[0].date
+
+  return (
+    <div className="relative flex items-center justify-center h-10 w-full mb-1">
+      {/* Botão Anterior */}
+      <button
+        type="button"
+        disabled={!previousMonth}
+        onClick={() => previousMonth && goToMonth(previousMonth)}
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "absolute left-0 h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 text-white hover:bg-zinc-800 disabled:opacity-20 flex items-center justify-center z-20 transition-all"
+        )}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      {/* Título Centralizado */}
+      <span className="text-sm font-bold text-white uppercase tracking-[0.2em] font-sans flex items-center justify-center text-center">
+        {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+      </span>
+
+      {/* Botão Próximo */}
+      <button
+        type="button"
+        disabled={!nextMonth}
+        onClick={() => nextMonth && goToMonth(nextMonth)}
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "absolute right-0 h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 text-white hover:bg-zinc-800 disabled:opacity-20 flex items-center justify-center z-20 transition-all"
+        )}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
 
 function Calendar({
   className,
@@ -17,68 +60,46 @@ function Calendar({
 }: CalendarProps) {
   return (
     <DayPicker
+      locale={ptBR}
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      captionLayout="dropdown"
-      fromYear={1900}
-      toYear={2100}
+      className={cn("p-0 w-full max-w-[320px] mx-auto", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-between pt-1 relative items-center w-full",
-        caption_label: "text-sm font-medium hidden", // Hide this one (legacy text?)
-        month_caption: "flex justify-center items-center grow", // Keep this visible (dropdowns container?)
-        dropdowns: "flex justify-center gap-1 w-full text-center",
-        nav: "contents", // Changed to contents to allow buttons to participate in caption flex
+        month: "space-y-4 w-full relative",
 
-        // Botões de navegação (Nav Buttons)
-        button_previous: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 order-first" // Removed absolute, added order-first
-        ),
-        button_next: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 order-last" // Removed absolute, added order-last
-        ),
+        // Escondemos os componentes nativos que estamos substituindo
+        month_caption: "block", // Precisa estar visível para o CustomMonthCaption aparecer
+        caption_label: "hidden",
+        nav: "hidden",
 
-        // Month Grid
+        // GRID
         month_grid: "w-full border-collapse space-y-1",
-        weekdays: "flex",
-        weekday: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        weekdays: "flex justify-between mb-2",
+        weekday: "text-zinc-500 w-8 font-normal text-[0.7rem] uppercase tracking-widest text-center",
 
-        // Lines and Days
-        week: "flex w-full mt-2",
-        day: "h-9 w-9 text-center text-sm p-0 relative font-mono [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-
-        // Day Button
-        day_button: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-mono font-normal aria-selected:opacity-100 hover:bg-primary hover:text-primary-foreground"
+        // DIAS
+        week: "flex w-full mt-2 justify-between",
+        day: cn(
+          "h-8 w-8 p-0 font-normal transition-all duration-200 flex items-center justify-center",
+          "text-center text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white focus:outline-none aria-selected:!text-black font-mono"
         ),
 
-        // States and Modifiers
-        range_end: "day-range-end",
-        selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground shadow-[0_0_15px_rgba(250,204,21,0.3)]",
-        today: "bg-zinc-800 text-primary border border-primary/20",
-        outside: "day-outside text-muted-foreground opacity-30 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        disabled: "text-muted-foreground opacity-50",
-        range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_button: "h-full w-full flex items-center justify-center rounded-md",
+
+        // ESTADOS
+        selected: "bg-primary !text-black hover:bg-primary hover:!text-black focus:bg-primary focus:!text-black font-bold shadow-md shadow-primary/20",
+        today: "text-primary border border-primary/50 font-bold",
+        outside: "day-outside text-zinc-700 opacity-50 aria-selected:bg-primary/50 aria-selected:text-black aria-selected:opacity-30",
+        disabled: "text-zinc-700 opacity-50",
+        range_start: "day-range-start rounded-l-md rounded-r-none bg-primary/80 !text-black",
+        range_end: "day-range-end rounded-r-md rounded-l-none bg-primary/80 !text-black",
+        range_middle: "aria-selected:bg-primary/20 aria-selected:!text-white rounded-none",
         hidden: "invisible",
-
-        // Dropdowns (Styling for captionLayout="dropdown")
-        caption_dropdowns: "flex gap-2 items-center justify-center font-mono",
-        dropdown: "bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 hover:text-white h-8 rounded-md px-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary font-mono",
-        dropdown_icon: "hidden",
-
         ...classNames,
       }}
       components={{
-        Chevron: ({ ...props }) => {
-          if (props.orientation === "left") {
-            return <ChevronLeft className="h-4 w-4" {...props} />
-          }
-          return <ChevronRight className="h-4 w-4" {...props} />
-        },
+        // A chave correta na v9 para substituir o conteúdo do topo é MonthCaption
+        MonthCaption: CustomMonthCaption,
       }}
       {...props}
     />

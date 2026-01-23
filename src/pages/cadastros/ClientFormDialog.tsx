@@ -8,7 +8,9 @@ import { StandardSheet, StandardSheetToggle } from "@/components/ui/StandardShee
 import { Loader2, User, Phone, Mail, Car, Trash2, Plus, FileText, MapPin, Calendar, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { clientsService, type Client, type NewClient, type VehicleWithPhotos } from "@/services/clientsService";
+import { clientsService, type Client, type VehicleWithPhotos } from "@/services/clientsService";
+import { SleekDatePicker } from "@/components/ui/sleek-date-picker";
+import { parseISO, isValid, format } from "date-fns";
 import { VehicleFormSheet } from "./VehicleFormSheet";
 
 
@@ -36,7 +38,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
     // Optional Fields Values
     const [cpfCnpj, setCpfCnpj] = useState("");
     const [email, setEmail] = useState("");
-    const [birthDate, setBirthDate] = useState("");
+    const [birthDate, setBirthDate] = useState<Date | undefined>(undefined);
     const [cep, setCep] = useState("");
     const [street, setStreet] = useState("");
     const [number, setNumber] = useState("");
@@ -70,7 +72,11 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                 setNeighborhood(clientToEdit.neighborhood || "");
                 setCity(clientToEdit.city || "");
                 setState(clientToEdit.state || "");
-                // Note: BirthDate and Notes might need DB migration if not present
+                if ((clientToEdit as any).birth_date) {
+                    const d = parseISO((clientToEdit as any).birth_date);
+                    if (isValid(d)) setBirthDate(d);
+                }
+                // Notes might need DB migration if not present
 
                 // Set Toggles
                 setShowDocument(!!clientToEdit.document);
@@ -96,7 +102,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
         setWhatsapp("");
         setCpfCnpj("");
         setEmail("");
-        setBirthDate("");
+        setBirthDate(undefined);
         setCep("");
         setStreet("");
         setNumber("");
@@ -179,7 +185,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Usuário não autenticado");
 
-            const payload: NewClient = {
+            const payload: any = {
                 user_id: user.id,
                 name,
                 phone: whatsapp,
@@ -191,6 +197,7 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                 neighborhood: neighborhood || null,
                 city: city || null,
                 state: state || null,
+                birth_date: birthDate ? format(birthDate, "yyyy-MM-dd") : null,
                 complement: null // Not in form yet
             };
 
@@ -417,11 +424,11 @@ export function ClientFormDialog({ open, onOpenChange, clientToEdit, onSuccess }
                     {showBirthDate && (
                         <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
                             <Label>Data de Nascimento</Label>
-                            <Input
-                                type="date"
-                                value={birthDate}
-                                onChange={(e) => setBirthDate(e.target.value)}
-                                className="justify-start text-left font-normal bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                            <SleekDatePicker
+                                date={birthDate}
+                                onSelect={setBirthDate}
+                                placeholder="Selecione a data de nascimento"
+                                className="bg-white dark:bg-zinc-950 border-input"
                             />
                         </div>
                     )}

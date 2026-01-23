@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { ResponsiveDatePicker } from "@/components/ui/responsive-date-picker";
+import { SleekDatePicker } from "@/components/ui/sleek-date-picker";
 import { Textarea } from "@/components/ui/textarea";
 
 import { costService } from "@/services/costService";
@@ -257,11 +257,10 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                             <FormItem className="flex flex-col w-[150px]">
                                 <FormLabel>Vencimento</FormLabel>
                                 <FormControl>
-                                    <ResponsiveDatePicker
+                                    <SleekDatePicker
                                         date={field.value}
                                         onSelect={field.onChange}
-                                        label="Data de Vencimento"
-                                        className="h-9"
+                                        placeholder="Data de Vencimento"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -375,11 +374,10 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Repetir até (Opcional)</FormLabel>
-                                    <ResponsiveDatePicker
+                                    <SleekDatePicker
                                         date={field.value}
                                         onSelect={field.onChange}
-                                        label="Repetir até"
-                                        placeholder="Indefinido"
+                                        placeholder="Repetir até"
                                         disabled={(date) => date < new Date()}
                                     />
                                 </FormItem>
@@ -416,10 +414,10 @@ export function NewCostDialog({ open, onOpenChange }: NewCostDialogProps) {
                                     <FormItem className="flex flex-col">
                                         <FormLabel>Data Pagamento</FormLabel>
                                         <FormControl>
-                                            <ResponsiveDatePicker
+                                            <SleekDatePicker
                                                 date={field.value}
                                                 onSelect={field.onChange}
-                                                label="Data do Pagamento"
+                                                placeholder="Data do Pagamento"
                                             />
                                         </FormControl>
                                         <FormMessage />

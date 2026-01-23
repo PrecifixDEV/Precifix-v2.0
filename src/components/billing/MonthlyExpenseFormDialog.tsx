@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ResponsiveDatePicker } from '@/components/ui/responsive-date-picker';
+import { SleekDatePicker } from '@/components/ui/sleek-date-picker';
 import { format } from 'date-fns';
 import type { MonthlyExpense } from '@/types/billing';
 
@@ -176,10 +176,10 @@ export const MonthlyExpenseFormDialog = ({ isOpen, onClose, monthlyBillingId, ex
 
                     <div className="space-y-2">
                         <Label htmlFor="expense-date">Data da Despesa</Label>
-                        <ResponsiveDatePicker
+                        <SleekDatePicker
                             date={expenseDate}
                             onSelect={setExpenseDate}
-                            label="Data da Despesa"
+                            placeholder="Data da Despesa"
                             className="bg-background"
                         />
                     </div>

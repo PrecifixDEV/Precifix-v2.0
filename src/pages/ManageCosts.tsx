@@ -20,13 +20,6 @@ import {
     CardDescription
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -60,8 +53,10 @@ import { CostHistorySheet } from '@/components/costs/CostHistorySheet';
 import { costService } from '@/services/costService';
 import type { OperationalCost } from '@/types/costs';
 import { formatMoney } from '@/utils/format';
-import { format, subMonths, isSameMonth, parseISO } from 'date-fns';
+import { format, subMonths, isSameMonth, parseISO, startOfMonth, endOfMonth, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { SleekDateRangePicker } from '@/components/ui/sleek-date-range-picker';
+import type { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 
 export const ManageCosts = () => {
@@ -70,11 +65,11 @@ export const ManageCosts = () => {
     const [costToDelete, setCostToDelete] = useState<string | null>(null);
     const [historyCostId, setHistoryCostId] = useState<string | null>(null);
 
-    // Date Filters
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = new Date().getFullYear();
-    const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-    const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+    // Date Range Filter - Default to Current Month
+    const [selectedDate, setSelectedDate] = useState<DateRange | undefined>({
+        from: startOfMonth(new Date()),
+        to: endOfMonth(new Date())
+    });
 
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -106,8 +101,13 @@ export const ManageCosts = () => {
             if (!cost.expense_date) return false;
             const date = parseISO(cost.expense_date);
 
-            // Filter by Month/Year selection
-            const matchesDate = date.getMonth() + 1 === selectedMonth && date.getFullYear() === selectedYear;
+            // Filter by Date Range selection
+            const matchesDate = selectedDate?.from && selectedDate?.to
+                ? isWithinInterval(date, {
+                    start: startOfDay(selectedDate.from),
+                    end: endOfDay(selectedDate.to)
+                })
+                : true;
 
             // Filter by Search
             const matchesSearch = searchTerm
@@ -117,16 +117,20 @@ export const ManageCosts = () => {
 
             return matchesDate && matchesSearch;
         });
-    }, [costs, selectedMonth, selectedYear, searchTerm]);
+    }, [costs, selectedDate, searchTerm]);
 
     const lastMonthCosts = useMemo(() => {
-        const lastMonthDate = subMonths(new Date(selectedYear, selectedMonth - 1), 1);
+        if (!selectedDate?.from) return [];
+        const lastMonthDate = subMonths(selectedDate.from, 1);
         return costs.filter(cost => {
             if (!cost.expense_date) return false;
             const date = parseISO(cost.expense_date);
-            return isSameMonth(date, lastMonthDate);
+            return isWithinInterval(date, {
+                start: startOfMonth(lastMonthDate),
+                end: endOfMonth(lastMonthDate)
+            });
         });
-    }, [costs, selectedMonth, selectedYear]);
+    }, [costs, selectedDate]);
 
     // Totals
     const totalExpenses = filteredCosts.reduce((acc, curr) => acc + curr.value, 0);
@@ -152,11 +156,12 @@ export const ManageCosts = () => {
             .sort((a, b) => b.total - a.total);
     }, [filteredCosts]);
 
-    // Chart Data: Monthly Evolution (Last 6 months)
+    // Chart Data: Monthly Evolution (Last 6 months based on range start)
     const evolutionData = useMemo(() => {
         const data = [];
+        const baseDate = selectedDate?.from || new Date();
         for (let i = 5; i >= 0; i--) {
-            const d = subMonths(new Date(selectedYear, selectedMonth - 1), i);
+            const d = subMonths(baseDate, i);
             const monthLabel = format(d, 'MMM', { locale: ptBR });
 
             // Sum costs for this specific month
@@ -167,7 +172,7 @@ export const ManageCosts = () => {
             data.push({ name: monthLabel.toUpperCase(), total: monthlyTotal });
         }
         return data;
-    }, [costs, selectedMonth, selectedYear]);
+    }, [costs, selectedDate]);
 
 
     // Delete Handler
@@ -180,14 +185,6 @@ export const ManageCosts = () => {
         }
     });
 
-
-    // --- UI Helpers ---
-    const months = Array.from({ length: 12 }, (_, i) => ({
-        value: i + 1,
-        label: format(new Date(2000, i, 1), 'MMMM', { locale: ptBR }),
-    }));
-
-    const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).sort((a, b) => b - a);
 
     if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
 
@@ -212,27 +209,13 @@ export const ManageCosts = () => {
 
                 {/* Period Selector */}
                 <div className="flex items-center gap-2">
-                    <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-                        <SelectTrigger className="w-[140px] bg-zinc-900 border-zinc-800">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {months.map(m => (
-                                <SelectItem key={m.value} value={String(m.value)} className="capitalize">{m.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-                        <SelectTrigger className="w-[100px] bg-zinc-900 border-zinc-800">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {years.map(y => (
-                                <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="w-[300px]">
+                        <SleekDateRangePicker
+                            date={selectedDate}
+                            onSelect={setSelectedDate}
+                            placeholder="Filtrar por Período"
+                        />
+                    </div>
                 </div>
             </div>
 

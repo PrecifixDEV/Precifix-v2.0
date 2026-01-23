@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
 import { financialCategoriesService, type FinancialCategory } from "@/services/financialCategoriesService";
 import { paymentMethodsService } from "@/services/paymentMethodsService";
-import { ResponsiveDatePicker } from "@/components/ui/responsive-date-picker";
+import { SleekDatePicker } from "@/components/ui/sleek-date-picker";
 
 interface AddValueDialogProps {
     open: boolean;
@@ -224,10 +224,10 @@ export function AddValueDialog({ open, onOpenChange, accounts, type = 'credit' }
                                     </div>
                                     <div className="space-y-1">
                                         <Label>Data da Transação</Label>
-                                        <ResponsiveDatePicker
+                                        <SleekDatePicker
                                             date={transactionDate}
                                             onSelect={setTransactionDate}
-                                            label="Data da Transação"
+                                            placeholder="Data da Transação"
                                         />
                                     </div>
                                 </div>

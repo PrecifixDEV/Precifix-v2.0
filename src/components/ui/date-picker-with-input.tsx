@@ -83,26 +83,23 @@ export function DatePickerWithInput({
                     }
                 />
             </div>
-            <DrawerContent className="bg-zinc-900 border-zinc-800">
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader className="border-b border-zinc-800 pb-4">
-                        <DrawerTitle className="text-center text-zinc-100 uppercase tracking-tight font-bold">
+            <DrawerContent className="bg-black border-zinc-900">
+                <div className="mx-auto w-full max-w-sm pb-8">
+                    <DrawerHeader>
+                        <DrawerTitle className="text-center text-zinc-600 uppercase tracking-[0.2em] font-bold text-[0.65rem] mb-2">
                             {label}
                         </DrawerTitle>
                     </DrawerHeader>
-                    <div className="p-4 flex justify-center">
+                    <div className="px-4 flex justify-center">
                         <Calendar
                             mode="single"
                             selected={date}
                             onSelect={(selectedDate) => {
                                 setDate(selectedDate)
-                                setIsOpen(false)
+                                if (selectedDate) setIsOpen(false)
                             }}
                             initialFocus
                             locale={ptBR}
-                            captionLayout="dropdown"
-                            fromYear={1900}
-                            toYear={2100}
                             className="bg-transparent"
                         />
                     </div>

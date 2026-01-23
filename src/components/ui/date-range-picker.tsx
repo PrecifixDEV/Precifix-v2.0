@@ -3,7 +3,7 @@
 import * as React from "react"
 import { startOfMonth, endOfMonth, subDays, subMonths } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Calendar as CalendarIcon, Check, X } from "lucide-react"
+import { Calendar as CalendarIcon } from "lucide-react"
 import type { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -97,14 +97,14 @@ export function DateRangePicker({
                         <CalendarIcon className="h-4 w-4" />
                     </Button>
                 </DrawerTrigger>
-                <DrawerContent className="bg-zinc-900 border-zinc-800">
-                    <div className="mx-auto w-full max-w-4xl">
-                        <DrawerHeader className="border-b border-zinc-800">
-                            <DrawerTitle className="text-center text-zinc-100 uppercase tracking-tight font-bold">
+                <DrawerContent className="bg-black border-zinc-900">
+                    <div className="mx-auto w-full max-w-4xl pb-6">
+                        <DrawerHeader>
+                            <DrawerTitle className="text-center text-zinc-600 uppercase tracking-[0.2em] font-bold text-[0.65rem] mb-2">
                                 Selecionar Período
                             </DrawerTitle>
                         </DrawerHeader>
-                        <div className="flex flex-col md:flex-row h-full max-h-[80vh] overflow-y-auto md:overflow-hidden p-4">
+                        <div className="flex flex-col md:flex-row h-full max-h-[80vh] overflow-y-auto md:overflow-hidden p-2">
                             {/* Calendars */}
                             <div className="flex-1 flex justify-center p-2">
                                 <Calendar
@@ -116,15 +116,12 @@ export function DateRangePicker({
                                     onSelect={setTempDate}
                                     numberOfMonths={isDesktop ? 2 : 1}
                                     locale={ptBR}
-                                    captionLayout="dropdown"
-                                    fromYear={2020}
-                                    toYear={2030}
                                     className="bg-transparent"
                                 />
                             </div>
 
                             {/* Sidebar / Presets */}
-                            <div className="border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-900/50 p-4 flex flex-col justify-between min-w-[200px]">
+                            <div className="border-t md:border-t-0 md:border-l border-zinc-900 bg-black/50 p-4 flex flex-col justify-between min-w-[200px]">
                                 <div className="flex flex-col gap-2">
                                     <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
                                         Períodos Rápidos
@@ -135,7 +132,7 @@ export function DateRangePicker({
                                                 key={preset.label}
                                                 variant="ghost"
                                                 size="sm"
-                                                className="justify-start font-normal text-zinc-300 hover:text-primary hover:bg-primary/10"
+                                                className="justify-start font-normal text-zinc-400 hover:text-primary hover:bg-zinc-900"
                                                 onClick={() => handlePresetSelect(preset.getValue())}
                                             >
                                                 {preset.label}
@@ -144,12 +141,12 @@ export function DateRangePicker({
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-2 mt-6 pt-4 border-t border-zinc-800">
-                                    <Button onClick={handleApply} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-wider">
-                                        <Check className="mr-2 h-4 w-4" /> Aplicar
+                                <div className="flex flex-col gap-2 mt-6 pt-4 border-t border-zinc-900 px-2">
+                                    <Button onClick={handleApply} className="w-full bg-primary text-black hover:bg-primary/90 font-bold uppercase tracking-tight h-12 shadow-[0_0_20px_rgba(250,204,21,0.2)]">
+                                        Aplicar
                                     </Button>
-                                    <Button onClick={handleCancel} variant="ghost" className="w-full text-zinc-400">
-                                        <X className="mr-2 h-4 w-4" /> Cancelar
+                                    <Button onClick={handleCancel} variant="ghost" className="w-full text-zinc-500 h-10">
+                                        Cancelar
                                     </Button>
                                 </div>
                             </div>
