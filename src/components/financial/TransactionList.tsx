@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { SleekDateRangePicker } from "@/components/ui/sleek-date-range-picker";
 
 import {
     AlertDialog,
@@ -292,21 +292,13 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
                 <div className="flex items-center justify-end gap-2 w-full md:w-auto">
 
-                    {/* Date Picker (Outside) */}
-                    <div className="hidden sm:block">
-                        <DateRangePicker
-                            date={dateRange}
-                            setDate={setDateRange}
-                            className="bg-zinc-900/50 border-none hover:bg-zinc-800 transition-colors"
-                        />
-                    </div>
-                    <div className="sm:hidden w-[36px] overflow-hidden">
-                        <DateRangePicker
-                            date={dateRange}
-                            setDate={setDateRange}
-                            className="w-[36px] p-0 border-none"
-                        />
-                    </div>
+                    {/* Date Picker */}
+                    <SleekDateRangePicker
+                        date={dateRange}
+                        onSelect={setDateRange}
+                        placeholder="Filtrar por Período"
+                        className="w-[280px]"
+                    />
 
                     {/* Filters Drawer Trigger */}
                     <Drawer open={isDrawerOpen} onOpenChange={(open) => {

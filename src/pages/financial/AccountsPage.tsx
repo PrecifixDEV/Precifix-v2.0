@@ -12,8 +12,7 @@ import { AddValueDialog } from "@/components/financial/AddValueDialog";
 
 import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
 import { ConsolidatedBalanceCard } from "@/components/dashboard/ConsolidatedBalanceCard";
-import { SleekDateRangePicker } from "@/components/ui/sleek-date-range-picker";
-import type { DateRange } from "react-day-picker";
+
 import { toast } from "sonner";
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -34,7 +33,7 @@ export default function AccountsPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isAddValueOpen, setIsAddValueOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<DateRange | undefined>(undefined);
+
     const [transactionType, setTransactionType] = useState<'credit' | 'debit'>('credit');
 
     // Edit State
@@ -110,13 +109,6 @@ export default function AccountsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                    <div className="w-[300px]">
-                        <SleekDateRangePicker
-                            date={selectedDate}
-                            onSelect={setSelectedDate}
-                            placeholder="Filtrar por Período"
-                        />
-                    </div>
                     <ResponsiveAddButton
                         onClick={handleCreateAccount}
                         label="Nova Conta"
@@ -224,7 +216,7 @@ export default function AccountsPage() {
                     >
                         <CarouselContent>
                             {accounts.map((account) => (
-                                <CarouselItem key={account.id} className="basis-full md:basis-1/2 lg:basis-1/3">
+                                <CarouselItem key={account.id} className="basis-[85%] md:basis-1/2 lg:basis-1/5">
                                     <div className="p-1 h-full">
                                         <FinancialAccountCard
                                             account={account}
