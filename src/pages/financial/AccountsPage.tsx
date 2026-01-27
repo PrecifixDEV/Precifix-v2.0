@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, ArrowRightLeft, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Plus, ArrowRightLeft, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
 import { financialService } from "@/services/financialService";
+import { costService } from "@/services/costService";
 import { Button } from "@/components/ui/button";
 
 import { AccountFormDialog } from "@/components/financial/AccountFormDialog";
@@ -10,11 +11,9 @@ import { TransactionList } from "@/components/financial/TransactionList";
 import { TransferDialog } from "@/components/financial/TransferDialog";
 import { AddValueDialog } from "@/components/financial/AddValueDialog";
 
-import { ResponsiveAddButton } from "@/components/ui/responsive-add-button";
 import { ConsolidatedBalanceCard } from "@/components/dashboard/ConsolidatedBalanceCard";
 
 import { toast } from "sonner";
-import Autoplay from "embla-carousel-autoplay";
 import {
     Carousel,
     CarouselContent,
@@ -26,6 +25,7 @@ import {
 import { FinancialAccountCard } from "@/components/financial/FinancialAccountCard";
 import { useNavigate } from "react-router-dom";
 import type { FinancialAccount } from "@/types/costs";
+import { formatMoney } from "@/utils/format";
 
 export default function AccountsPage() {
     const navigate = useNavigate();
@@ -39,22 +39,6 @@ export default function AccountsPage() {
     // Edit State
     const [editingAccount, setEditingAccount] = useState<FinancialAccount | null>(null);
 
-    // Responsive check
-    const [isDesktop, setIsDesktop] = useState(false);
-
-    useEffect(() => {
-        const checkDesktop = () => {
-            if (typeof window !== "undefined") {
-                setIsDesktop(window.innerWidth >= 768);
-            }
-        };
-        checkDesktop();
-        if (typeof window !== "undefined") {
-            window.addEventListener('resize', checkDesktop);
-            return () => window.removeEventListener('resize', checkDesktop);
-        }
-    }, []);
-
     // Queries
     const { data: accounts, isLoading: loadingAccounts } = useQuery({
         queryKey: ['commercial_accounts'],
@@ -64,6 +48,16 @@ export default function AccountsPage() {
     const { data: transactions, isLoading: loadingTransactions } = useQuery({
         queryKey: ['financial_transactions'],
         queryFn: async () => financialService.getTransactions()
+    });
+
+    const { data: payables = [] } = useQuery({
+        queryKey: ['payable-summary'],
+        queryFn: () => costService.getPayablePayments(new Date().getMonth() + 1, new Date().getFullYear())
+    });
+
+    const { data: receivables = [] } = useQuery({
+        queryKey: ['receivable-summary'],
+        queryFn: () => financialService.getReceivablePayments(new Date().getMonth() + 1, new Date().getFullYear())
     });
 
     const handleDeleteAccount = async (id: string, name: string) => {
@@ -97,23 +91,33 @@ export default function AccountsPage() {
     // Calculations
     const totalBalance = accounts?.reduce((acc, curr) => acc + Number(curr.current_balance), 0) || 0;
 
+    const totalToPay = payables
+        .filter((p: any) => p.status !== 'paid')
+        .reduce((acc: number, curr: any) => acc + curr.amount_original, 0);
+
+    const totalToReceive = receivables
+        .filter((p: any) => p.status !== 'paid')
+        .reduce((acc: number, curr: any) => acc + curr.amount_original, 0);
+
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
             {/* Header */}
             <div className="flex items-center justify-between gap-4 print:hidden">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-zinc-50 hidden md:block">Caixas e Bancos</h1>
-                    <p className="text-zinc-400 mt-1">
-                        Gerencie suas contas bancárias e acompanhe o fluxo financeiro.
+                    <h1 className="text-3xl font-bold tracking-tight text-white hidden md:block">Gestão Financeira</h1>
+                    <p className="text-zinc-500 mt-1">
+                        Acompanhe seu fluxo de caixa e compromissos.
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                    <ResponsiveAddButton
+                    <Button
                         onClick={handleCreateAccount}
-                        label="Nova Conta"
-                        className="shrink-0"
-                    />
+                        className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02]"
+                    >
+                        <Plus className="mr-2 h-5 w-5" />
+                        Nova Conta
+                    </Button>
                 </div>
             </div>
 
@@ -123,7 +127,7 @@ export default function AccountsPage() {
                 accountToEdit={editingAccount}
             />
 
-            {/* Action Support Dialogs */}
+            {/* Support Dialogs */}
             <TransferDialog open={isTransferOpen} onOpenChange={setIsTransferOpen} accounts={accounts || []} />
             <AddValueDialog
                 open={isAddValueOpen}
@@ -132,118 +136,124 @@ export default function AccountsPage() {
                 type={transactionType}
             />
 
-
-            {/* Top Grid: Total & Actions */}
-            {/* Fix: changed h-[200px] to lg:h-[200px] to allow auto height on mobile, preventing flattening */}
-            <div className="flex flex-col lg:flex-row gap-6 lg:items-center lg:h-[200px] mb-8 print:hidden">
-                <div className="w-full lg:w-1/2 h-full">
+            {/* Dashboard Context Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 print:hidden">
+                {/* Main Balance */}
+                <div className="lg:col-span-4 h-full">
                     <ConsolidatedBalanceCard totalBalance={totalBalance} accounts={accounts} />
                 </div>
 
-                {/* Actions Buttons - Visually separated but next to balance */}
-                <div className="w-full lg:w-1/2 flex flex-row items-center justify-start lg:justify-center gap-4 h-full">
-                    <Button
-                        variant="ghost"
-                        onClick={() => setIsTransferOpen(true)}
-                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-800 hover:border-primary/50 hover:bg-zinc-900 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
+                {/* Auxiliary Summaries */}
+                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    <div
+                        onClick={() => navigate('/accounts-payable')}
+                        className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-red-500/30 transition-all cursor-pointer group flex items-center justify-between shadow-sm"
                     >
-                        <div className="h-10 w-10 rounded-full bg-zinc-800 group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
-                            <ArrowRightLeft className="h-5 w-5 text-zinc-500 group-hover:text-primary transition-colors" />
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20 group-hover:bg-red-500/20 transition-all">
+                                <ArrowDownLeft className="h-6 w-6 text-red-500" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-0.5">Pendentes a Pagar (Mês)</span>
+                                <p className="text-2xl font-bold text-white font-mono tracking-tighter">
+                                    {formatMoney(totalToPay)}
+                                </p>
+                            </div>
                         </div>
-                        <div className="text-center">
-                            <span className="block font-semibold text-zinc-300 group-hover:text-primary">Transferir</span>
-                            <span className="block text-xs text-zinc-400 hidden sm:block">Entre contas</span>
-                        </div>
-                    </Button>
+                        <ArrowRightLeft className="h-4 w-4 text-zinc-700 group-hover:text-red-500 transition-all" />
+                    </div>
 
-                    <Button
-                        variant="ghost"
-                        onClick={() => handleOpenTransaction('credit')}
-                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-800 hover:border-emerald-500/50 hover:bg-emerald-950/20 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
+                    <div
+                        onClick={() => navigate('/accounts-receivable')}
+                        className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/30 transition-all cursor-pointer group flex items-center justify-between shadow-sm"
                     >
-                        <div className="h-10 w-10 rounded-full bg-zinc-800 group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
-                            <ArrowUpRight className="h-5 w-5 text-zinc-500 group-hover:text-emerald-500 transition-colors" />
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-all">
+                                <ArrowUpRight className="h-6 w-6 text-emerald-500" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-0.5">Previstos a Receber (Mês)</span>
+                                <p className="text-2xl font-bold text-white font-mono tracking-tighter">
+                                    {formatMoney(totalToReceive)}
+                                </p>
+                            </div>
                         </div>
-                        <div className="text-center">
-                            <span className="block font-semibold text-zinc-300 group-hover:text-emerald-500">Entrada</span>
-                            <span className="block text-xs text-zinc-400 hidden sm:block">Nova Entrada de Valor</span>
-                        </div>
-                    </Button>
-
-                    <Button
-                        variant="ghost"
-                        onClick={() => handleOpenTransaction('debit')}
-                        className="flex-1 h-24 lg:h-full border border-dashed border-zinc-800 hover:border-red-500/50 hover:bg-red-950/20 rounded-xl flex flex-col items-center justify-center gap-3 transition-all group"
-                    >
-                        <div className="h-10 w-10 rounded-full bg-zinc-800 group-hover:bg-zinc-950 flex items-center justify-center transition-colors">
-                            <ArrowDownRight className="h-5 w-5 text-zinc-500 group-hover:text-red-500 transition-colors" />
-                        </div>
-                        <div className="text-center">
-                            <span className="block font-semibold text-zinc-300 group-hover:text-red-500">Saída</span>
-                            <span className="block text-xs text-zinc-400 hidden sm:block">Nova Saída de Valor</span>
-                        </div>
-                    </Button>
+                        <ArrowRightLeft className="h-4 w-4 text-zinc-700 group-hover:text-emerald-500 transition-all" />
+                    </div>
                 </div>
             </div>
 
-            {/* Carousel Section */}
+            {/* Quick Action Bar */}
+            <div className="flex flex-wrap gap-4 print:hidden">
+                <Button
+                    variant="outline"
+                    onClick={() => setIsTransferOpen(true)}
+                    className="flex-1 min-w-[140px] h-14 bg-zinc-950 border-zinc-800 hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-xl gap-2 font-medium transition-all"
+                >
+                    <ArrowRightLeft className="h-4 w-4 opacity-50" />
+                    Transferir
+                </Button>
+                <Button
+                    variant="outline"
+                    onClick={() => handleOpenTransaction('credit')}
+                    className="flex-1 min-w-[140px] h-14 bg-zinc-950 border-zinc-800 hover:bg-emerald-500/5 hover:border-emerald-500/30 text-emerald-500/90 hover:text-emerald-400 rounded-xl gap-2 font-medium transition-all"
+                >
+                    <Plus className="h-4 w-4 opacity-50" />
+                    Entrada Manual
+                </Button>
+                <Button
+                    variant="outline"
+                    onClick={() => handleOpenTransaction('debit')}
+                    className="flex-1 min-w-[140px] h-14 bg-zinc-950 border-zinc-800 hover:bg-red-500/5 hover:border-red-500/30 text-red-500/90 hover:text-red-400 rounded-xl gap-2 font-medium transition-all"
+                >
+                    <Plus className="h-4 w-4 opacity-50" />
+                    Saída Manual
+                </Button>
+            </div>
+
+            {/* Accounts Slides - Using modern carousel */}
             <div className="space-y-4 print:hidden">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-zinc-100">Contas</h2>
+                    <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-widest pl-1">Minhas Contas</h2>
                 </div>
 
                 {loadingAccounts ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[1, 2, 3].map(i => <div key={i} className="h-32 bg-zinc-100 dark:bg-zinc-800 rounded-xl animate-pulse" />)}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-zinc-900 border border-zinc-800 rounded-2xl animate-pulse" />)}
                     </div>
                 ) : accounts && accounts.length > 0 ? (
                     <Carousel
-                        opts={{
-                            align: "start",
-                            loop: true,
-                        }}
-                        plugins={
-                            isDesktop
-                                ? []
-                                : [
-                                    Autoplay({
-                                        delay: 4000,
-                                        stopOnInteraction: true,
-                                    }),
-                                ]
-                        }
-                        className="w-full"
+                        opts={{ align: "start", loop: false }}
+                        className="w-full relative px-1"
                     >
-                        <CarouselContent>
+                        <CarouselContent className="-ml-4">
                             {accounts.map((account) => (
-                                <CarouselItem key={account.id} className="basis-[85%] md:basis-1/2 lg:basis-1/5">
-                                    <div className="p-1 h-full">
-                                        <FinancialAccountCard
-                                            account={account}
-                                            onDelete={handleDeleteAccount}
-                                            onDetail={(id) => navigate(`/accounts/${id}`)}
-                                            onEdit={handleEditAccount}
-                                        />
-                                    </div>
+                                <CarouselItem key={account.id} className="pl-4 basis-[85%] md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                                    <FinancialAccountCard
+                                        account={account}
+                                        onDelete={handleDeleteAccount}
+                                        onDetail={(id) => navigate(`/accounts/${id}`)}
+                                        onEdit={handleEditAccount}
+                                    />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
-                        <CarouselPrevious className="hidden md:flex -left-4" />
-                        <CarouselNext className="hidden md:flex -right-4" />
+                        <CarouselPrevious className="hidden xl:flex -left-4 bg-zinc-950 border-zinc-800" />
+                        <CarouselNext className="hidden xl:flex -right-4 bg-zinc-950 border-zinc-800" />
                     </Carousel>
                 ) : (
                     <div
                         onClick={handleCreateAccount}
-                        className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-xl hover:bg-zinc-900/50 cursor-pointer transition-all text-zinc-400 hover:text-primary hover:border-primary/50 gap-2 min-h-[140px]"
+                        className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/50 cursor-pointer transition-all text-zinc-400 hover:text-primary hover:border-primary/50 gap-2"
                     >
                         <Plus className="h-8 w-8" />
-                        <span className="font-medium text-sm">Adicionar primeira conta</span>
+                        <span className="font-medium text-sm text-zinc-500">Adicionar primeira conta</span>
                     </div>
                 )}
             </div>
 
-            {/* Transactions Section */}
-            <div className="mt-8">
+            {/* Last Transactions Table/List */}
+            <div className="pt-4">
                 <TransactionList
                     transactions={transactions || []}
                     isLoading={loadingTransactions}

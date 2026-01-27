@@ -124,11 +124,10 @@ export const costService = {
      * Deletes a cost. If it has a recurrence_group_id, optionally deletes all related costs.
      */
     deleteCost: async (costId: string, deleteGroup: boolean = false) => {
+        // ... existing delete logic ...
         if (deleteGroup) {
-            // 1. Get the cost to find the group ID
             const { data: cost, error: fetchError } = await supabase
                 .from('operational_costs')
-                // @ts-ignore - column pending migration
                 .select('recurrence_group_id')
                 .eq('id', costId)
                 .single();
@@ -136,11 +135,9 @@ export const costService = {
             if (fetchError) throw fetchError;
 
             if ((cost as any)?.recurrence_group_id) {
-                // Delete all in group
                 const { error: deleteError } = await supabase
                     .from('operational_costs')
                     .delete()
-                    // @ts-ignore - column pending migration
                     .eq('recurrence_group_id', (cost as any).recurrence_group_id);
 
                 if (deleteError) throw deleteError;
@@ -148,12 +145,39 @@ export const costService = {
             }
         }
 
-        // Default: delete only single row (or if no group id)
         const { error } = await supabase
             .from('operational_costs')
             .delete()
             .eq('id', costId);
 
         if (error) throw error;
+    },
+
+    // --- Compatible methods for refactored UI ---
+
+    async getPayablePayments(month: number, year: number) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+        const { data, error } = await supabase
+            .from('operational_cost_payments')
+            .select('*')
+            .eq('user_id', user.id)
+            .gte('due_date', startDate)
+            .lte('due_date', endDate);
+
+        if (error) throw error;
+        return data;
+    },
+
+    async createCost(data: any) {
+        return this.saveCost(data);
+    },
+
+    async updateCost(id: string, data: any) {
+        return this.saveCost({ ...data, id });
     }
 }

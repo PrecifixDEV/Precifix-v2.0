@@ -35,6 +35,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { financialService } from "@/services/financialService";
 import { ActiveFilters } from "@/components/ui/active-filters";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface TransactionListProps {
     transactions: (FinancialTransaction & { commercial_accounts: { name: string } | null })[];
@@ -65,7 +66,7 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 25;
+    const [itemsPerPage, setItemsPerPage] = useState(25);
 
     const openFilterDrawer = () => {
         setDraftTypeFilter(typeFilter);
@@ -203,12 +204,12 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
     const paginatedTransactions = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
-    }, [filteredTransactions, currentPage]);
+    }, [filteredTransactions, currentPage, itemsPerPage]);
 
-    // Reset page when filters change
+    // Reset page when filters or items per page change
     useMemo(() => {
         setCurrentPage(1);
-    }, [activeSearch, typeFilter, dateRange, showDeletedOnly]);
+    }, [activeSearch, typeFilter, dateRange, showDeletedOnly, itemsPerPage]);
 
     const groupedTransactions = paginatedTransactions.reduce((groups, transaction) => {
         const date = transaction.transaction_date;
@@ -297,7 +298,17 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
                         date={dateRange}
                         onSelect={setDateRange}
                         placeholder="Filtrar por Período"
-                        className="w-[280px]"
+                        variant="icon"
+                        maxDays={31}
+                        onMaxDaysExceeded={(max) => {
+                            toast.warning(`O período máximo é de ${max} dias.`, {
+                                description: "Para períodos maiores, utilize os filtros de busca detalhada.",
+                                action: {
+                                    label: "Entendi",
+                                    onClick: () => { }
+                                }
+                            });
+                        }}
                     />
 
                     {/* Filters Drawer Trigger */}
@@ -583,62 +594,14 @@ export function TransactionList({ transactions, isLoading, consolidatedBalance, 
 
             {/* Pagination */}
             {filteredTransactions.length > 0 && (
-                <div className="border-t border-zinc-800 px-6 py-4 flex items-center justify-between print:hidden">
-                    {/* Left: Nav Buttons */}
-                    <div className="flex items-center gap-4 text-sm text-zinc-500 font-medium">
-                        <button
-                            onClick={() => setCurrentPage(1)}
-                            disabled={currentPage === 1}
-                            className="hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Primeira
-                        </button>
-                        <span className="text-zinc-300">|</span>
-                        <button
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                            className="hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Anterior
-                        </button>
-                    </div>
-
-                    {/* Center: Dropdown */}
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={currentPage}
-                            onChange={(e) => setCurrentPage(Number(e.target.value))}
-                            className="h-8 w-16 rounded-md border border-zinc-800 bg-zinc-900 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        >
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <option key={page} value={page}>{page}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Right: Nav Buttons & Info */}
-                    <div className="flex items-center gap-4 text-sm text-zinc-500 font-medium">
-                        <button
-                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                            disabled={currentPage === totalPages}
-                            className="hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Próxima
-                        </button>
-                        <span className="text-zinc-300">|</span>
-                        <button
-                            onClick={() => setCurrentPage(totalPages)}
-                            disabled={currentPage === totalPages}
-                            className="hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Última
-                        </button>
-
-                        <span className="ml-4 text-xs font-normal opacity-70">
-                            {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} de {filteredTransactions.length}
-                        </span>
-                    </div>
-                </div>
+                <TablePagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    totalItems={filteredTransactions.length}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                />
             )}
 
             <AlertDialog open={!!transactionToDelete} onOpenChange={(open) => !open && setTransactionToDelete(null)}>

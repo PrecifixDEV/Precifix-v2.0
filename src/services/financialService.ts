@@ -186,7 +186,6 @@ export const financialService = {
     },
 
     async restoreTransaction(transactionId: string) {
-        // 1. Fetch transaction
         const { data: transaction, error: fetchError } = await supabase
             .from('financial_transactions')
             .select('*')
@@ -194,9 +193,8 @@ export const financialService = {
             .single();
 
         if (fetchError || !transaction) throw new Error("Transação não encontrada.");
-        if (!(transaction as FinancialTransaction).is_deleted) return; // Already active
+        if (!(transaction as FinancialTransaction).is_deleted) return;
 
-        // 2. Re-apply Balance
         if (transaction.account_id) {
             await this.updateAccountBalance(
                 transaction.account_id,
@@ -205,7 +203,6 @@ export const financialService = {
             );
         }
 
-        // 3. Unmark is_deleted and clean description if needed
         let newDescription = transaction.description;
         if (newDescription.endsWith(' (excluída)')) {
             newDescription = newDescription.replace(' (excluída)', '');
@@ -223,9 +220,132 @@ export const financialService = {
 
         if (updateError) throw updateError;
 
-        // 4. Restore related transaction if it's a transfer pair
         if (transaction.related_entity_type === 'transfer_pair' && transaction.related_entity_id) {
             await this.restoreTransaction(transaction.related_entity_id);
         }
+    },
+
+    // --- New Integrated Payment Logic ---
+
+    /**
+     * Registers a payment for either a Payable or Receivable item.
+     * Marks the item as paid/partially_paid and creates a bank transaction.
+     */
+    async registerPayment(params: {
+        type: 'payable' | 'receivable',
+        id: string, // ID of the payment record (operational_cost_payments or financial_receivable_payments)
+        accountId: string,
+        amountPaid: number,
+        paymentDate: string,
+        category?: string,
+        paymentMethod?: string
+    }) {
+        const { type, id, accountId, amountPaid, paymentDate, category, paymentMethod } = params;
+
+        // 1. Fetch the payment record to get details
+        const table = type === 'payable' ? 'operational_cost_payments' : 'financial_receivable_payments';
+        const { data: payment, error: fetchError } = await supabase
+            .from(table)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !payment) throw new Error(`${type === 'payable' ? 'Pagamento' : 'Recebimento'} não encontrado.`);
+
+        const status = amountPaid < payment.amount_original ? 'partially_paid' : 'paid';
+
+        // 2. Update the payment record
+        const { error: updateError } = await supabase
+            .from(table)
+            .update({
+                amount_paid: amountPaid,
+                payment_date: paymentDate,
+                status: status
+            })
+            .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        // 3. Create the bank transaction
+        const txType = type === 'payable' ? 'debit' : 'credit';
+        await this.createTransaction({
+            description: payment.description,
+            amount: amountPaid,
+            type: txType,
+            // @ts-ignore
+            category: category || (payment as any).category || (type === 'payable' ? 'Despesa' : 'Receita'),
+            payment_method: paymentMethod || 'Dinheiro',
+            transaction_date: paymentDate,
+            account_id: accountId,
+            related_entity_type: type === 'payable' ? 'operational_cost' : 'financial_receivable',
+            // @ts-ignore
+            related_entity_id: (payment as any).operational_cost_id || (payment as any).financial_receivable_id
+        });
+
+        return { success: true, status };
+    },
+
+    // --- Receivables CRUD ---
+
+    async getReceivables(month?: number, year?: number) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("User not authenticated");
+
+        let query = supabase.from('financial_receivables').select('*').eq('user_id', user.id);
+
+        if (month !== undefined && year !== undefined) {
+            const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+            query = query.gte('expense_date', startDate).lte('expense_date', endDate);
+        }
+
+        const { data, error } = await query.order('expense_date', { ascending: true });
+        if (error) throw error;
+        return data;
+    },
+
+    async getReceivablePayments(month: number, year: number) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+        const { data, error } = await supabase
+            .from('financial_receivable_payments')
+            .select('*')
+            .eq('user_id', user.id)
+            .gte('due_date', startDate)
+            .lte('due_date', endDate);
+
+        if (error) throw error;
+        return data;
+    },
+
+    async createReceivable(receivable: any) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("User not authenticated");
+
+        const { data, error } = await supabase
+            .from('financial_receivables')
+            .insert({ ...receivable, user_id: user.id })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Automatically create a payment record for the receivable
+        if (data) {
+            await supabase.from('financial_receivable_payments').insert([{
+                user_id: user.id,
+                financial_receivable_id: data.id,
+                description: data.description,
+                due_date: data.expense_date,
+                amount_original: data.value,
+                status: 'pending'
+            }] as any);
+        }
+
+        return data;
     }
-};
+}

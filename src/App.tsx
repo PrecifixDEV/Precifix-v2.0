@@ -13,6 +13,7 @@ import ManageCosts from './pages/ManageCosts';
 import AccountsPage from "./pages/financial/AccountsPage";
 import AccountDetailsPage from "./pages/financial/AccountDetailsPage";
 import AccountsPayable from './pages/AccountsPayable'
+import AccountsReceivable from './pages/financial/AccountsReceivable';
 import { MyCompany } from './pages/MyCompany'
 import { Products } from './pages/cadastros/Products'
 import { Services } from './pages/cadastros/Services'
@@ -57,6 +58,7 @@ function App() {
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/accounts/:id" element={<AccountDetailsPage />} />
             <Route path="/accounts-payable" element={<AccountsPayable />} />
+            <Route path="/accounts-receivable" element={<AccountsReceivable />} />
 
             {/* Cadastros Routes */}
             <Route path="/cadastros/produtos" element={<Products />} />

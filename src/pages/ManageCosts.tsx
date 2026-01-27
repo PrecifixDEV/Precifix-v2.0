@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ResponsiveAddButton } from '@/components/ui/responsive-add-button';
 
 import {
     BarChart,
@@ -200,11 +199,13 @@ export const ManageCosts = () => {
                         <p className="text-muted-foreground mt-1">Análise detalhada de custos e despesas operacionais.</p>
                     </div>
 
-                    <ResponsiveAddButton
+                    <Button
                         onClick={() => setIsDialogOpen(true)}
-                        label="Nova Despesa"
-                        className="shadow-lg shadow-primary/10 shrink-0"
-                    />
+                        className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02]"
+                    >
+                        <Plus className="mr-2 h-5 w-5" />
+                        Nova Despesa
+                    </Button>
                 </div>
 
                 {/* Period Selector */}

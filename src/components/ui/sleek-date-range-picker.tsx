@@ -20,6 +20,9 @@ interface SleekDateRangePickerProps {
     onSelect: (date: DateRange | undefined) => void
     placeholder?: string
     className?: string
+    variant?: 'default' | 'icon'
+    maxDays?: number
+    onMaxDaysExceeded?: (max: number) => void
 }
 
 export function SleekDateRangePicker({
@@ -27,6 +30,9 @@ export function SleekDateRangePicker({
     onSelect,
     placeholder = "Selecionar período",
     className,
+    variant = 'default',
+    maxDays,
+    onMaxDaysExceeded,
 }: SleekDateRangePickerProps) {
     const [open, setOpen] = React.useState(false)
     const [tempRange, setTempRange] = React.useState<DateRange | undefined>(date)
@@ -55,39 +61,53 @@ export function SleekDateRangePicker({
     }
 
     const isRangeExceeded = React.useMemo(() => {
-        if (tempRange?.from && tempRange?.to) {
-            return differenceInDays(tempRange.to, tempRange.from) > 31
+        if (maxDays && tempRange?.from && tempRange?.to) {
+            // Conta os dias inclusive (ex: Jan 1 a Jan 2 = 2 dias)
+            return (differenceInDays(tempRange.to, tempRange.from) + 1) > maxDays
         }
         return false
-    }, [tempRange])
+    }, [tempRange, maxDays])
 
     return (
         <div className={cn("grid gap-2", className)}>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <div className="relative w-full">
-                        <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <div className={cn("relative", variant === 'default' ? "w-full" : "w-auto")}>
+                        {variant === 'default' && (
+                            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                        )}
                         <Button
                             id="date"
-                            variant={"outline"}
+                            variant={variant === 'icon' && date?.from ? "default" : "outline"}
+                            size={variant === 'icon' ? "icon" : "default"}
                             className={cn(
-                                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                                "justify-start text-left font-normal pl-9",
-                                !date && "text-muted-foreground",
+                                variant === 'default' ? [
+                                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                                    "justify-start text-left font-normal pl-9",
+                                    !date && "text-muted-foreground",
+                                ] : [
+                                    "shrink-0 transition-all",
+                                    !date && "bg-zinc-900/50 border-none text-white hover:text-yellow-500",
+                                    date && "bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border-yellow-400"
+                                ],
                                 className
                             )}
                         >
-                            {date?.from ? (
-                                date.to ? (
-                                    <>
-                                        {format(date.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                                        {format(date.to, "dd/MM/yyyy", { locale: ptBR })}
-                                    </>
-                                ) : (
-                                    format(date.from, "dd/MM/yyyy", { locale: ptBR })
-                                )
+                            {variant === 'icon' ? (
+                                <CalendarIcon className="h-4 w-4" />
                             ) : (
-                                <span>{placeholder}</span>
+                                date?.from ? (
+                                    date.to ? (
+                                        <>
+                                            {format(date.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                                            {format(date.to, "dd/MM/yyyy", { locale: ptBR })}
+                                        </>
+                                    ) : (
+                                        format(date.from, "dd/MM/yyyy", { locale: ptBR })
+                                    )
+                                ) : (
+                                    <span>{placeholder}</span>
+                                )
                             )}
                         </Button>
                     </div>
@@ -105,11 +125,17 @@ export function SleekDateRangePicker({
                                 onMonthChange={setMonth}
                                 selected={tempRange}
                                 onSelect={(range) => {
-                                    // Se o intervalo exceder 31 dias, não permitimos a seleção automática pelo prop 'max'
-                                    // mas aqui fazemos uma validação visual extra se necessário.
+                                    if (maxDays && range?.from && range?.to) {
+                                        // Conta inclusive (ex: Jan 1 a Jan 31 = 31 dias)
+                                        const daysCount = differenceInDays(range.to, range.from) + 1
+                                        if (daysCount > maxDays) {
+                                            onMaxDaysExceeded?.(maxDays)
+                                            return
+                                        }
+                                    }
                                     setTempRange(range)
                                 }}
-                                max={31} // react-day-picker v9 limit
+                                // Removido 'max' nativo para podermos mostrar a notificação customizada via handleSelect
                                 numberOfMonths={1}
                                 className="p-0"
                             />
@@ -141,7 +167,7 @@ export function SleekDateRangePicker({
                         {isRangeExceeded && (
                             <div className="px-4 pb-3 text-center">
                                 <p className="text-[10px] text-red-500 font-medium uppercase tracking-wider">
-                                    Limite máximo de 31 dias atingido
+                                    Limite máximo de {maxDays} dias atingido
                                 </p>
                             </div>
                         )}

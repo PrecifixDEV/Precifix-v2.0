@@ -75,3 +75,35 @@ export interface FinancialTransaction {
     is_deleted?: boolean;
     created_at?: string;
 }
+
+export interface FinancialReceivable {
+    id: string;
+    description: string;
+    value: number;
+    type: string;
+    user_id: string;
+    client_id?: string | null;
+    created_at: string;
+    expense_date?: string | null; // Symmetry with AP
+    is_recurring?: boolean | null;
+    recurrence_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    recurrence_end_date?: string | null;
+    recurrence_group_id?: string;
+    category: string | null;
+    status: string;
+    observation?: string | null;
+}
+
+export interface FinancialReceivablePayment {
+    id: string;
+    user_id: string;
+    financial_receivable_id: string | null;
+    description: string;
+    due_date: string;
+    payment_date: string | null;
+    amount_original: number;
+    amount_paid: number | null;
+    status: 'pending' | 'paid' | 'overdue' | 'cancelled' | 'partially_paid';
+    created_at?: string;
+    updated_at?: string;
+}
