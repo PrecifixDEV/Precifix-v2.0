@@ -36,7 +36,7 @@ export const MobileMenu = () => {
         {
             category: 'Financeiro',
             items: [
-                { name: 'Visão Geral', href: '/financial', icon: Wallet },
+                { name: 'Precificação', href: '/financial', icon: Calculator },
                 { name: 'Caixas e Bancos', href: '/accounts', icon: Building2 }, // Using Building2 as generic bank icon
                 { name: 'Contas a Pagar', href: '/accounts-payable', icon: Receipt },
                 { name: 'Gerenciar Despesas', href: '/custos', icon: Wallet },
@@ -98,10 +98,10 @@ export const MobileMenu = () => {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className="flex flex-col items-start p-4 bg-zinc-900 rounded-xl border border-zinc-800 shadow-sm active:scale-95 transition-transform"
+                                        className="flex flex-col items-start p-4 bg-zinc-900 rounded-xl border border-yellow-500/10 shadow-sm active:scale-95 transition-all hover:bg-zinc-800/80 hover:border-yellow-500/30"
                                     >
                                         <div className="p-2 bg-zinc-800 rounded-lg mb-3">
-                                            <item.icon className="w-5 h-5 text-zinc-300" />
+                                            <item.icon className="w-5 h-5 text-yellow-500" />
                                         </div>
                                         <span className="font-medium text-white text-sm">
                                             {item.name}

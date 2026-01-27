@@ -11,7 +11,7 @@ const PAGE_TITLES: Record<string, string> = {
     "/cadastros/formas-pagamento": "Formas de Pagamento",
     "/sales": "Vendas",
     "/schedule": "Agenda",
-    "/financial": "Visão Geral",
+    "/financial": "Precificação",
     "/accounts": "Caixas e Bancos",
     "/accounts-payable": "Contas a Pagar",
     "/custos": "Gerenciar Despesas",

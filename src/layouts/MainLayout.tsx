@@ -142,7 +142,7 @@ export const MainLayout = () => {
             name: 'Financeiro',
             icon: Wallet,
             children: [
-                { name: 'Visão Geral', href: '/financial' },
+                { name: 'Precificação', href: '/financial' },
                 { name: 'Caixas e Bancos', href: '/accounts' },
                 { name: 'Contas a Pagar', href: '/accounts-payable' },
                 { name: 'Gerenciar Despesas', href: '/custos' }
@@ -310,7 +310,7 @@ export const MainLayout = () => {
                                     <div className="grid grid-cols-4 gap-2">
                                         <Link
                                             to="/tools/dilution-calculator"
-                                            className="flex items-center justify-center p-2 rounded-md bg-zinc-800 hover:bg-primary/10 hover:text-primary border border-zinc-700 transition-all shadow-sm group relative"
+                                            className="flex items-center justify-center p-2 rounded-md bg-zinc-800 hover:bg-yellow-500/10 hover:text-yellow-500 border border-yellow-500/10 hover:border-yellow-500/30 transition-all shadow-sm group relative"
                                             onClick={() => setIsSidebarOpen(false)}
                                             title="Calculadora de Diluição"
                                         >
@@ -318,7 +318,7 @@ export const MainLayout = () => {
                                         </Link>
                                         <Link
                                             to="/tools/product-cost"
-                                            className="flex items-center justify-center p-2 rounded-md bg-zinc-800 hover:bg-primary/10 hover:text-primary border border-zinc-700 transition-all shadow-sm group relative"
+                                            className="flex items-center justify-center p-2 rounded-md bg-zinc-800 hover:bg-yellow-500/10 hover:text-yellow-500 border border-yellow-500/10 hover:border-yellow-500/30 transition-all shadow-sm group relative"
                                             onClick={() => setIsSidebarOpen(false)}
                                             title="Calculadora de Custos"
                                         >
