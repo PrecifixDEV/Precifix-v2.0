@@ -9,7 +9,6 @@ import { MainLayout } from './layouts/MainLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Profile } from './pages/Profile'
 import { ThemeProvider } from './contexts/ThemeContext'
-import ManageCosts from './pages/ManageCosts';
 import AccountsPage from "./pages/financial/AccountsPage";
 import AccountDetailsPage from "./pages/financial/AccountDetailsPage";
 import AccountsPayable from './pages/AccountsPayable'
@@ -54,7 +53,7 @@ function App() {
             <Route path="/profile-menu" element={<ProfileMenu />} />
             <Route path="/minha-empresa" element={<MyCompany />} />
             <Route path="/menu" element={<MobileMenu />} />
-            <Route path="/custos" element={<ManageCosts />} />
+            <Route path="/custos" element={<Navigate to="/accounts-payable" replace />} />
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/accounts/:id" element={<AccountDetailsPage />} />
             <Route path="/accounts-payable" element={<AccountsPayable />} />

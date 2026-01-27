@@ -1,16 +1,13 @@
-import { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { useMemo, useState } from 'react';
 import {
-    Loader2,
     TrendingDown,
     TrendingUp,
     DollarSign,
     CalendarRange,
     Search,
     PieChart,
-    Plus,
-    Info
+    Info,
+    Plus
 } from 'lucide-react';
 import {
     Card,
@@ -28,73 +25,31 @@ import { Separator } from "@/components/ui/separator";
 import {
     BarChart,
     Bar,
-    XAxis,
-    YAxis,
     Tooltip,
     ResponsiveContainer,
     Area,
     AreaChart,
+    XAxis,
+    YAxis,
 } from 'recharts';
 
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
-import { NewCostDialog } from '@/components/costs/NewCostDialog';
-import { CostHistorySheet } from '@/components/costs/CostHistorySheet';
-import { costService } from '@/services/costService';
 import type { OperationalCost } from '@/types/costs';
 import { formatMoney } from '@/utils/format';
 import { format, subMonths, isSameMonth, parseISO, startOfMonth, endOfMonth, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { SleekDateRangePicker } from '@/components/ui/sleek-date-range-picker';
 import type { DateRange } from 'react-day-picker';
-import { toast } from 'sonner';
 
-export const ManageCosts = () => {
-    const queryClient = useQueryClient();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [costToDelete, setCostToDelete] = useState<string | null>(null);
-    const [historyCostId, setHistoryCostId] = useState<string | null>(null);
+interface CostAnalysisProps {
+    costs: OperationalCost[];
+    selectedDate: DateRange | undefined;
+    onViewHistory: (id: string) => void;
+    onDelete: (id: string) => void;
+}
 
-    // Date Range Filter - Default to Current Month
-    const [selectedDate, setSelectedDate] = useState<DateRange | undefined>({
-        from: startOfMonth(new Date()),
-        to: endOfMonth(new Date())
-    });
-
+export function CostAnalysis({ costs, selectedDate, onViewHistory, onDelete }: CostAnalysisProps) {
     const [searchTerm, setSearchTerm] = useState("");
 
-    // --- Queries ---
-
-    // 1. Fetch Costs (All costs for the selected year roughly, or just all and filter client side for better UX on charts)
-    // To be efficient for scale we should filter, but for < 1000 items client side is instant.
-    // Let's fetch all for year to handle charts well.
-    const { data: costs = [], isLoading } = useQuery({
-        queryKey: ['operationalCosts', 'all'], // We might want to scope this later
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('operational_costs')
-                .select('*')
-                .order('expense_date', { ascending: false });
-
-            if (error) throw error;
-            return data as OperationalCost[];
-        }
-    });
-
-    // Fetch configured categories to suggest even unused ones
-
-
     // --- Derived Data Processing ---
-
     const filteredCosts = useMemo(() => {
         return costs.filter(cost => {
             if (!cost.expense_date) return false;
@@ -149,7 +104,6 @@ export const ManageCosts = () => {
             grouped[cat].items.push(cost);
         });
 
-        // Convert to array and sort by total desc
         return Object.entries(grouped)
             .map(([category, data]) => ({ category, ...data }))
             .sort((a, b) => b.total - a.total);
@@ -163,7 +117,6 @@ export const ManageCosts = () => {
             const d = subMonths(baseDate, i);
             const monthLabel = format(d, 'MMM', { locale: ptBR });
 
-            // Sum costs for this specific month
             const monthlyTotal = costs
                 .filter(c => c.expense_date && isSameMonth(parseISO(c.expense_date), d))
                 .reduce((acc, c) => acc + c.value, 0);
@@ -173,61 +126,16 @@ export const ManageCosts = () => {
         return data;
     }, [costs, selectedDate]);
 
-
-    // Delete Handler
-    const { mutate: deleteCost } = useMutation({
-        mutationFn: async (id: string) => costService.deleteCost(id),
-        onSuccess: () => {
-            toast.success("Despesa removida");
-            setCostToDelete(null);
-            queryClient.invalidateQueries({ queryKey: ["operationalCosts"] });
-        }
-    });
-
-
-    if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
-
     return (
-        <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 pb-20">
-            <div className="space-y-4">
-                {/* Header */}
-                <div className="flex items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent hidden md:block">
-                            Gerenciar Despesas
-                        </h1>
-                        <p className="text-muted-foreground mt-1">Análise detalhada de custos e despesas operacionais.</p>
-                    </div>
-
-                    <Button
-                        onClick={() => setIsDialogOpen(true)}
-                        className="w-full md:w-auto h-10 bg-yellow-500 hover:bg-yellow-600 text-zinc-900 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02]"
-                    >
-                        <Plus className="mr-2 h-5 w-5" />
-                        Nova Despesa
-                    </Button>
-                </div>
-
-                {/* Period Selector */}
-                <div className="flex items-center gap-2">
-                    <div className="w-[300px]">
-                        <SleekDateRangePicker
-                            date={selectedDate}
-                            onSelect={setSelectedDate}
-                            placeholder="Filtrar por Período"
-                        />
-                    </div>
-                </div>
-            </div>
-
+        <div className="space-y-8 animate-in fade-in duration-500">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-zinc-800 relative overflow-hidden">
+                <Card className="border-zinc-800 relative overflow-hidden bg-zinc-900/50">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <DollarSign className="h-24 w-24" />
                     </div>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total do Mês</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Selecionado</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-white">{formatMoney(totalExpenses)}</div>
@@ -243,12 +151,12 @@ export const ManageCosts = () => {
                                     {percentChange.toFixed(1)}%
                                 </span>
                             )}
-                            <span className="text-muted-foreground ml-2">vs. mês anterior</span>
+                            <span className="text-muted-foreground ml-2 text-xs uppercase tracking-tighter opacity-70">vs. período anterior</span>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-zinc-800 relative overflow-hidden md:col-span-2">
+                <Card className="border-zinc-800 relative overflow-hidden md:col-span-2 bg-zinc-900/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Evolução Mensal</CardTitle>
                     </CardHeader>
@@ -260,13 +168,13 @@ export const ManageCosts = () => {
                                     content={({ active, payload }) => {
                                         if (active && payload && payload.length) {
                                             return (
-                                                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                                <div className="rounded-lg border bg-zinc-900 p-2 shadow-sm border-zinc-800">
                                                     <div className="grid grid-cols-2 gap-2">
                                                         <div className="flex flex-col">
                                                             <span className="text-[0.70rem] uppercase text-muted-foreground">
                                                                 Total
                                                             </span>
-                                                            <span className="font-bold text-muted-foreground">
+                                                            <span className="font-bold text-yellow-500">
                                                                 {formatMoney(payload[0].value as number)}
                                                             </span>
                                                         </div>
@@ -281,7 +189,7 @@ export const ManageCosts = () => {
                                     dataKey="total"
                                     fill="currentColor"
                                     radius={[4, 4, 0, 0]}
-                                    className="fill-primary"
+                                    className="fill-yellow-500"
                                     barSize={40}
                                 />
                             </BarChart>
@@ -293,24 +201,24 @@ export const ManageCosts = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left: Detailed List (DRE Style) */}
                 <div className="lg:col-span-2 space-y-6">
-                    <Card className="h-full border-zinc-800">
+                    <Card className="h-full border-zinc-800 bg-zinc-900/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-4">
                             <div>
-                                <CardTitle>Detalhamento por Categoria</CardTitle>
-                                <CardDescription>Despesas agrupadas por centro de custo</CardDescription>
+                                <CardTitle className="text-lg">Detalhamento por Categoria</CardTitle>
+                                <CardDescription className="text-xs">Custos agrupados por centro de saída</CardDescription>
                             </div>
                             <div className="relative w-full max-w-[200px]">
                                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
-                                    placeholder="Filtrar..."
-                                    className="pl-8 h-9"
+                                    placeholder="Buscar..."
+                                    className="pl-8 h-9 bg-zinc-950 border-zinc-800"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <ScrollArea className="h-[600px] pr-4 pl-6 pb-6 pt-0">
+                            <ScrollArea className="h-[400px] pr-4 pl-6 pb-6 pt-0">
                                 {costsByCategory.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 text-muted-foreground opacity-50">
                                         <PieChart className="h-12 w-12 mb-4" />
@@ -321,13 +229,13 @@ export const ManageCosts = () => {
                                         {costsByCategory.map((categoryGroup) => (
                                             <div key={categoryGroup.category} className="space-y-3">
                                                 {/* Category Header */}
-                                                <div className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
+                                                <div className="flex items-center justify-between bg-zinc-900/80 p-3 rounded-lg border border-zinc-800">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-8 w-8 rounded-full bg-yellow-900/30 flex items-center justify-center text-yellow-400">
+                                                        <div className="h-8 w-8 rounded-full bg-yellow-900/30 flex items-center justify-center text-yellow-500">
                                                             <CalendarRange className="h-4 w-4" />
                                                         </div>
                                                         <span className="font-semibold text-zinc-200">{categoryGroup.category}</span>
-                                                        <Badge variant="secondary" className="ml-2 text-xs font-normal">
+                                                        <Badge variant="secondary" className="ml-2 text-[10px] font-normal bg-zinc-800 text-zinc-400">
                                                             {categoryGroup.items.length} itens
                                                         </Badge>
                                                     </div>
@@ -341,40 +249,40 @@ export const ManageCosts = () => {
                                                     {categoryGroup.items.map((cost) => (
                                                         <div
                                                             key={cost.id}
-                                                            className="flex items-center justify-between p-2 rounded-md hover:bg-zinc-900/30 transition-colors group text-sm"
+                                                            className="flex items-center justify-between p-2 rounded-md hover:bg-zinc-800/50 transition-colors group text-sm"
                                                         >
                                                             <div className="flex items-center gap-3 overflow-hidden">
-                                                                <span className="text-zinc-400 font-mono text-xs shrink-0">
+                                                                <span className="text-zinc-500 font-mono text-[10px] shrink-0">
                                                                     {cost.expense_date ? format(parseISO(cost.expense_date), 'dd') : '--'}
                                                                 </span>
                                                                 <span className="truncate max-w-[200px] md:max-w-[300px] text-zinc-300">
                                                                     {cost.description}
                                                                 </span>
                                                                 {cost.type === 'variable' && (
-                                                                    <Badge variant="outline" className="text-[10px] h-4 px-1 text-zinc-400 border-zinc-800">Var</Badge>
+                                                                    <Badge variant="outline" className="text-[10px] h-4 px-1 text-zinc-500 border-zinc-800">Var</Badge>
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-4">
-                                                                <span className="text-zinc-300 font-medium">
+                                                                <span className="text-white font-medium">
                                                                     {formatMoney(cost.value)}
                                                                 </span>
-                                                                <div className="flex items-center">
+                                                                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                                     <Button
                                                                         size="icon"
                                                                         variant="ghost"
-                                                                        className="h-8 w-8 text-zinc-400 hover:text-yellow-500 hover:bg-yellow-900/20"
-                                                                        onClick={() => setHistoryCostId(cost.id)}
+                                                                        className="h-7 w-7 text-zinc-400 hover:text-yellow-500 hover:bg-yellow-500/10"
+                                                                        onClick={() => onViewHistory(cost.id)}
                                                                         title="Ver Histórico"
                                                                     >
-                                                                        <Info className="h-4 w-4" />
+                                                                        <Info className="h-3.5 w-3.5" />
                                                                     </Button>
                                                                     <Button
                                                                         size="icon"
                                                                         variant="ghost"
-                                                                        className="h-6 w-6 text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all ml-1"
-                                                                        onClick={() => setCostToDelete(cost.id)}
+                                                                        className="h-7 w-7 text-zinc-400 hover:text-red-500 hover:bg-red-500/10"
+                                                                        onClick={() => onDelete(cost.id)}
                                                                     >
-                                                                        <Plus className="h-3 w-3 rotate-45" /> {/* Delete Icon X */}
+                                                                        <Plus className="h-3.5 w-3.5 rotate-45" />
                                                                     </Button>
                                                                 </div>
                                                             </div>
@@ -392,13 +300,13 @@ export const ManageCosts = () => {
 
                 {/* Right: Distribution Chart */}
                 <div className="space-y-6">
-                    <Card className="border-zinc-800">
+                    <Card className="border-zinc-800 bg-zinc-900/30">
                         <CardHeader>
-                            <CardTitle>Distribuição</CardTitle>
-                            <CardDescription>Onde seu dinheiro está indo</CardDescription>
+                            <CardTitle className="text-lg">Distribuição</CardTitle>
+                            <CardDescription className="text-xs">Representatividade por categoria</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="h-[300px] relative">
+                            <div className="h-[250px] relative">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart
                                         data={costsByCategory.slice(0, 5)}
@@ -406,13 +314,13 @@ export const ManageCosts = () => {
                                         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                                     >
                                         <XAxis type="number" hide />
-                                        <YAxis dataKey="category" type="category" width={100} tick={{ fontSize: 12 }} />
+                                        <YAxis dataKey="category" type="category" width={80} tick={{ fontSize: 10, fill: '#71717a' }} />
                                         <Tooltip
                                             content={({ active, payload }) => {
                                                 if (active && payload && payload.length) {
                                                     return (
-                                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                                            <span className="font-bold text-muted-foreground">
+                                                        <div className="rounded-lg border bg-zinc-900 p-2 shadow-sm border-zinc-800">
+                                                            <span className="font-bold text-yellow-500">
                                                                 {formatMoney(payload[0].value as number)}
                                                             </span>
                                                         </div>
@@ -421,73 +329,40 @@ export const ManageCosts = () => {
                                                 return null
                                             }}
                                         />
-                                        <Area type="monotone" dataKey="total" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} />
+                                        <Area type="monotone" dataKey="total" stroke="#eab308" fill="#eab308" fillOpacity={0.2} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
-                            <Separator className="my-4" />
+                            <Separator className="my-4 bg-zinc-800" />
                             <div className="space-y-2">
                                 {costsByCategory.slice(0, 5).map((item, index) => (
-                                    <div key={item.category} className="flex items-center justify-between text-sm">
+                                    <div key={item.category} className="flex items-center justify-between text-[11px] uppercase tracking-wider">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-2 w-2 rounded-full bg-primary/80" style={{ opacity: 1 - index * 0.15 }} />
-                                            <span className="text-zinc-300">{item.category}</span>
+                                            <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" style={{ opacity: 1 - index * 0.15 }} />
+                                            <span className="text-zinc-400">{item.category}</span>
                                         </div>
-                                        <span className="font-medium">{Math.round((item.total / totalExpenses) * 100)}%</span>
+                                        <span className="font-bold text-zinc-200">{Math.round((item.total / totalExpenses) * 100)}%</span>
                                     </div>
                                 ))}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-zinc-800 to-zinc-900 text-white border-zinc-700 shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="text-white">Dica Financeira</CardTitle>
+                    <Card className="bg-gradient-to-br from-zinc-800 to-zinc-900 text-white border-zinc-700 shadow-lg border-l-4 border-l-yellow-500">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-white text-sm uppercase tracking-widest flex items-center gap-2">
+                                <Info className="h-4 w-4 text-yellow-500" />
+                                Insight
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-zinc-300 text-sm">
-                                Analise mensalmente suas <strong>despesas fixas</strong>. Uma redução de 10% nesses custos pode impactar significativamente seu lucro líquido anual.
+                            <p className="text-zinc-300 text-xs leading-relaxed">
+                                Analise mensalmente suas <strong>despesas fixas</strong>. Uma redução de 10% nesses custos impacta diretamente seu lucro líquido anual.
                             </p>
                         </CardContent>
                     </Card>
                 </div>
             </div>
-
-            <NewCostDialog
-                open={isDialogOpen}
-                onOpenChange={setIsDialogOpen}
-            />
-
-            <CostHistorySheet
-                open={!!historyCostId}
-                onOpenChange={(open) => !open && setHistoryCostId(null)}
-                costId={historyCostId}
-                allCosts={costs}
-            />
-
-            <AlertDialog open={!!costToDelete} onOpenChange={(open) => !open && setCostToDelete(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Excluir Despesa?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Tem certeza que deseja excluir esta despesa?
-                            <br /><br />
-                            <strong>Atenção:</strong> A despesa e todas as contas associadas a ela serão apagadas permanentemente. Esta ação não pode ser desfeita.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => costToDelete && deleteCost(costToDelete)}
-                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600 text-white"
-                        >
-                            Excluir Permanentemente
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
-};
-
-export default ManageCosts;
+}

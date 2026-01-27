@@ -1,18 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, ChevronRight, ChevronDown } from "lucide-react"
-
+import { Check, ChevronsUpDown, ChevronRight, ChevronDown, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
 import {
     Popover,
     PopoverContent,
@@ -61,17 +52,12 @@ export function CategoryTreeSelect({
 
         for (const parent of data) {
             if (parent.subcategories) {
-                const found = parent.subcategories.find(c => c.id === value || c.label === value) // Checking label too for backward compat if ID logic changes
+                const found = parent.subcategories.find(c => c.id === value || c.label === value)
                 if (found) return found.label
             }
         }
         return value // Fallback
     }
-
-    // Filter logic
-    // Filter logic
-    // The filter logic was previously here but was unused as renderSearchResults handles it.
-
 
     // Specific render for flat search results
     const renderSearchResults = () => {
@@ -92,49 +78,62 @@ export function CategoryTreeSelect({
             }
         })
 
-        if (results.length === 0) return <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
+        if (results.length === 0) {
+            return (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                    Nenhuma categoria encontrada.
+                </div>
+            )
+        }
 
         return (
-            <CommandGroup heading="Resultados">
+            <div className="py-2">
+                <div className="px-2 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-widest px-3">Resultados</div>
                 {results.map(item => (
-                    <CommandItem
+                    <div
                         key={item.id}
-                        value={`${item.id}-${item.label}`} // Unique value for command
-                        onSelect={() => {
-                            onSelect(item.label) // We return Label as "ID" currently based on old app logic, or actual ID?
-                            // The app uses Name (String) as ID in many places. 
-                            // Let's assume we pass what the app expects.
-                            // The user said "value: string". 
-                            // In ManageCosts, we pass `cat` which seems to be the name string.
+                        className={cn(
+                            "relative flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors",
+                            value === item.label && "bg-zinc-100 dark:bg-zinc-800"
+                        )}
+                        onClick={() => {
+                            onSelect(item.label)
                             setOpen(false)
                             setSearchTerm("")
                         }}
                     >
                         <Check
                             className={cn(
-                                "mr-2 h-4 w-4",
+                                "mr-2 h-4 w-4 shrink-0",
                                 value === item.label ? "opacity-100" : "opacity-0"
                             )}
                         />
-                        <div className="flex flex-col">
-                            <span>{item.label}</span>
-                            <span className="text-xs text-muted-foreground">{item.path}</span>
+                        <div className="flex flex-col overflow-hidden">
+                            <span className="truncate">{item.label}</span>
+                            <span className="text-xs text-muted-foreground truncate">{item.path}</span>
                         </div>
-                    </CommandItem>
+                    </div>
                 ))}
-            </CommandGroup>
+            </div>
         )
     }
 
     const renderTree = () => {
+        if (data.length === 0) {
+            return (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                    Lista vazia.
+                </div>
+            )
+        }
+
         return (
-            <>
-                <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
+            <div className="py-1">
                 {data.map(parent => (
                     <React.Fragment key={parent.id}>
-                        {/* Parent Node (Not Selectable, acts as Accordion Trigger) */}
+                        {/* Parent Node */}
                         <div
-                            className="flex items-center px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer select-none group"
+                            className="flex items-center px-3 py-2 text-sm font-medium text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer select-none group transition-colors"
                             onClick={(e) => toggleExpand(parent.id, e)}
                         >
                             <span className="mr-2 h-4 w-4 flex items-center justify-center text-muted-foreground">
@@ -149,60 +148,73 @@ export function CategoryTreeSelect({
 
                         {/* Children Nodes */}
                         {expandedParents[parent.id] && parent.subcategories && (
-                            <CommandGroup className="pl-6 border-l ml-3 my-1">
+                            <div className="pl-6 border-l border-zinc-100 dark:border-zinc-800 ml-4 my-1 flex flex-col gap-1">
                                 {parent.subcategories.map(child => (
-                                    <CommandItem
+                                    <div
                                         key={child.id}
-                                        value={child.label} // Command uses this for filtering internally, but we handle filter manually? 
-                                        // Actually Command component has internal filtering.
-                                        // If we control state, we might fight with it.
-                                        // Better: Only show renderTree if !hasSearch.
-                                        onSelect={() => {
-                                            onSelect(child.label) // Return label/name as expected by current backend
+                                        className={cn(
+                                            "relative flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors",
+                                            value === child.label && "bg-zinc-100 dark:bg-zinc-800"
+                                        )}
+                                        onClick={() => {
+                                            onSelect(child.label)
                                             setOpen(false)
                                         }}
                                     >
                                         <Check
                                             className={cn(
-                                                "mr-2 h-4 w-4",
+                                                "mr-2 h-4 w-4 shrink-0",
                                                 value === child.label ? "opacity-100" : "opacity-0"
                                             )}
                                         />
-                                        {child.label}
-                                    </CommandItem>
+                                        <span className="truncate">{child.label}</span>
+                                    </div>
                                 ))}
-                            </CommandGroup>
+                            </div>
                         )}
                     </React.Fragment>
                 ))}
-            </>
+            </div>
         )
     }
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
             <PopoverTrigger asChild>
                 <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between font-normal"
+                    type="button"
+                    variant="ghost"
+                    className={cn(
+                        "flex h-10 w-full rounded-md border border-input bg-background dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "justify-between font-normal hover:bg-zinc-800/50 text-foreground"
+                    )}
                 >
                     {getSelectedLabel() || placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0" align="start">
-                <Command shouldFilter={false}> {/* We handle filtering manually to swap views */}
-                    <CommandInput
-                        placeholder="Buscar categoria..."
-                        value={searchTerm}
-                        onValueChange={setSearchTerm}
-                    />
-                    <CommandList>
+            <PopoverContent
+                className="w-[320px] p-0 z-[200] overflow-hidden shadow-2xl rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                align="start"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+                <div className="flex flex-col h-full max-h-[400px]">
+                    <div className="flex items-center border-b px-3 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50">
+                        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground" />
+                        <input
+                            placeholder="Buscar categoria..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+                        />
+                    </div>
+                    <div
+                        className="max-h-[350px] overflow-y-auto overscroll-contain custom-scrollbar py-1"
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
                         {hasSearch ? renderSearchResults() : renderTree()}
-                    </CommandList>
-                </Command>
+                    </div>
+                </div>
             </PopoverContent>
         </Popover>
     )

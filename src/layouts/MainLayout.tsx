@@ -145,7 +145,6 @@ export const MainLayout = () => {
                 { name: 'Precificação', href: '/financial' },
                 { name: 'Caixas e Bancos', href: '/accounts' },
                 { name: 'Contas a Pagar', href: '/accounts-payable' },
-                { name: 'Gerenciar Despesas', href: '/custos' }
             ]
         },
     ]

@@ -32,16 +32,17 @@ export function SleekDatePicker({
     const [open, setOpen] = React.useState(false)
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
             <PopoverTrigger asChild>
                 <div className="relative w-full">
                     <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                     <Button
-                        variant={"outline"}
+                        type="button"
+                        variant="ghost"
                         className={cn(
-                            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                            "justify-start text-left font-normal pl-9",
-                            !date && "text-muted-foreground",
+                            "flex h-10 w-full rounded-md border border-input bg-background dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            "justify-start text-left font-normal pl-9 hover:bg-zinc-800/50 text-foreground",
+                            !date && "text-muted-foreground transition-none",
                             className
                         )}
                     >

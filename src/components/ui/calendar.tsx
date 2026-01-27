@@ -12,9 +12,9 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 // Componente de Cabeçalho Customizado (Injetado via MonthCaption)
-function CustomMonthCaption() {
-  const { goToMonth, nextMonth, previousMonth, months } = useDayPicker()
-  const currentMonth = months[0].date
+function CustomMonthCaption(props: any) {
+  const { goToMonth, nextMonth, previousMonth } = useDayPicker()
+  const currentMonth = props.calendarMonth.date
 
   return (
     <div className="relative flex items-center justify-center h-10 w-full mb-1">
