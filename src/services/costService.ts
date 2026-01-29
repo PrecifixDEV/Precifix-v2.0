@@ -1,24 +1,24 @@
 import { supabase } from "@/lib/supabase";
 import type { OperationalCost } from "@/types/costs"; // Type-only import
-import { addDays, addMonths, addWeeks, format, isBefore } from "date-fns"; // Removed unused isAfter
+import { addDays, addMonths, addWeeks, format } from "date-fns"; // Removed unused isAfter and isBefore
 import { v4 as uuidv4 } from 'uuid';
 
 export const costService = {
     /**
      * Saves a cost, handling recurrence by generating multiple records if needed.
      */
-    saveCost: async (costData: Omit<OperationalCost, 'id' | 'created_at' | 'updated_at' | 'user_id'> & { id?: string }) => {
+    saveCost: async (costData: Omit<OperationalCost, 'id' | 'created_at' | 'updated_at' | 'user_id'> & {
+        id?: string;
+        is_paid?: boolean;
+        payment_date?: string;
+        payment_method?: string;
+        account_id?: string | null;
+    }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Usuário não autenticado.");
 
-        // If editing an existing cost, we check if it's part of a recurrence group
+        // If editing an existing cost
         if (costData.id) {
-            // For now, editing a recurring cost instance only updates that specific instance
-            // unless we implement "update all future" logic later.
-            // But if it was NOT recurring and BECOMES recurring, we might need logic.
-            // For simplicity/MVP as per request: Standard edit behavior (single row) 
-            // OR if the user intends to edit the "Series", we'd need more UI.
-            // Given the request focuses on CREATION and DELETION, we'll keep Update simple for now:
             const payload = {
                 description: costData.description,
                 value: costData.value,
@@ -28,8 +28,7 @@ export const costService = {
                 recurrence_frequency: costData.recurrence_frequency,
                 recurrence_end_date: costData.recurrence_end_date,
                 category: costData.category,
-                // Do not change recurrence_group_id on edit of single item for now to avoid breaking groups
-                // user_id: user.id // Usually don't update user_id
+                observation: costData.observation ?? undefined,
             };
 
             const { data, error } = await supabase
@@ -40,6 +39,18 @@ export const costService = {
                 .single();
 
             if (error) throw error;
+
+            // Update associated payment record
+            await supabase
+                .from('operational_cost_payments')
+                .update({
+                    description: costData.description,
+                    due_date: costData.expense_date as string,
+                    amount_original: costData.value
+                })
+                .eq('operational_cost_id', costData.id)
+                .eq('status', 'pending'); // Only update pending ones to avoid overwriting paid historical data
+
             return data;
         }
 
@@ -49,8 +60,7 @@ export const costService = {
             value: costData.value,
             type: costData.type,
             category: costData.category,
-            observation: costData.observation ?? null, // Add observation
-            // expense_date will vary
+            observation: costData.observation ?? undefined,
             is_recurring: costData.is_recurring,
             recurrence_frequency: costData.recurrence_frequency,
             recurrence_end_date: costData.recurrence_end_date,
@@ -60,64 +70,101 @@ export const costService = {
         };
 
         const costsToInsert = [];
-        // Manually parse YYYY-MM-DD to avoid UTC conversion issues (off-by-one error)
         const [year, month, day] = (costData.expense_date as string).split('-').map(Number);
-        const startDate = new Date(year, month - 1, day); // Local midnight
+        const startDate = new Date(year, month - 1, day);
 
-        // Fixed comparison: ensure we don't compare 'none' with the union type if it doesn't overlap, or cast it.
-        // Actually, costData.recurrence_frequency is typed as 'daily' | ... | undefined.
-        // If the UI passes 'none', it might be coerced or ignored.
-        // We should check if it is truthy and not 'none' (if 'none' was passed from UI state).
-        if (costData.is_recurring && costData.recurrence_end_date && costData.recurrence_frequency && costData.recurrence_frequency !== ('none' as any)) {
-            const endDate = new Date(costData.recurrence_end_date);
+        const isActuallyRecurring = Boolean(costData.is_recurring) &&
+            costData.recurrence_frequency &&
+            costData.recurrence_frequency !== ('none' as any);
+
+        if (isActuallyRecurring) {
+            let endDate: Date;
+            if (costData.recurrence_end_date) {
+                const [endYear, endMonth, endDay] = (costData.recurrence_end_date as string).split('-').map(Number);
+                endDate = new Date(endYear, endMonth - 1, endDay);
+            } else {
+                endDate = addMonths(startDate, 12);
+            }
+
             let currentDate = startDate;
-
-            // Safety break to prevent infinite loops
             let iterations = 0;
-            const MAX_ITERATIONS = 365 * 5; // 5 years max
+            const MAX_ITERATIONS = 365 * 5;
 
-            while ((isBefore(currentDate, endDate) || currentDate.getTime() === endDate.getTime()) && iterations < MAX_ITERATIONS) {
+            while (iterations < MAX_ITERATIONS) {
                 costsToInsert.push({
                     ...baseCost,
                     expense_date: format(currentDate, 'yyyy-MM-dd')
                 });
 
-                // Next date
+                if (currentDate.getTime() >= endDate.getTime()) break;
+
                 switch (costData.recurrence_frequency) {
-                    case 'daily':
-                        currentDate = addDays(currentDate, 1);
-                        break;
-                    case 'weekly':
-                        currentDate = addWeeks(currentDate, 1);
-                        break;
-                    case 'monthly':
-                        currentDate = addMonths(currentDate, 1);
-                        break;
-                    case 'yearly':
-                        currentDate = addMonths(currentDate, 12); // addYears is also valid but addMonths(12) works fine if we don't import addYears
-                        break;
-                    default:
-                        // specific logic or break
-                        currentDate = addDays(currentDate, 1); // fallback
-                        break;
+                    case 'daily': currentDate = addDays(currentDate, 1); break;
+                    case 'weekly': currentDate = addWeeks(currentDate, 1); break;
+                    case 'monthly': currentDate = addMonths(currentDate, 1); break;
+                    case 'yearly': currentDate = addMonths(currentDate, 12); break;
+                    default: currentDate = addDays(currentDate, 1); break;
                 }
                 iterations++;
             }
         } else {
-            // Single insert
             costsToInsert.push({
                 ...baseCost,
                 expense_date: costData.expense_date
             });
         }
 
-        const { data, error } = await supabase
+        const { data: createdCosts, error: costError } = await supabase
             .from('operational_costs')
             .insert(costsToInsert)
             .select();
 
-        if (error) throw error;
-        return data; // Returns array
+        if (costError) throw costError;
+        if (!createdCosts) return null;
+
+        // CREATE PAYMENT RECORDS
+        const paymentsToInsert = createdCosts.map((cost, index) => {
+            const isFirst = index === 0;
+            const isActuallyPaid = isFirst && costData.is_paid;
+
+            return {
+                user_id: user.id,
+                operational_cost_id: cost.id,
+                description: cost.description,
+                category: cost.category, // Include category!
+                due_date: cost.expense_date as string,
+                amount_original: cost.value,
+                amount_paid: isActuallyPaid ? cost.value : null,
+                payment_date: isActuallyPaid ? (costData.payment_date || new Date().toISOString()) : null,
+                status: isActuallyPaid ? 'paid' : 'pending'
+            };
+        });
+
+        const { error: paymentError } = await supabase
+            .from('operational_cost_payments')
+            .insert(paymentsToInsert);
+
+        if (paymentError) throw paymentError;
+
+        // CREATE FINANCIAL TRANSACTION IF PAID
+        if (costData.is_paid && createdCosts.length > 0) {
+            const firstCost = createdCosts[0];
+            const { financialService } = await import("./financialService");
+
+            await financialService.createTransaction({
+                description: `Pgto: ${firstCost.description}`,
+                category: firstCost.category || 'Despesa',
+                payment_method: costData.payment_method || 'Dinheiro',
+                amount: firstCost.value,
+                type: 'debit',
+                transaction_date: costData.payment_date || new Date().toISOString(),
+                account_id: costData.account_id || null,
+                related_entity_type: 'operational_cost',
+                related_entity_id: firstCost.id,
+            });
+        }
+
+        return createdCosts;
     },
 
     /**
@@ -155,19 +202,32 @@ export const costService = {
 
     // --- Compatible methods for refactored UI ---
 
-    async getPayablePayments(month: number, year: number) {
+    async getPayablePayments(monthOrStart: number | string, yearOrEnd?: number | string) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return [];
 
-        const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
-        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+        let startDate: string;
+        let endDate: string;
+
+        if (typeof monthOrStart === 'string' && typeof yearOrEnd === 'string') {
+            // Range provided as ISO strings or YYYY-MM-DD
+            startDate = monthOrStart;
+            endDate = yearOrEnd;
+        } else {
+            // Month/Year provided
+            const m = monthOrStart as number;
+            const y = yearOrEnd as number;
+            startDate = new Date(y, m - 1, 1).toISOString().split('T')[0];
+            endDate = new Date(y, m, 0).toISOString().split('T')[0];
+        }
 
         const { data, error } = await supabase
             .from('operational_cost_payments')
             .select('*')
             .eq('user_id', user.id)
             .gte('due_date', startDate)
-            .lte('due_date', endDate);
+            .lte('due_date', endDate)
+            .order('due_date', { ascending: true });
 
         if (error) throw error;
         return data;

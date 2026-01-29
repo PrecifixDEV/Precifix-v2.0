@@ -44,12 +44,20 @@ export const AccountsPayable = () => {
 
     // 1. Fetch Planned Payments for Management Tab
     // Let's use the month/year from selectedDate.from for the management query.
-    const month = selectedDate?.from ? selectedDate.from.getMonth() + 1 : new Date().getMonth() + 1;
-    const year = selectedDate?.from ? selectedDate.from.getFullYear() : new Date().getFullYear();
-
     const { data: payments = [], isLoading: isLoadingPayments } = useQuery({
-        queryKey: ['payable-payments', month, year],
-        queryFn: () => costService.getPayablePayments(month, year)
+        queryKey: ['payable-payments', selectedDate?.from?.toISOString(), selectedDate?.to?.toISOString()],
+        queryFn: () => {
+            if (selectedDate?.from && selectedDate?.to) {
+                return costService.getPayablePayments(
+                    format(selectedDate.from, 'yyyy-MM-dd'),
+                    format(selectedDate.to, 'yyyy-MM-dd')
+                );
+            }
+
+            const month = selectedDate?.from ? selectedDate.from.getMonth() + 1 : new Date().getMonth() + 1;
+            const year = selectedDate?.from ? selectedDate.from.getFullYear() : new Date().getFullYear();
+            return costService.getPayablePayments(month, year);
+        }
     });
 
     // 2. Fetch All Costs for Analysis Tab

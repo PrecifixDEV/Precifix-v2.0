@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { StandardDrawer } from "@/components/ui/StandardDrawer";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +7,6 @@ import { financialService } from "@/services/financialService";
 import { toast } from "sonner";
 import { formatMoney } from "@/utils/format";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Banknote } from "lucide-react";
 
 interface TransactionPaymentDialogProps {
     open: boolean;
@@ -36,7 +34,6 @@ export function TransactionPaymentDialog({ open, onOpenChange, item }: Transacti
     useEffect(() => {
         if (item) {
             setAmountPaid(item.amount);
-            // Default to first account if available
             if (accounts.length > 0 && !accountId) {
                 setAccountId(accounts[0].id);
             }
@@ -61,11 +58,10 @@ export function TransactionPaymentDialog({ open, onOpenChange, item }: Transacti
 
             toast.success(item.type === 'payable' ? "Pagamento registrado!" : "Recebimento registrado!");
 
-            // Invalidate all relevant queries
             queryClient.invalidateQueries({ queryKey: ['payable-payments'] });
             queryClient.invalidateQueries({ queryKey: ['receivable-payments'] });
             queryClient.invalidateQueries({ queryKey: ['financial-accounts'] });
-            queryClient.invalidateQueries({ queryKey: ['financial-transactions'] });
+            queryClient.invalidateQueries({ queryKey: ['financial_transactions'] });
 
             onOpenChange(false);
         } catch (error: any) {
@@ -78,91 +74,68 @@ export function TransactionPaymentDialog({ open, onOpenChange, item }: Transacti
     if (!item) return null;
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-zinc-100">
-                        {item.type === 'payable' ? (
-                            <>
-                                <Banknote className="h-5 w-5 text-red-500" />
-                                Confirmar Pagamento
-                            </>
-                        ) : (
-                            <>
-                                <Banknote className="h-5 w-5 text-emerald-500" />
-                                Confirmar Recebimento
-                            </>
-                        )}
-                    </DialogTitle>
-                    <DialogDescription className="text-zinc-500">
-                        {item.description}
-                    </DialogDescription>
-                </DialogHeader>
+        <StandardDrawer
+            open={open}
+            onOpenChange={onOpenChange}
+            title={item.type === 'payable' ? "Confirmar Pagamento" : "Confirmar Recebimento"}
+            onSave={handleConfirm}
+            isLoading={isLoading}
+            saveLabel="Confirmar Lançamento"
+        >
+            <div className="space-y-5">
+                <p className="text-zinc-500 text-[11px] font-medium text-center -mt-2 mb-2">
+                    {item.description}
+                </p>
 
-                <div className="grid gap-6 py-4">
-                    <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 flex justify-between items-center">
-                        <span className="text-sm text-zinc-400">Valor Total</span>
-                        <span className="text-xl font-bold font-mono text-zinc-100">
-                            {formatMoney(item.amount)}
-                        </span>
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="account">Conta Bancária</Label>
-                        <Select value={accountId} onValueChange={setAccountId}>
-                            <SelectTrigger className="bg-zinc-900 border-zinc-800">
-                                <SelectValue placeholder="Selecione uma conta..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800">
-                                {accounts.map(acc => (
-                                    <SelectItem key={acc.id} value={acc.id}>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: acc.color || '#888' }} />
-                                            {acc.name}
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="date">Data</Label>
-                            <Input
-                                id="date"
-                                type="date"
-                                value={paymentDate}
-                                onChange={(e) => setPaymentDate(e.target.value)}
-                                className="bg-zinc-900 border-zinc-800"
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="amount">Valor Pago</Label>
-                            <Input
-                                id="amount"
-                                type="number"
-                                value={amountPaid}
-                                onChange={(e) => setAmountPaid(parseFloat(e.target.value))}
-                                className="bg-zinc-900 border-zinc-800"
-                            />
-                        </div>
-                    </div>
+                <div className="p-4 rounded-xl bg-black border border-zinc-800/50 flex justify-between items-center shadow-inner">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Valor Previsto</span>
+                    <span className="text-xl font-bold font-mono text-white">
+                        {formatMoney(item.amount)}
+                    </span>
                 </div>
 
-                <DialogFooter>
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                        Cancelar
-                    </Button>
-                    <Button
-                        onClick={handleConfirm}
-                        disabled={isLoading || !accountId}
-                        className={item.type === 'payable' ? "bg-red-600 hover:bg-red-700" : "bg-emerald-600 hover:bg-emerald-700"}
-                    >
-                        {isLoading ? "Processando..." : "Confirmar e Registrar"}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Conta Financeira</Label>
+                    <Select value={accountId} onValueChange={setAccountId}>
+                        <SelectTrigger className="bg-black border-zinc-800 h-10 rounded-lg text-zinc-200">
+                            <SelectValue placeholder="Selecione uma conta..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-950 border-zinc-800">
+                            {accounts.map(acc => (
+                                <SelectItem key={acc.id} value={acc.id}>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: acc.color || '#888' }} />
+                                        <span className="font-semibold text-sm">{acc.name}</span>
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Data</Label>
+                        <Input
+                            id="date"
+                            type="date"
+                            value={paymentDate}
+                            onChange={(e) => setPaymentDate(e.target.value)}
+                            className="bg-black border-zinc-800 h-10 rounded-lg text-zinc-200 text-sm"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Valor Pago</Label>
+                        <Input
+                            id="amount"
+                            type="number"
+                            value={amountPaid}
+                            onChange={(e) => setAmountPaid(parseFloat(e.target.value))}
+                            className="bg-black border-zinc-800 h-10 rounded-lg font-mono text-zinc-200 text-sm"
+                        />
+                    </div>
+                </div>
+            </div>
+        </StandardDrawer>
     );
 }

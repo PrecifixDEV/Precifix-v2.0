@@ -19,10 +19,6 @@ description: Padrões de UI/UX, responsividade e componentes para o Precifix.
 - **Bordas**: `border-zinc-800`
 - **Inputs**: `bg-zinc-950` com border `border-zinc-800`
 
-### Light Mode
-- **Fundo da Página**: `bg-zinc-50`
-- **Elementos**: `bg-white`
-
 ## Entrada de Dados (Formulários)
 
 > [!IMPORTANT]

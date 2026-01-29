@@ -7,7 +7,6 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { Repeat, Receipt } from "lucide-react";
 
-import { supabase } from "@/lib/supabase";
 import { CategoryTreeSelect, type CategoryNode } from "@/components/ui/category-tree-select";
 import {
     Form,
@@ -148,10 +147,8 @@ export function NewCostSheet({ open, onOpenChange }: NewCostSheetProps) {
     const { mutate: saveCost, isPending } = useMutation({
         mutationFn: async (values: CostFormValues) => {
             const numValue = values.value;
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Usuário não autenticado");
 
-            const savedCosts = await costService.saveCost({
+            return await costService.saveCost({
                 description: values.description,
                 observation: values.observation,
                 value: numValue,
@@ -161,42 +158,20 @@ export function NewCostSheet({ open, onOpenChange }: NewCostSheetProps) {
                 is_recurring: values.is_recurring,
                 recurrence_frequency: values.is_recurring ? values.recurrence_frequency : undefined,
                 recurrence_end_date: values.is_recurring && values.recurrence_end_date ? format(values.recurrence_end_date, "yyyy-MM-dd") : undefined,
+                // Payment fields
+                is_paid: values.is_paid,
+                payment_date: values.is_paid && values.payment_date ? values.payment_date.toISOString() : undefined,
+                payment_method: values.is_paid ? values.payment_method : undefined,
+                account_id: values.is_paid ? values.account_id : undefined,
             } as any);
-
-            if (values.is_paid && savedCosts && Array.isArray(savedCosts) && savedCosts.length > 0) {
-                const cost = savedCosts[0];
-
-                await financialService.createTransaction({
-                    description: `Pgto: ${values.description}`,
-                    category: values.category,
-                    payment_method: values.payment_method,
-                    amount: numValue,
-                    type: 'debit',
-                    transaction_date: values.payment_date ? values.payment_date.toISOString() : new Date().toISOString(),
-                    account_id: values.account_id || null,
-                    related_entity_type: 'operational_cost',
-                    related_entity_id: cost.id,
-                });
-
-                const { error: paymentError } = await supabase.from('operational_cost_payments').insert({
-                    user_id: user?.id,
-                    operational_cost_id: cost.id,
-                    description: values.description,
-                    due_date: format(values.expense_date, 'yyyy-MM-dd'),
-                    amount_original: numValue,
-                    amount_paid: numValue,
-                    payment_date: values.payment_date ? values.payment_date.toISOString() : new Date().toISOString(),
-                    status: 'paid'
-                });
-
-                if (paymentError) {
-                    console.error("Error creating payment record:", paymentError);
-                    toast.error("Erro ao registrar status de pagamento.");
-                }
-            }
         },
-        onSuccess: () => {
-            toast.success("Despesa salva com sucesso!");
+        onSuccess: (data: any) => {
+            const count = Array.isArray(data) ? data.length : 1;
+            if (count > 1) {
+                toast.success(`Despesa salva! ${count} ocorrências criadas para os próximos meses.`);
+            } else {
+                toast.success("Despesa salva com sucesso!");
+            }
             queryClient.invalidateQueries({ queryKey: ["operationalCosts"] });
             queryClient.invalidateQueries({ queryKey: ["financial_transactions"] });
             queryClient.invalidateQueries({ queryKey: ["operationalCostPayments"] });
