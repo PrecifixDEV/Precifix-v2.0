@@ -123,7 +123,7 @@ export function StandardSheet({
                                         disabled={isLoading}
                                         variant="outline-destructive"
                                         size="icon"
-                                        className="rounded-lg w-10 h-10 shrink-0 shadow-md transition-all hover:scale-110"
+                                        className="rounded-xl w-10 h-10 shrink-0 bg-zinc-900 border-2 border-red-500/50 text-red-500 shadow-[0_4px_0_0_#450a0a] active:translate-y-1 active:shadow-none transition-all"
                                     >
                                         <Trash2 className="h-5 w-5" />
                                     </Button>

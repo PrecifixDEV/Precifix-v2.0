@@ -82,11 +82,11 @@ export function SleekDateRangePicker({
                             size={variant === 'icon' ? "icon" : "default"}
                             className={cn(
                                 variant === 'default' ? [
-                                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                                    "justify-start text-left font-normal pl-9",
+                                    "flex h-10 w-full rounded-xl border-2 border-zinc-800 bg-transparent dark:bg-transparent px-3 py-2 text-sm transition-all focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0",
+                                    "justify-start text-left font-normal pl-9 hover:bg-zinc-800/50",
                                     !date && "text-muted-foreground",
                                 ] : [
-                                    "shrink-0 transition-all",
+                                    "shrink-0 transition-all rounded-xl",
                                     !date && "bg-zinc-900/50 border-none text-white hover:text-yellow-500",
                                     date && "bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border-yellow-400"
                                 ],
@@ -113,7 +113,7 @@ export function SleekDateRangePicker({
                     </div>
                 </PopoverTrigger>
                 <PopoverContent
-                    className="w-auto p-0 bg-card border rounded-2xl overflow-hidden shadow-2xl"
+                    className="w-auto p-0 bg-zinc-800 border-zinc-700 rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8),0_0_20px_rgba(0,0,0,0.3)] z-[200]"
                     align="start"
                 >
                     <div className="flex flex-col">
@@ -142,7 +142,7 @@ export function SleekDateRangePicker({
                         </div>
 
                         {/* Footer com Botões - Compactado */}
-                        <div className="flex items-center justify-between p-2 px-3 border-t border-zinc-900 bg-zinc-900/50">
+                        <div className="flex items-center justify-between p-3 border-t border-zinc-700 bg-zinc-900/50">
                             <Button
                                 variant="secondary-yellow"
                                 size="sm"

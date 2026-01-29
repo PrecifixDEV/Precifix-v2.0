@@ -5,18 +5,20 @@ import { cn } from "@/lib/utils";
 // Usamos cores para criar 'luz' nas bordas e ícones.
 const colorStyles = {
     yellow: {
-        // Borda interna brilhante (efeito de luz)
         rimLight: 'shadow-[inset_0_0_0_1px_rgba(234,179,8,0.3),0_0_10px_-2px_rgba(234,179,8,0.3)] group-hover:shadow-[inset_0_0_0_1px_rgba(234,179,8,0.8),0_0_15px_-2px_rgba(234,179,8,0.5)]',
+        depthShadow: 'shadow-[0_4px_0_0_#422006]',
         iconColor: 'text-yellow-500 group-hover:text-yellow-400',
         iconGlow: 'group-hover:drop-shadow-[0_0_6px_rgba(234,179,8,0.7)]',
     },
     green: {
         rimLight: 'shadow-[inset_0_0_0_1px_rgba(22,163,74,0.3),0_0_10px_-2px_rgba(22,163,74,0.3)] group-hover:shadow-[inset_0_0_0_1px_rgba(22,163,74,0.8),0_0_15px_-2px_rgba(22,163,74,0.5)]',
+        depthShadow: 'shadow-[0_4px_0_0_#052e16]',
         iconColor: 'text-green-500 group-hover:text-green-400',
         iconGlow: 'group-hover:drop-shadow-[0_0_6px_rgba(22,163,74,0.7)]',
     },
     red: {
         rimLight: 'shadow-[inset_0_0_0_1px_rgba(220,38,38,0.3),0_0_10px_-2px_rgba(220,38,38,0.3)] group-hover:shadow-[inset_0_0_0_1px_rgba(220,38,38,0.8),0_0_15px_-2px_rgba(220,38,38,0.5)]',
+        depthShadow: 'shadow-[0_4px_0_0_#450a0a]',
         iconColor: 'text-red-500 group-hover:text-red-400',
         iconGlow: 'group-hover:drop-shadow-[0_0_6px_rgba(220,38,38,0.7)]',
     },
@@ -54,12 +56,13 @@ const SleekIndustrialButton = ({ color, icon: Icon, label, onClick, className }:
         /* Sombra superior clara (luz) e sombra interna escura (profundidade) */
         shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07),inset_0_0_20px_rgba(0,0,0,0.8)]
         
-        /* Interação de clique: afunda levemente */
-        active:scale-[0.99] active:shadow-[inset_0_2px_5px_rgba(0,0,0,0.8)]
-        transition-all duration-200 ease-out
+        /* Interação de clique: afunda fisicamente (Industrial Pattern) */
+        active:translate-y-1 active:shadow-none
+        transition-all duration-150 ease-out
         
-        /* Layout */
-        p-5 flex flex-col items-center justify-center gap-3 min-w-[130px]`,
+        /* Layout unificado com botões padrão */
+        px-4 py-2.5 flex flex-row items-center justify-center gap-3 min-w-[140px] h-12`,
+                styles.depthShadow,
                 className
             )}
             // Usamos estilo inline para o fundo sólido customizado
@@ -74,13 +77,13 @@ const SleekIndustrialButton = ({ color, icon: Icon, label, onClick, className }:
             <MicroRivet className="bottom-2 left-2" />
             <MicroRivet className="bottom-2 right-2" />
 
-            {/* Ícone e Texto */}
-            <div className="relative z-10 flex flex-col items-center gap-2">
+            {/* Ícone e Texto - Layout Horizontal Unificado */}
+            <div className="relative z-10 flex items-center gap-2.5">
                 <div className={cn("transition-all duration-300 transform group-hover:-translate-y-0.5", styles.iconColor, styles.iconGlow)}>
-                    <Icon size={26} strokeWidth={1.5} />
+                    <Icon size={20} strokeWidth={2} />
                 </div>
 
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 group-hover:text-zinc-200 transition-colors">
+                <span className="text-sm font-black uppercase tracking-tighter text-white transition-colors">
                     {label}
                 </span>
             </div>

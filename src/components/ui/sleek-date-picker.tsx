@@ -40,7 +40,7 @@ export function SleekDatePicker({
                         type="button"
                         variant="ghost"
                         className={cn(
-                            "flex h-10 w-full rounded-md border border-input bg-background dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            "flex h-10 w-full rounded-xl border border-input bg-background dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                             "justify-start text-left font-normal pl-9 hover:bg-zinc-800/50 text-foreground",
                             !date && "text-muted-foreground transition-none",
                             className
@@ -55,7 +55,7 @@ export function SleekDatePicker({
                 </div>
             </PopoverTrigger>
             <PopoverContent
-                className="w-auto p-0 bg-card border rounded-2xl overflow-hidden shadow-2xl z-[200]"
+                className="w-auto p-0 bg-zinc-800 border-zinc-700 rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8),0_0_20px_rgba(0,0,0,0.3)] z-[200]"
                 align="start"
             >
                 <div className="p-4 pt-2">

@@ -9,7 +9,6 @@ import { SleekDatePicker } from "@/components/ui/sleek-date-picker";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { SleekDateRangePicker } from "@/components/ui/sleek-date-range-picker";
-import IndustrialButton from "@/components/ui/IndustrialButton";
 import SleekIndustrialButton from "@/components/ui/SleekIndustrialButton";
 
 export function VisualTest() {
@@ -148,26 +147,7 @@ export function VisualTest() {
                 </div>
             </section>
 
-            <section className="space-y-4">
-                <h2 className="text-xl font-bold">Industrial Buttons Style 1 (Classic Metal)</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
-                    <IndustrialButton
-                        color="yellow"
-                        icon={ArrowRightLeft}
-                        label="Transferir"
-                    />
-                    <IndustrialButton
-                        color="green"
-                        icon={ArrowUpRight}
-                        label="Receber"
-                    />
-                    <IndustrialButton
-                        color="red"
-                        icon={ArrowDownRight}
-                        label="Pagar"
-                    />
-                </div>
-            </section>
+
 
             <section className="space-y-4">
                 <h2 className="text-xl font-bold">Industrial Buttons Style 2 (Sleek Dark)</h2>

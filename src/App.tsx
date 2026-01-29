@@ -24,6 +24,7 @@ import FinancialCategories from './pages/settings/FinancialCategories';
 import { MyFiles } from './pages/settings/MyFiles';
 import Settings from './pages/settings/Settings';
 import { VisualTest } from './pages/tests/VisualTest';
+import { LayoutElements } from './pages/tests/LayoutElements';
 import { AgendaPage } from './pages/AgendaPage';
 
 
@@ -77,6 +78,7 @@ function App() {
             <Route path="/tools/dilution-calculator" element={<DilutionCalculator />} />
             <Route path="/tools/product-cost" element={<ProductCostCalculator />} />
             <Route path="/visual-test" element={<VisualTest />} />
+            <Route path="/layout" element={<LayoutElements />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
