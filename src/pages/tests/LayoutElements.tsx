@@ -199,9 +199,9 @@ export function LayoutElements() {
                         {/* 1. Botão Principal (Confirmação/Criação) */}
                         <div className="space-y-4">
                             <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.2em]">Botão Principal (h-12)</p>
-                            <Button className="w-full h-12 bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_#927c00] active:translate-y-1 active:shadow-none transition-all rounded-xl">
+                            <Button className="w-full h-12 bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_#927c00] active:translate-y-1 active:shadow-none transition-all rounded-xl gap-3 [&_svg]:!size-5">
                                 Confirmar Cadastro
-                                <Check className="ml-2 h-6 w-6" />
+                                <Check className="ml-2" />
                             </Button>
                             <p className="text-sm text-zinc-100 font-sans leading-relaxed">Uso: Ações definitivas, salvar novo registro, finalizar processo.</p>
                         </div>
@@ -209,9 +209,9 @@ export function LayoutElements() {
                         {/* 2. Botão Secundário (Ação Alternativa Amarela) */}
                         <div className="space-y-4">
                             <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.2em]">Botão Secundário (Outline Yellow)</p>
-                            <Button variant="outline" className="w-full h-12 bg-transparent border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_rgba(234,179,8,0.3)] active:translate-y-1 active:shadow-none transition-all rounded-xl">
+                            <Button variant="outline" className="w-full h-12 bg-transparent border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_rgba(234,179,8,0.3)] active:translate-y-1 active:shadow-none transition-all rounded-xl gap-3 [&_svg]:!size-5">
                                 Adicionar Outro
-                                <Plus className="ml-2 h-6 w-6" />
+                                <Plus className="ml-2" />
                             </Button>
                             <p className="text-sm text-zinc-100 font-sans leading-relaxed">Uso: Quando já existe um botão principal na tela, mas esta ação ainda é importante.</p>
                         </div>
@@ -219,11 +219,23 @@ export function LayoutElements() {
                         {/* 3. Botão de Cancelamento (Gray Outline) */}
                         <div className="space-y-4">
                             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Botão de Cancelamento (Gray)</p>
-                            <Button variant="outline" className="w-full h-12 bg-transparent border-2 border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-700 hover:bg-zinc-900/50 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_#000000] active:translate-y-1 active:shadow-none transition-all rounded-xl">
+                            <Button variant="outline" className="w-full h-12 bg-transparent border-2 border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-700 hover:bg-zinc-900/50 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_#000000] active:translate-y-1 active:shadow-none transition-all rounded-xl gap-3 [&_svg]:!size-5">
                                 Cancelar / Voltar
-                                <X className="ml-2 h-6 w-6" />
+                                <X className="ml-2" />
                             </Button>
                             <p className="text-sm text-zinc-100 font-sans leading-relaxed">Uso: Sair sem salvar, fechar formulários, desistir da ação atual.</p>
+                        </div>
+                    </div>
+
+                    {/* 4. Botão Interno (White Outline) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-zinc-800">
+                        <div className="space-y-4">
+                            <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Botão Interno (White)</p>
+                            <Button variant="outline-white" className="w-full h-12 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_#000000] active:translate-y-1 active:shadow-none transition-all rounded-xl gap-3 [&_svg]:!size-5">
+                                Detalhes Técnicos
+                                <ArrowUpRight className="ml-2" />
+                            </Button>
+                            <p className="text-sm text-zinc-100 font-sans leading-relaxed">Uso: Ações internas importantes que precisam de destaque sobre fundo escuro.</p>
                         </div>
                     </div>
                 </div>
@@ -235,8 +247,9 @@ export function LayoutElements() {
                 <div className="p-8 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-2xl space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                         {/* 1. Combobox / Select */}
+                        {/* 1. Combobox / Select */}
                         <div className="space-y-4">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Seleção Industrial (Select/Combobox)</Label>
+                            <Label className="text-zinc-500 uppercase tracking-widest text-xs font-bold">Seleção Industrial (Select/Combobox)</Label>
                             <Select value={selectValue} onValueChange={setSelectValue}>
                                 <SelectTrigger className="w-full h-12 !bg-transparent dark:!bg-transparent border-2 border-zinc-800 text-zinc-100 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all rounded-xl !font-sans font-medium">
                                     <SelectValue placeholder="Selecione uma categoria" />
@@ -247,36 +260,36 @@ export function LayoutElements() {
                                     <SelectItem value="equip">Equipamentos</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <p className="text-sm text-zinc-100 font-sans leading-relaxed">Padrão p/ listas de opções fixas ou dinâmicas.</p>
+                            <p className="text-base text-zinc-100 font-sans leading-relaxed">Padrão p/ listas de opções fixas ou dinâmicas.</p>
                         </div>
 
                         {/* 2. Calendário Industrial */}
                         <div className="space-y-4">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Seletor de Data (SleekDatePicker)</Label>
+                            <Label className="text-zinc-500 uppercase tracking-widest text-xs font-bold">Seletor de Data (SleekDatePicker)</Label>
                             <SleekDatePicker
                                 date={date}
                                 onSelect={setDate}
                                 placeholder="Selecione a data de execução"
                                 className="!bg-transparent dark:!bg-transparent border-2 border-zinc-800 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all h-12 !font-sans font-medium rounded-xl"
                             />
-                            <p className="text-sm text-zinc-100 font-sans leading-relaxed">Drawer no mobile, popover elegante no desktop.</p>
+                            <p className="text-base text-zinc-100 font-sans leading-relaxed">Drawer no mobile, popover elegante no desktop.</p>
                         </div>
 
                         {/* 2.1 Seletor de Período (PickRange) */}
                         <div className="space-y-4">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Seletor de Período (PickRange)</Label>
+                            <Label className="text-zinc-500 uppercase tracking-widest text-xs font-bold">Seletor de Período (PickRange)</Label>
                             <SleekDateRangePicker
                                 date={range}
                                 onSelect={setRange}
                                 placeholder="Selecionar intervalo"
                                 className="!bg-transparent dark:!bg-transparent border-2 border-zinc-800 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all h-12 !font-sans font-medium rounded-xl"
                             />
-                            <p className="text-sm text-zinc-100 font-sans leading-relaxed">Gestão de períodos com estabilidade industrial.</p>
+                            <p className="text-base text-zinc-100 font-sans leading-relaxed">Gestão de períodos com estabilidade industrial.</p>
                         </div>
 
                         {/* 3. Busca & Filtro */}
                         <div className="space-y-4">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Barra de Busca Industrial</Label>
+                            <Label className="text-zinc-500 uppercase tracking-widest text-xs font-bold">Barra de Busca Industrial</Label>
                             <div className="relative group">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white transition-colors" />
                                 <Input
@@ -284,38 +297,38 @@ export function LayoutElements() {
                                     className="h-12 pl-10 !bg-transparent dark:!bg-transparent border-2 border-zinc-800 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-100 placeholder:text-zinc-600 rounded-xl !font-sans font-medium"
                                 />
                             </div>
-                            <p className="text-sm text-zinc-100 font-sans leading-relaxed">Fundo preto sólido com transição de foco amarela.</p>
+                            <p className="text-base text-zinc-100 font-sans leading-relaxed">Fundo preto sólido com transição de foco amarela.</p>
                         </div>
 
                         {/* 4. Switch & Toggle */}
                         <div className="space-y-4">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-xs font-bold">Interruptores de Estado (Switch)</Label>
+                            <Label className="text-zinc-500 uppercase tracking-widest text-sm font-bold">Interruptores de Estado (Switch)</Label>
                             <div className="flex items-center gap-4 bg-transparent p-4 rounded-xl border-2 border-zinc-800">
                                 <Switch
                                     checked={isSwitchActive}
                                     onCheckedChange={setIsSwitchActive}
                                 />
                                 <div className="space-y-0.5">
-                                    <p className="text-sm font-bold text-zinc-100 uppercase tracking-tight font-sans">Status Operacional</p>
-                                    <p className="text-xs text-zinc-500 uppercase font-bold tracking-tighter font-sans">
+                                    <p className="text-base font-bold text-zinc-100 uppercase tracking-tight font-sans">Status Operacional</p>
+                                    <p className="text-sm text-zinc-500 uppercase font-bold tracking-tighter font-sans">
                                         {isSwitchActive ? 'Ativado' : 'Desativado'}
                                     </p>
                                 </div>
                             </div>
-                            <p className="text-sm text-zinc-100 font-sans leading-relaxed">Uso: Ativar/desativar funções ou estados binários.</p>
+                            <p className="text-base text-zinc-100 font-sans leading-relaxed">Uso: Ativar/desativar funções ou estados binários.</p>
                         </div>
 
                         {/* 5. Icon Buttons Group */}
                         <div className="space-y-4">
                             <Label className="text-zinc-400 uppercase tracking-widest text-[11px] font-bold">Botões de Ação com Ícone</Label>
                             <div className="flex gap-4">
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-white shadow-[0_4px_0_0_#000000] active:translate-y-1 active:shadow-none transition-all group">
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-white shadow-[0_4px_0_0_#000000] active:translate-y-1 active:shadow-none transition-all group [&_svg]:!size-5">
                                     <Filter className="h-6 w-6 group-hover:scale-110 transition-transform" />
                                 </Button>
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl bg-zinc-900 border-2 border-red-500/50 text-red-500 shadow-[0_4px_0_0_#450a0a] active:translate-y-1 active:shadow-none transition-all group">
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl bg-zinc-900 border-2 border-red-500/50 text-red-500 shadow-[0_4px_0_0_#450a0a] active:translate-y-1 active:shadow-none transition-all group [&_svg]:!size-5">
                                     <Trash2 className="h-6 w-6 group-hover:scale-110 transition-transform" />
                                 </Button>
-                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl bg-zinc-900 border-2 border-yellow-500/50 text-yellow-500 shadow-[0_4px_0_0_#422006] active:translate-y-1 active:shadow-none transition-all group">
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl bg-zinc-900 border-2 border-yellow-500/50 text-yellow-500 shadow-[0_4px_0_0_#422006] active:translate-y-1 active:shadow-none transition-all group [&_svg]:!size-5">
                                     <Bell className="h-6 w-6 group-hover:scale-110 transition-transform" />
                                 </Button>
                             </div>
@@ -417,12 +430,30 @@ export function LayoutElements() {
             <StandardSheet
                 open={isSheetOpen}
                 onOpenChange={setIsSheetOpen}
-                title="Novo Cadastro Industrial"
-                onSave={() => {
-                    toast.success("Item salvo!");
-                    setIsSheetOpen(false);
-                }}
-                onDelete={() => toast.error("Item excluído")}
+                title="NOVO CADASTRO INDUSTRIAL"
+                // Implementando o padrão de botões industriais no footer
+                saveButton={
+                    <div className="flex w-full gap-4 items-center">
+                        <Button
+                            className="flex-1 h-12 bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-display font-bold uppercase tracking-tight text-lg shadow-[0_4px_0_0_#927c00] active:translate-y-1 active:shadow-none transition-all rounded-xl"
+                            onClick={() => {
+                                toast.success("Item salvo!");
+                                setIsSheetOpen(false);
+                            }}
+                        >
+                            Salvar Cadastro
+                            <Check className="ml-2 h-6 w-6 shrink-0" />
+                        </Button>
+                        <Button
+                            variant="outline-destructive"
+                            size="icon"
+                            className="h-12 w-12 shrink-0 rounded-xl bg-zinc-900 border-2 border-red-500/50 text-red-500 shadow-[0_4px_0_0_#450a0a] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center [&_svg]:!size-5"
+                            onClick={() => toast.error("Item excluído")}
+                        >
+                            <Trash2 />
+                        </Button>
+                    </div>
+                }
                 optionalFieldsToggles={
                     <>
                         <StandardSheetToggle
@@ -441,28 +472,35 @@ export function LayoutElements() {
             >
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Nome do Ativo</Label>
-                        <Input placeholder="Ex: Motor V8 Turbo" className="!bg-transparent dark:!bg-transparent border-2 border-zinc-800 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 transition-all !font-sans font-medium" />
+                        <Label className="text-white text-sm font-bold">Nome do Ativo <span className="text-red-500">*</span></Label>
+                        <Input placeholder="Ex: Motor V8 Turbo" className="!bg-transparent dark:!bg-transparent border-2 border-zinc-800 placeholder:text-zinc-500 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 transition-all !font-sans font-medium rounded-xl text-zinc-100" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Peso (kg)</Label>
-                            <Input type="number" placeholder="0.00" className="!bg-transparent dark:!bg-transparent border-2 border-zinc-800 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 transition-all !font-sans font-medium" />
+                            <Label className="text-white text-sm font-bold">Peso (kg)</Label>
+                            <Input type="number" placeholder="0.00" className="!bg-transparent dark:!bg-transparent border-2 border-zinc-800 placeholder:text-zinc-500 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 transition-all !font-sans font-medium rounded-xl text-zinc-100" />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Status</Label>
-                            <div className="h-12 bg-transparent border-2 border-zinc-800 rounded-xl flex items-center px-4 text-sm font-sans font-medium text-yellow-500 uppercase tracking-tight">
-                                OPERACIONAL
-                            </div>
+                            <Label className="text-white text-sm font-bold">Status <span className="text-red-500">*</span></Label>
+                            <Select defaultValue="op">
+                                <SelectTrigger className="w-full h-12 !bg-transparent dark:!bg-transparent border-2 border-zinc-800 text-zinc-100 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all rounded-xl !font-sans font-medium">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                                    <SelectItem value="op">OPERACIONAL</SelectItem>
+                                    <SelectItem value="man">MANUTENÇÃO</SelectItem>
+                                    <SelectItem value="ina">INATIVO</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
                     {showOptional && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="space-y-2">
-                                <Label className="text-zinc-500 uppercase tracking-widest text-[11px] font-bold">Observações Técnicas</Label>
-                                <textarea className="w-full !bg-transparent dark:!bg-transparent border-2 border-zinc-800 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl p-3 text-white text-sm min-h-[100px] transition-all !font-sans font-medium" placeholder="Detalhes de manutenção..." />
+                                <Label className="text-white text-sm font-bold">Observações Técnicas</Label>
+                                <textarea className="w-full !bg-transparent dark:!bg-transparent border-2 border-zinc-800 placeholder:text-zinc-500 focus:border-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl p-3 text-zinc-100 text-sm min-h-[100px] transition-all !font-sans font-medium outline-none resize-none" placeholder="Detalhes de manutenção..." />
                             </div>
                         </div>
                     )}

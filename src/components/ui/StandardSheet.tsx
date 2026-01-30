@@ -68,7 +68,7 @@ export function StandardSheet({
             >
                 {/* Standardized Header */}
                 <SheetHeader className="h-16 px-6 border-b border-zinc-800 flex justify-center shrink-0 bg-black">
-                    <SheetTitle className="text-primary text-center font-bold text-xl uppercase tracking-tighter">
+                    <SheetTitle className="text-primary text-center font-bold text-2xl uppercase tracking-tighter">
                         {title}
                     </SheetTitle>
                 </SheetHeader>
@@ -159,10 +159,14 @@ export function StandardSheetToggle({ label, active, onClick, icon }: StandardSh
     return (
         <Button
             type="button"
-            variant={active ? "secondary" : "outline"}
+            variant={active ? "secondary" : "outline-white"}
             size="sm"
             onClick={onClick}
-            className="gap-2 h-9"
+            className={
+                active
+                    ? "gap-2 h-9 bg-white text-black hover:bg-white/90 border-2 border-white font-bold"
+                    : "gap-2 h-9 font-medium"
+            }
         >
             {icon ? icon : null}
             {label}
