@@ -25,6 +25,8 @@ import { MyFiles } from './pages/settings/MyFiles';
 import Settings from './pages/settings/Settings';
 import { VisualTest } from './pages/tests/VisualTest';
 import { LayoutElements } from './pages/tests/LayoutElements';
+import { Layout2 } from './pages/tests/Layout2';
+import { Layout2Clients } from './pages/tests/Layout2Clients';
 import { AgendaPage } from './pages/AgendaPage';
 
 
@@ -79,6 +81,8 @@ function App() {
             <Route path="/tools/product-cost" element={<ProductCostCalculator />} />
             <Route path="/visual-test" element={<VisualTest />} />
             <Route path="/layout" element={<LayoutElements />} />
+            <Route path="/layout2" element={<Layout2 />} />
+            <Route path="/layout2/clientes" element={<Layout2Clients />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

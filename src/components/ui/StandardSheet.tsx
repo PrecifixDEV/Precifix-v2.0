@@ -107,7 +107,7 @@ export function StandardSheet({
                                 variant="secondary-yellow"
                                 onClick={onSave}
                                 disabled={isLoading || isSaveDisabled}
-                                className="flex-1 h-10 font-bold uppercase tracking-wider shadow-md transition-all hover:scale-[1.02] flex items-center justify-between"
+                                className="flex-1 h-12 font-bold uppercase tracking-tight rounded-xl shadow-[0_4px_0_0_#927c00] active:translate-y-1 active:shadow-none transition-all flex items-center justify-between"
                             >
                                 <span className="flex items-center">
                                     {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -164,8 +164,8 @@ export function StandardSheetToggle({ label, active, onClick, icon }: StandardSh
             onClick={onClick}
             className={
                 active
-                    ? "gap-2 h-9 bg-white text-black hover:bg-white/90 border-2 border-white font-bold"
-                    : "gap-2 h-9 font-medium"
+                    ? "gap-2 h-10 bg-white text-black hover:bg-white/90 border-2 border-white font-bold rounded-xl shadow-[0_4px_0_0_#18181b] active:translate-y-1 active:shadow-none transition-all"
+                    : "gap-2 h-10 font-medium rounded-xl border-2 border-zinc-700 hover:border-white shadow-[0_4px_0_0_#18181b] active:translate-y-1 active:shadow-none transition-all"
             }
         >
             {icon ? icon : null}
